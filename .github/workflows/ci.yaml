@@ -3,8 +3,6 @@ name: CI Workflow
 on:
   push:
     branches: [ "**" ]
-  release:
-    types: [ created ]
 
 jobs:
   test-app:
