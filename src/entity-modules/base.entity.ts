@@ -1,6 +1,6 @@
 import { Entity, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
 import { randomUUID } from "crypto";
-import { ClassCtor, toDTO } from "../utils/dto.utils";
+import { ClassCtor, toDTO } from "src/utils/dto.utils";
 import { BaseEntity as BE } from "@mikro-orm/core";
 
 @Entity({ abstract: true })
