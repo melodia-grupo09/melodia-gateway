@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
-import { UUID } from "crypto";
+import type { UUID } from "crypto";
 
 export class BaseEntityDTO {
   @ApiProperty({

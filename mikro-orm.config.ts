@@ -14,13 +14,13 @@ export default defineConfig({
     entitiesTs: ['src/**/*.entity.ts'],
     extensions: [Migrator, SeedManager],
     seeder: {
-        path: Utils.detectTsNode() ? 'src/database/relational/seeders' : 'dist/src/database/relational/seeders',
+        path: Utils.detectTsNode() ? 'src/database/seeders' : 'dist/src/database/seeders',
     },
     migrations: {
         tableName: '_migrations',
         allOrNothing: true,
         disableForeignKeys: true,
-        path: Utils.detectTsNode() ? 'src/database/relational/migrations' : 'dist/src/database/relational/migrations',
+        path: Utils.detectTsNode() ? 'src/database/migrations' : 'dist/src/database/migrations',
         transactional: true,
         emit: 'ts',
     },
