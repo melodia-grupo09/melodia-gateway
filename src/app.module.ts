@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import mikroOrmConfig from 'mikro-orm.config';
 import { SongManagerModule } from './business-modules/song-manager/song-manager.module';
+import { ResponseFormatInterceptor } from './interceptors/response-format.interceptor';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -13,6 +15,12 @@ import { SongManagerModule } from './business-modules/song-manager/song-manager.
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseFormatInterceptor,
+    },
+    AppService
+  ],
 })
 export class AppModule {}
