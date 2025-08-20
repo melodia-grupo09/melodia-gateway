@@ -1,7 +1,18 @@
 services:
+  app:
+    build: .
+    env_file: .env.local
+    ports:
+    - 3000:3000
+    depends_on:
+    - postgres
+    volumes:
+    - './.env:/app/.env'
+
   postgres:
     image: postgres:17
     restart: unless-stopped
+    env_file: .env.local
     ports:
     - "5432:5432"
     environment:
