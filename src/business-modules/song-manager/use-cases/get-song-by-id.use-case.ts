@@ -1,18 +1,18 @@
 import { MikroORM } from "@mikro-orm/core";
-import { EntityManager } from "@mikro-orm/postgresql";
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { UUID } from "crypto";
 import { CreateSongDTO, SongDTO } from "src/business-modules/song-manager/dtos/song.dto";
 import { SongRepository } from "src/entity-modules/song/song.repository";
 
 @Injectable()
-export class CreateSongUseCase {
+export class GetSongByIdUseCase {
   constructor(
     private readonly songRepository: SongRepository
   ) {}
 
-  async execute(songCreateDto: CreateSongDTO): Promise<SongDTO> {
-    const song = this.songRepository.create(songCreateDto);
-    await this.songRepository.flush();
+  async execute(id: UUID): Promise<SongDTO> {
+    const song = await this.songRepository.findOne({ id })
+    if (!song) throw new NotFoundException(`Song with ID ${id} not found`);
     return song.toDTO(SongDTO);
   }
 }
