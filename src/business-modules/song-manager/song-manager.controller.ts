@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put } from "@nestjs/common";
 import { ApiBody, ApiExtraModels, ApiOkResponse, ApiOperation, ApiParam, ApiTags, getSchemaPath } from "@nestjs/swagger";
 import { CreateSongDTO, SongDTO, UpdateSongDTO } from "src/business-modules/song-manager/dtos/song.dto";
 import { CreateSongUseCase } from "./use-cases/create-song.use-case";
@@ -52,7 +52,7 @@ export class SongsController {
     type: String,
   })
   async getSongById(
-    @Param('id') id: UUID
+    @Param('id', ParseUUIDPipe) id: UUID
   ): Promise<SongDTO> {
     return this.getSongByIdUseCase.execute(id);
   }
@@ -98,7 +98,7 @@ export class SongsController {
     },
   })
   async updateSong(
-    @Param('id') id: UUID,
+    @Param('id', ParseUUIDPipe) id: UUID,
     @Body() updateSongDto: UpdateSongDTO
   ): Promise<SongDTO> {
     return this.updateSongUseCase.execute(id, updateSongDto);
@@ -113,7 +113,7 @@ export class SongsController {
     type: String,
   })
   async deleteSong(
-    @Param('id') id: UUID
+    @Param('id', ParseUUIDPipe) id: UUID
   ): Promise<void> {
     await this.deleteSongUseCase.execute(id);
   }
