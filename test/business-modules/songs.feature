@@ -28,3 +28,16 @@ Feature: Song Management
     When the user deletes the song by its ID
     Then the response status code is 204
     And the song no longer exists in the list of songs
+
+  # Unhappy path scenarios
+  Scenario: Attempt to retrieve a non-existent song
+    When the user requests a song with ID "00000000-0000-0000-0000-000000000000"
+    Then the response status code is 404
+
+  Scenario: Attempt to update a non-existent song
+    When the user tries to update a song with ID "00000000-0000-0000-0000-000000000000"
+    Then the response status code is 404
+
+  Scenario: Attempt to delete a non-existent song
+    When the user tries to delete a song with ID "00000000-0000-0000-0000-000000000000"
+    Then the response status code is 404

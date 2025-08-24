@@ -45,8 +45,22 @@ When('the user deletes the song by its ID', async function () {
   this.response = await request(this.app.getHttpServer()).delete(`/songs/${this.createdSong.id}`);
 });
 
+When('the user requests a song with ID {string}', async function (songId: string) {
+  this.response = await request(this.app.getHttpServer()).get(`/songs/${songId}`);
+});
+
+When('the user tries to update a song with ID {string}', async function (songId: string) {
+  this.response = await request(this.app.getHttpServer())
+    .put(`/songs/${songId}`)
+    .send({ name: 'any name', artist: 'any artist' });
+});
+
+When('the user tries to delete a song with ID {string}', async function (songId: string) {
+  this.response = await request(this.app.getHttpServer()).delete(`/songs/${songId}`);
+});
+
 Then('the response status code is {int}', function (statusCode: number) {
-  assert.strictEqual(this.response.status, statusCode);
+  assert.strictEqual(this.response.status, statusCode, `Expected status code ${statusCode} but got ${this.response.status}`);
 });
 
 Then('the response body contains the created song with the name {string}', function (expectedName: string) {
@@ -73,8 +87,8 @@ Then('the song details have been updated to {string} and {string}', function (ex
 });
 
 Then('the song no longer exists in the list of songs', async function () {
-  this.response = await request(this.app.getHttpServer()).get("/songs");
-  const songList = this.response.body.data;
+  const getResponse = await request(this.app.getHttpServer()).get("/songs");
+  const songList = getResponse.body.data;
   const songExists = songList.some((song: any) => song.id === this.createdSong.id);
-  assert.ok(!songExists, `The song "${this.createdSong.name}" was found in the list`);
+  assert.strictEqual(songExists, false, `The deleted song "${this.createdSong.name}" was unexpectedly found in the list`);
 });
