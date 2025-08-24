@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { BaseEntityDTO } from "../base.dto";
+import { BaseEntityDTO } from "../../../entity-modules/base.dto";
 import { IsString, MaxLength } from "class-validator";
 
 export class SongDTO extends BaseEntityDTO {
@@ -34,3 +34,5 @@ export class CreateSongDTO {
   @IsString()
   artist: string;
 }
+
+export class UpdateSongDTO extends CreateSongDTO {}
