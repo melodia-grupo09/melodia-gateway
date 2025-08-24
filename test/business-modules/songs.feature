@@ -1,7 +1,7 @@
 Feature: Songs
   Scenario: Create a Song
     When someone creates a song with name "Song Title" and artist "Artist Name"
-    Then the song should be created and retrievable
+    Then the song with name "Song Title" is successfully created and available
 
   Scenario: Retrieve Songs
     Given a song with name "Song Title" and artist "Artist Name"
