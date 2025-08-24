@@ -12,7 +12,7 @@ export class UpdateSongUseCase {
 
   async execute(id: UUID, updateSongDto: UpdateSongDTO): Promise<SongDTO> {
     const song = await this.songRepository.findOne({ id })
-    if (!song) throw new NotFoundException(`Song with ID ${id} not found`);
+    if (song === null) throw new NotFoundException(`Song with ID ${id} not found`);
     song.assign(updateSongDto);
     await this.songRepository.getEntityManager().persistAndFlush(song);
     return song.toDTO(SongDTO);
