@@ -1,98 +1,97 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+Melodía Backend App
+=========================================================
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Repositorio de la API REST de Melodía, hecha con **NestJS**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Tabla de Contenido
+------------------
 
-## Description
+*   [Introducción](#introducción)
+    
+*   [El Mayor Desafío](#el-mayor-desafío)
+    
+*   [Pre-requisitos](#pre-requisitos)
+    
+*   [Biblioteca de Testing](#biblioteca-de-testing)
+    
+*   [Comandos de Docker](#comandos-de-docker)
+    
+    *   [Construir la Imagen](#construir-la-imagen)
+        
+    *   [Correr la Base de Datos](#correr-la-base-de-datos)
+        
+    *   [Correr el Servicio](#correr-el-servicio)
+        
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Introducción
+------------
 
-## Project setup
+La solución implementa una API REST utilizando **NestJS**, un framework de Node.js que favorece la escalabilidad y la modularidad. La elección de este framework por sobre Express, fue motivada no solo por la filosofía modular que tiene el framework, sino también por todo el set de herramientas que incluye. El objetivo principal fue construir una base sólida y documentada, complementada por una estrategia de testing de integración. Para ello, se utilizó **Cucumber**, que permite definir el comportamiento esperado de la API en un lenguaje natural (Gherkin), permitiendo que los que se está queriendo probar pueda ser leido de forma sencilla, e incluso escrito por alguien no-técnico
 
+El Mayor Desafío
+----------------
+
+Tengo bastante experiencia con este stack (Nest, Cucumber, Docker, MikroORM) y la forma de trabajarlo, por lo que no hubo nada particularmente desafiante desde el lado tecnológico. Lo más entretenido desde mi punto de vista fue la parte de entender los requerimientos del proyecto y desarrollarlo. Lo más tedioso (aunque no por eso desafiante) fue hacer la configuración inicial de Cucumber y armar el pipeline de CI, por ser algo que, si bien lo hago en el trabajo, no lo hago todos los días.
+
+Pre-requisitos
+--------------
+
+Para levantar el entorno de desarrollo y correr el proyecto localmente, necesitamos tener instalado el siguiente software:
+
+*   **Node.js**: v22
+    
+*   **NPM** v11.x
+    
+*   **Docker** y **Docker Compose**.
+    
+
+Biblioteca de Testing
+-------------------
+
+Las pruebas de integración se desarrollaron utilizando **Cucumber.js**, una herramienta que implementa el paradigma de Behavior-Driven Development (BDD). Permite escribir casos de prueba en un lenguaje natural y comprensible llamado Gherkin.
+
+*   **Link a la documentación oficial:** [Cucumber.io](https://cucumber.io/docs/)
+    
+
+Comandos de Docker
+------------------
+
+A continuación, se detallan los comandos necesarios para construir y ejecutar la aplicación utilizando Docker.
+
+### Construir y correr la app
+Con este comando vamos a construir la imagen del servicio, levantar postgres, y por ultimo levantar el servicio.
 ```bash
-$ npm install
+docker compose up -d
 ```
 
-## Compile and run the project
+### Construir la Imagen
+La imagen que vamos a construir es una imagen productiva, no de desarrollo.
+Para construir la imagen, tenemos que ejecutar el siguiente comando desde la raíz del proyecto:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+docker build -t fiuba-melodia-backend .
 ```
 
-## Run tests
-
+Si queremos unicamente correr el servicio localmente podemos directamente levantarlo con docker compose. Esto va a constuir la imagen si no está construida, y va a levantar la db.
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+docker compose up app
 ```
 
-## Deployment
+### Correr la Base de Datos
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+Para levantar el contenedor de postgres, no debemos tener nada escuchando en el puerto 5432 de nuestro host. Está hecho de esta forma por si queremos correr la app desde un Node local (no docker).
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker compose up -d postgres
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Correr el Servicio
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Para iniciar el contenedor de la aplicación (con la ultima version construida de la imagen) podemos usar
+```bash
+docker compose build
+docker compose up -d app
+```
+Si queremos iniciarlo desde la imagen que construimos en el paso anterior podemos hacerlo con
+`docker run -v './.env:/app/.env' --network=host fiuba-melodia-backend`
+Antes de hacerlo tenemos que crear el .env desde el .env.local modificando el `DATABASE_HOST` para correrlo local. El .env.local no sirve porque tiene como `DATABASE_HOST` el nombre del contenedor de docker que está en la misma red al levantarlo con docker compose. Como no estamos usando docker compose acá, no está por defecto en la misma red (podríamos ponerlo, pero recomiendo no hacerlo y usar docker compose para todo).
+Usamos el `--network=host` para que el contenedor pueda acceder a la db sin estar dentro de la misma red de docker. Podríamos crear una red de docker en el docker compose y despues ver el nombre para usarlo en el comando de `docker run`, porque el nombre de la red que se crea con docker compose depende del nombre del directorio donde está. Hacer todo esto me pareció que iba a ser mucho trabajo, asi que decidí montar el contenedor en la red del host (lo cual no es lo ideal y por eso recomiendo correr todo desde docker compose).
