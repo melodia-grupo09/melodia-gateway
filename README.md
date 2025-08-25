@@ -40,7 +40,7 @@ Para levantar el entorno de desarrollo y correr el proyecto localmente, necesita
 
 *   **Node.js**: v22
     
-*   **NPM** v11.x
+*   **NPM** v11
     
 *   **Docker** y **Docker Compose**.
     
