@@ -8,7 +8,7 @@ export class SongDTO extends BaseEntityDTO {
     example: 'Song Title',
   })
   @IsString()
-  name: string;
+  title: string;
 
   @ApiProperty({
     description: 'The artist of the song',
@@ -25,7 +25,7 @@ export class CreateSongDTO {
   })
   @IsString()
   @MaxLength(50)
-  name: string;
+  title: string;
 
   @ApiProperty({
     description: 'The artist of the song',

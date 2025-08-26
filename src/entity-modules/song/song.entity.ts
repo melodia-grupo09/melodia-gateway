@@ -14,7 +14,7 @@ export class Song extends BaseEntity<Song> {
   [EntityRepositoryType]: SongRepository;
 
   @Property({ nullable: false })
-  name: string;
+  title: string;
 
   @Property({ nullable: false })
   artist: string;
@@ -22,9 +22,9 @@ export class Song extends BaseEntity<Song> {
   @OneToMany(() => PlaylistSong, (playlistSong) => playlistSong.song)
   playlistLinks = new Collection<PlaylistSong>(this);
 
-  constructor(name: string, artist: string) {
+  constructor(title: string, artist: string) {
     super();
-    this.name = name;
+    this.title = title;
     this.artist = artist;
   }
 }

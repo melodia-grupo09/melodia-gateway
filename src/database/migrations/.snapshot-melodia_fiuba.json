@@ -85,8 +85,8 @@
           "nullable": false,
           "mappedType": "uuid"
         },
-        "name": {
-          "name": "name",
+        "title": {
+          "name": "title",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
