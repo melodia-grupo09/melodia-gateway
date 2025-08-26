@@ -1,7 +1,7 @@
-import { defineParameterType } from "@cucumber/cucumber";
+import { defineParameterType } from '@cucumber/cucumber';
 
 defineParameterType({
-  name: "boolean",
+  name: 'boolean',
   regexp: /true|false/,
-  transformer: (s: string) => s === "true",
+  transformer: (s: string) => s === 'true',
 });

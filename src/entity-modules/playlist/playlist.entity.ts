@@ -1,11 +1,20 @@
-import { Collection, Entity, EntityRepositoryType, ManyToMany, OneToMany, Property } from "@mikro-orm/core";
-import { BaseEntity } from "../base.entity";
-import { PlaylistRepository } from "./playlist.repository";
-import { PlaylistSong } from "./playlist-song.entity";
-import { Song } from "../song/song.entity";
+import {
+  Collection,
+  Entity,
+  EntityRepositoryType,
+  OneToMany,
+  Property,
+} from '@mikro-orm/core';
+import { BaseEntity } from '../base.entity';
+import { PlaylistRepository } from './playlist.repository';
+import { PlaylistSong } from './playlist-song.entity';
+import { Song } from '../song/song.entity';
 
 @Entity({ repository: () => PlaylistRepository })
-export class Playlist extends BaseEntity<Playlist, 'isPublished' | 'publishedAt' | 'songs'> {
+export class Playlist extends BaseEntity<
+  Playlist,
+  'isPublished' | 'publishedAt' | 'songs'
+> {
   [EntityRepositoryType]: PlaylistRepository;
 
   @Property({ nullable: false })
@@ -20,15 +29,18 @@ export class Playlist extends BaseEntity<Playlist, 'isPublished' | 'publishedAt'
   @Property({ nullable: false })
   publishedAt: Date = new Date();
 
-  @OneToMany(() => PlaylistSong, playlistSong => playlistSong.playlist, {
-    serializer: (value) => value.map(link => Object.assign(link.song, { addedAt: link.addedAt }) as Song & { addedAt: Date })
+  @OneToMany(() => PlaylistSong, (playlistSong) => playlistSong.playlist, {
+    serializer: (value: PlaylistSong[]) =>
+      value.map(
+        (link: PlaylistSong) =>
+          Object.assign(link.song, { addedAt: link.addedAt }) as Song & {
+            addedAt: Date;
+          },
+      ),
   })
   songs = new Collection<PlaylistSong>(this);
 
-  constructor(
-    name: string,
-    description: string,
-  ) {
+  constructor(name: string, description: string) {
     super();
     this.name = name;
     this.description = description;

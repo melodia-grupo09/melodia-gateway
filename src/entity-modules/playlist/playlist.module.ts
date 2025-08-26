@@ -1,6 +1,6 @@
-import { Module } from "@nestjs/common";
-import { MikroOrmModule } from "@mikro-orm/nestjs";
-import { Playlist } from "./playlist.entity";
+import { Module } from '@nestjs/common';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { Playlist } from './playlist.entity';
 
 @Module({
   imports: [MikroOrmModule.forFeature([Playlist])],
