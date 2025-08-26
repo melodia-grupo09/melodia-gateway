@@ -12,7 +12,8 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"src/**/*.ts\" --fix",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "test": "jest",
     "test:e2e": "cucumber-js --tags \"not @wip\" --format summary --format progress",
     "test:watch": "jest --watch",
@@ -23,7 +24,7 @@
   "lint-staged": {
     "*.ts": [
       "npm run format",
-      "npm run lint"
+      "npm run lint:fix"
     ]
   },
   "dependencies": {
