@@ -6,12 +6,21 @@ import { PlaylistDTO } from '../dtos/playlist.dto';
 export class GetPlaylistsUseCase {
   constructor(private readonly playlistRepository: PlaylistRepository) {}
 
-  async execute(): Promise<PlaylistDTO[]> {
+  async execute(
+    onlyPublished: boolean,
+    {
+      sortField,
+      sortDirection,
+    }: { sortField: keyof PlaylistDTO; sortDirection: 'asc' | 'desc' },
+  ): Promise<PlaylistDTO[]> {
+    const whereCondition = onlyPublished ? { isPublished: true } : {};
     const playlists = await this.playlistRepository.findAll({
+      where: whereCondition,
       populate: ['songs', 'songs.song'],
+      orderBy: {
+        [sortField]: sortDirection,
+      },
     });
-    return playlists
-      .map((playlist) => playlist.toDTO(PlaylistDTO))
-      .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+    return playlists.map((playlist) => playlist.toDTO(PlaylistDTO));
   }
 }

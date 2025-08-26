@@ -7,6 +7,7 @@ Feature: Playlists Management
 
   Scenario: Retrieve the list of playlists
     Given a playlist with name "Pop Hits" and description "The ultimate playlist featuring today's biggest chart-topping pop artists."
+    Given the user has published the playlist with name "Pop Hits"
     When the user requests the list of playlists
     Then the response status code is 200
     And the list of playlists contains the playlist "Pop Hits"
@@ -29,6 +30,18 @@ Feature: Playlists Management
     When the user adds by ID the song with name "Smells Like Teen Spirit" to the playlist with name "Rock Anthems"
     Then the response status code is 200
     And the playlist "Rock Anthems" contains the song "Smells Like Teen Spirit"
+
+  Scenario: A playlist is not published by default after creation
+    When the user creates a playlist with name "Unpublished Playlist" and description "This is a playlist to test the app's features. It contains a random mix of songs from different genres."
+    Then the response status code is 201
+    And the response body contains the created playlist with the name "Unpublished Playlist"
+    And the playlist "Unpublished Playlist" is not published
+
+  Scenario: Publish a playlist
+    Given a playlist with name "My Rock Classics" and description "Your essential collection of legendary rock tracks that truly never get old."
+    When the user publishes the playlist with name "My Rock Classics"
+    Then the response status code is 200
+    And the playlist "My Rock Classics" is published
 
   # Unhappy path scenarios
   Scenario: Attempt to retrieve a non-existent playlist

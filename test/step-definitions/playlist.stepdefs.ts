@@ -24,6 +24,24 @@ Given(
   },
 );
 
+Given(
+  'the user has published the playlist with name {string}',
+  async function (this: TestWorld, name: string) {
+    const playlist = this.playlists.get(name);
+    assert.ok(
+      playlist?.id,
+      `Could not find a created playlist named "${name}" in the test context`,
+    );
+    const updatedPlaylist = await request(this.app.getHttpServer())
+      .post(`/playlists/${playlist.id}/publish`)
+      .send();
+    this.playlists.set(
+      name,
+      (updatedPlaylist.body as { data: PlaylistDTO }).data,
+    );
+  },
+);
+
 // --- Whens ---
 When(
   'the user creates a playlist with name {string} and description {string}',
@@ -145,6 +163,47 @@ When(
   },
 );
 
+When(
+  'the user requests the list of playlists published or unpublished',
+  async function (this: TestWorld) {
+    this.response = await request(this.app.getHttpServer()).get(
+      `/playlists?published=false`,
+    );
+  },
+);
+
+When(
+  'the user publishes the playlist with name {string}',
+  async function (this: TestWorld, name: string) {
+    const playlist = this.playlists.get(name);
+    assert.ok(
+      playlist?.id,
+      `Could not find a created playlist named "${name}" in the test context`,
+    );
+    this.response = await request(this.app.getHttpServer()).post(
+      `/playlists/${playlist.id}/publish`,
+    );
+    const updatedPlaylist = (this.response.body as { data: PlaylistDTO }).data;
+    this.playlists.set(name, updatedPlaylist);
+  },
+);
+
+When(
+  'the user unpublishes the playlist with name {string}',
+  async function (this: TestWorld, name: string) {
+    const playlist = this.playlists.get(name);
+    assert.ok(
+      playlist?.id,
+      `Could not find a created playlist named "${name}" in the test context`,
+    );
+    const response = await request(this.app.getHttpServer()).post(
+      `/playlists/${playlist.id}/unpublish`,
+    );
+    const updatedPlaylist = (response.body as { data: PlaylistDTO }).data;
+    this.playlists.set(name, updatedPlaylist);
+  },
+);
+
 // --- Thens (Assertions) ---
 Then(
   'the response body contains the created playlist with the name {string}',
@@ -261,6 +320,52 @@ Then(
     assert.ok(
       songLink?.addedAt,
       'The song in the playlist does not have an "addedAt" property',
+    );
+  },
+);
+
+Then(
+  'the playlist {string} is not published',
+  function (this: TestWorld, playlistName: string) {
+    const playlist = this.playlists.get(playlistName);
+    assert.ok(
+      playlist,
+      `Could not find playlist "${playlistName}" in the test context to verify unpublished status`,
+    );
+    assert.strictEqual(
+      playlist.isPublished,
+      false,
+      `The playlist "${playlistName}" was expected to be unpublished`,
+    );
+    assert.strictEqual(
+      playlist.publishedAt,
+      null,
+      `The playlist "${playlistName}" was expected to have a null publishedAt date`,
+    );
+  },
+);
+
+Then(
+  'the playlist {string} is published',
+  function (this: TestWorld, playlistName: string) {
+    const playlist = this.playlists.get(playlistName);
+    assert.ok(
+      playlist,
+      `Could not find playlist "${playlistName}" in the test context to verify published status`,
+    );
+    assert.strictEqual(
+      playlist.isPublished,
+      true,
+      `The playlist "${playlistName}" was expected to be published`,
+    );
+    assert.notStrictEqual(
+      playlist.publishedAt,
+      null,
+      `The playlist "${playlistName}" was expected to have a publishedAt date`,
+    );
+    assert.ok(
+      playlist.publishedAt,
+      `The playlist "${playlistName}" was expected to have a publishedAt date`,
     );
   },
 );

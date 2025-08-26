@@ -4,6 +4,7 @@ import {
   IsArray,
   IsBoolean,
   IsDate,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -48,7 +49,8 @@ export class PlaylistDTO extends BaseEntityDTO {
     example: '2023-01-01T00:00:00Z',
   })
   @IsDate()
-  publishedAt: Date;
+  @IsOptional()
+  publishedAt: Date | null;
 
   @ApiProperty({
     type: [PlaylistSongDTO],

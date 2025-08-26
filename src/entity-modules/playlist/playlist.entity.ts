@@ -24,10 +24,10 @@ export class Playlist extends BaseEntity<
   description: string;
 
   @Property({ nullable: false })
-  isPublished: boolean = true;
+  isPublished: boolean = false;
 
-  @Property({ nullable: false })
-  publishedAt: Date = new Date();
+  @Property({ nullable: true, default: null, type: 'timestamptz' })
+  publishedAt: Date | null = null;
 
   @OneToMany(() => PlaylistSong, (playlistSong) => playlistSong.playlist, {
     serializer: (value: PlaylistSong[]) =>
@@ -56,5 +56,10 @@ export class Playlist extends BaseEntity<
   publish() {
     this.isPublished = true;
     this.publishedAt = new Date();
+  }
+
+  unpublish() {
+    this.isPublished = false;
+    this.publishedAt = null;
   }
 }
