@@ -15,8 +15,8 @@ export class AddSongToPlaylistUseCase {
     const song = await this.songRepository.findOne({ id: songId });
     if (song === null) {
       throw new NotFoundException(
-        'Song not found',
         `Song with ID ${songId} not found`,
+        'Song not found',
       );
     }
     const playlist = await this.playlistRepository.findOne(
@@ -26,8 +26,8 @@ export class AddSongToPlaylistUseCase {
 
     if (!playlist) {
       throw new NotFoundException(
-        'Playlist not found',
         `Playlist with ID ${playlistId} not found`,
+        'Playlist not found',
       );
     }
 

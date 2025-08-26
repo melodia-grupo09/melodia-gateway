@@ -10,8 +10,8 @@ export class DeletePlaylistUseCase {
     const playlist = await this.playlistRepository.findOne({ id });
     if (playlist === null)
       throw new NotFoundException(
-        'Playlist not found',
         `Playlist with ID ${id} not found`,
+        'Playlist not found',
       );
     this.playlistRepository.delete(playlist);
     await this.playlistRepository.flush();

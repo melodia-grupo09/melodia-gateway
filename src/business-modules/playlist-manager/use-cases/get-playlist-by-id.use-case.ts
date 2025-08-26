@@ -14,8 +14,8 @@ export class GetPlaylistByIdUseCase {
     );
     if (playlist === null)
       throw new NotFoundException(
-        'Playlist not found',
         `Playlist with ID ${id} not found`,
+        'Playlist not found',
       );
     return playlist.toDTO(PlaylistDTO);
   }

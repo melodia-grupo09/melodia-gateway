@@ -13,11 +13,14 @@ export class ExceptionFilter implements NestExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
+    const exceptionResponse = exception.getResponse();
 
     response.status(status).json({
       type: 'about:blank',
-      title: exception.name,
-      detail: exception.message,
+      title: exceptionResponse['error'] as string,
+      detail: Array.isArray(exceptionResponse['message'])
+        ? exceptionResponse['message'].join('. ')
+        : (exceptionResponse['message'] as string),
       status,
       instance: request.path,
     });

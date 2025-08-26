@@ -9,7 +9,10 @@ export class DeleteSongUseCase {
   async execute(id: UUID): Promise<void> {
     const song = await this.songRepository.findOne({ id });
     if (song === null)
-      throw new NotFoundException(`Song with ID ${id} not found`);
+      throw new NotFoundException(
+        `Song with ID ${id} not found`,
+        'Song not found',
+      );
     this.songRepository.delete(song);
     await this.songRepository.flush();
   }

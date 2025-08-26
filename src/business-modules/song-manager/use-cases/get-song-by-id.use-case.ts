@@ -10,7 +10,10 @@ export class GetSongByIdUseCase {
   async execute(id: UUID): Promise<SongDTO> {
     const song = await this.songRepository.findOne({ id });
     if (song === null)
-      throw new NotFoundException(`Song with ID ${id} not found`);
+      throw new NotFoundException(
+        `Song with ID ${id} not found`,
+        'Song not found',
+      );
     return song.toDTO(SongDTO);
   }
 }
