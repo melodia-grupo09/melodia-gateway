@@ -3,6 +3,7 @@ import assert from 'assert';
 import request from 'supertest';
 import { TestWorld } from './common.stepdefs';
 import { PlaylistDTO } from 'src/business-modules/playlist-manager/dtos/playlist.dto';
+import { SongDTO } from 'src/business-modules/song-manager/dtos/song.dto';
 
 // --- Givens (Preconditions) ---
 Given(
@@ -17,13 +18,13 @@ Given(
       `The precondition playlist "${name}" could not be created`,
     );
 
-    const createdPlaylist = res.body.data;
+    const createdPlaylist = (res.body as { data: PlaylistDTO }).data;
     this.createdPlaylist = createdPlaylist;
     this.playlists.set(name, createdPlaylist);
   },
 );
 
-// --- Whens (Actions) ---
+// --- Whens ---
 When(
   'the user creates a playlist with name {string} and description {string}',
   async function (this: TestWorld, name: string, description: string) {
@@ -34,7 +35,7 @@ When(
     if (!this.response || !this.response.body) {
       throw new Error('Playlist creation failed');
     }
-    const createdPlaylist = this.response.body.data;
+    const createdPlaylist = (this.response.body as { data: PlaylistDTO }).data;
     this.createdPlaylist = createdPlaylist;
     this.playlists.set(name, createdPlaylist);
   },
@@ -152,10 +153,10 @@ Then(
       throw new Error('Response is not defined');
     }
     assert.ok(
-      this.response.body.data,
+      (this.response.body as { data: PlaylistDTO }).data,
       'The response body does not contain data',
     );
-    const createdPlaylist = this.response.body.data as PlaylistDTO;
+    const createdPlaylist = (this.response.body as { data: PlaylistDTO }).data;
 
     assert.strictEqual(
       createdPlaylist.name,
@@ -176,10 +177,11 @@ Then(
       throw new Error('Response is not defined');
     }
     assert.ok(
-      this.response.body.data && Array.isArray(this.response.body.data),
+      (this.response.body as { data: PlaylistDTO[] }).data &&
+        Array.isArray((this.response.body as { data: PlaylistDTO[] }).data),
       'The response data is not an array',
     );
-    const playlists = this.response.body.data as PlaylistDTO[];
+    const playlists = (this.response.body as { data: PlaylistDTO[] }).data;
     const playlistExists = playlists.some((p) => p.name === playlistName);
     assert.ok(
       playlistExists,
@@ -195,10 +197,10 @@ Then(
       throw new Error('Response is not defined');
     }
     assert.ok(
-      this.response.body.data,
+      (this.response.body as { data: PlaylistDTO }).data,
       'The response body does not contain data',
     );
-    const fetchedPlaylist = this.response.body.data as PlaylistDTO;
+    const fetchedPlaylist = (this.response.body as { data: PlaylistDTO }).data;
 
     assert.deepStrictEqual(
       fetchedPlaylist,
@@ -220,7 +222,7 @@ Then(
     const getResponse = await request(this.app.getHttpServer()).get(
       '/playlists',
     );
-    const currentPlaylists = getResponse.body.data as PlaylistDTO[];
+    const currentPlaylists = (getResponse.body as { data: PlaylistDTO[] }).data;
     const playlistExists = currentPlaylists.some(
       (p) => p.id === deletedPlaylist.id,
     );
@@ -239,21 +241,25 @@ Then(
     if (!this.response) {
       throw new Error('Response is not defined');
     }
-    const playlistData = this.response.body.data;
+    const playlistData = (this.response.body as { data: PlaylistDTO }).data;
     assert.ok(
       playlistData && playlistData.songs,
       "Response data is empty or does not contain a 'songs' property",
     );
 
-    const songExists = playlistData.songs.some((s: any) => s.name === songName);
+    const songExists = playlistData.songs.some(
+      (s: SongDTO) => s.title === songName,
+    );
     assert.ok(
       songExists,
       `The song "${songName}" was not found in the playlist "${playlistName}"`,
     );
 
-    const songLink = playlistData.songs.find((s: any) => s.name === songName);
+    const songLink = playlistData.songs.find(
+      (s: SongDTO) => s.title === songName,
+    );
     assert.ok(
-      songLink.addedAt,
+      songLink?.addedAt,
       'The song in the playlist does not have an "addedAt" property',
     );
   },

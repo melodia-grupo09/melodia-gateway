@@ -24,7 +24,7 @@ Feature: Playlists Management
     And the playlist "To Be Deleted" no longer exists in the list of playlists
 
   Scenario: Add a song to a playlist
-    Given a song with name "Smells Like Teen Spirit" and artist "Nirvana"
+    Given a song with title "Smells Like Teen Spirit" and artist "Nirvana"
     And a playlist with name "Rock Anthems" and description "Legendary rock songs"
     When the user adds by ID the song with name "Smells Like Teen Spirit" to the playlist with name "Rock Anthems"
     Then the response status code is 200
@@ -45,6 +45,6 @@ Feature: Playlists Management
     Then the response status code is 404
 
   Scenario: Attempt to add a song to a non-existent playlist
-    Given a song with name "Test Song" and artist "Test Artist"
+    Given a song with title "Test Song" and artist "Test Artist"
     When the user adds the song with name "Test Song" to the playlist with ID "00000000-0000-0000-0000-000000000000"
     Then the response status code is 404
