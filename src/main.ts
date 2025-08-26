@@ -11,7 +11,7 @@ async function bootstrap() {
   const mikroORM: MikroORM = app.get(MikroORM);
   await mikroORM.checkConnection();
   await mikroORM.migrator.up();
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.NODE_PORT ?? 3000);
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
