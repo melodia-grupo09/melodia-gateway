@@ -11,6 +11,7 @@ import assert from 'assert';
 import { PlaylistDTO } from 'src/business-modules/playlist-manager/dtos/playlist.dto';
 import { SongDTO } from 'src/business-modules/song-manager/dtos/song.dto';
 import supertest from 'supertest';
+import { App } from 'supertest/types';
 
 Before(async function (this: TestWorld) {
   process.env.NODE_ENV = 'testing';
@@ -51,7 +52,7 @@ After(async function (this: TestWorld) {
 });
 
 export class TestWorld {
-  public app!: INestApplication;
+  public app!: INestApplication<App>;
   public playlists: Map<string, PlaylistDTO>;
   public songs: Map<string, SongDTO>;
   public response?: supertest.Response;
