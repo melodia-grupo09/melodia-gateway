@@ -1,13 +1,16 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
+  ParseBoolPipe,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -15,6 +18,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
@@ -30,6 +34,8 @@ import { GetPlaylistByIdUseCase } from './use-cases/get-playlist-by-id.use-case'
 import { DeletePlaylistUseCase } from './use-cases/delete-playlist.use-case';
 import { AddSongToPlaylistUseCase } from './use-cases/add-song-to-playlist.use-case';
 import { AddSongToPlaylistDTO } from './dtos/add-song.dto';
+import { PublishPlaylistUseCase } from './use-cases/publish-playlist.use-case';
+import { UnpublishPlaylistUseCase } from './use-cases/unpublish-playlist.use-case';
 
 @ApiTags('Playlists')
 @ApiExtraModels(CreatePlaylistDTO, PlaylistDTO, PlaylistSongDTO)
@@ -41,6 +47,8 @@ export class PlaylistManagerController {
     private readonly getPlaylistByIdUseCase: GetPlaylistByIdUseCase,
     private readonly deletePlaylistUseCase: DeletePlaylistUseCase,
     private readonly addSongToPlaylistUseCase: AddSongToPlaylistUseCase,
+    private readonly publishPlaylistUseCase: PublishPlaylistUseCase,
+    private readonly unpublishPlaylistUseCase: UnpublishPlaylistUseCase,
   ) {}
 
   @Get()
@@ -54,8 +62,29 @@ export class PlaylistManagerController {
     },
     isArray: true,
   })
-  async getPlaylists(): Promise<PlaylistDTO[]> {
-    return this.getPlaylistsUseCase.execute();
+  @ApiQuery({
+    name: 'published',
+    type: Boolean,
+    default: true,
+    required: false,
+  })
+  @ApiQuery({
+    name: 'sort',
+    type: String,
+    default: '-publishedAt',
+    required: false,
+  })
+  async getPlaylists(
+    @Query('published', new DefaultValuePipe(true), ParseBoolPipe)
+    published: boolean,
+    @Query('sort', new DefaultValuePipe('-publishedAt')) sort: string,
+  ): Promise<PlaylistDTO[]> {
+    const sortDirection = sort[0] === '-' ? 'desc' : 'asc';
+    const sortField = sort.replace('-', '') as keyof PlaylistDTO;
+    return this.getPlaylistsUseCase.execute(published, {
+      sortField,
+      sortDirection,
+    });
   }
 
   @Get(':id')
@@ -136,5 +165,37 @@ export class PlaylistManagerController {
     @Body() addSongDto: AddSongToPlaylistDTO,
   ): Promise<PlaylistDTO> {
     return this.addSongToPlaylistUseCase.execute(id, addSongDto.songId);
+  }
+
+  @Post(':id/publish')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Publish playlist' })
+  @ApiOkResponse({
+    description: 'Publish an existing playlist',
+    type: PlaylistDTO,
+    schema: {
+      $ref: getSchemaPath(PlaylistDTO),
+    },
+  })
+  async publishPlaylist(
+    @Param('id', ParseUUIDPipe) id: UUID,
+  ): Promise<PlaylistDTO> {
+    return this.publishPlaylistUseCase.execute(id);
+  }
+
+  @Post(':id/unpublish')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Publish playlist' })
+  @ApiOkResponse({
+    description: 'Publish an existing playlist',
+    type: PlaylistDTO,
+    schema: {
+      $ref: getSchemaPath(PlaylistDTO),
+    },
+  })
+  async unpublishPlaylist(
+    @Param('id', ParseUUIDPipe) id: UUID,
+  ): Promise<PlaylistDTO> {
+    return this.unpublishPlaylistUseCase.execute(id);
   }
 }

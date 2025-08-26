@@ -7,6 +7,8 @@ import { GetPlaylistByIdUseCase } from './use-cases/get-playlist-by-id.use-case'
 import { CreatePlaylistUseCase } from './use-cases/create-playlist.use-case';
 import { DeletePlaylistUseCase } from './use-cases/delete-playlist.use-case';
 import { AddSongToPlaylistUseCase } from './use-cases/add-song-to-playlist.use-case';
+import { PublishPlaylistUseCase } from './use-cases/publish-playlist.use-case';
+import { UnpublishPlaylistUseCase } from './use-cases/unpublish-playlist.use-case';
 
 @Module({
   controllers: [PlaylistManagerController],
@@ -16,6 +18,8 @@ import { AddSongToPlaylistUseCase } from './use-cases/add-song-to-playlist.use-c
     CreatePlaylistUseCase,
     DeletePlaylistUseCase,
     AddSongToPlaylistUseCase,
+    PublishPlaylistUseCase,
+    UnpublishPlaylistUseCase,
   ],
   imports: [SongModule, PlaylistModule],
 })
