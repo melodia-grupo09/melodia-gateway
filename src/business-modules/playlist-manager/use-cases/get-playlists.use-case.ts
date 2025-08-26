@@ -10,6 +10,8 @@ export class GetPlaylistsUseCase {
     const playlists = await this.playlistRepository.findAll({
       populate: ['songs', 'songs.song'],
     });
-    return playlists.map((playlist) => playlist.toDTO(PlaylistDTO));
+    return playlists
+      .map((playlist) => playlist.toDTO(PlaylistDTO))
+      .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
   }
 }
