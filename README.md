@@ -16,6 +16,8 @@ Tabla de Contenido
     
 *   [Comandos de Docker](#comandos-de-docker)
     
+    *   [Construir y correr la app](#construir-y-correr-la-app)
+
     *   [Construir la Imagen](#construir-la-imagen)
         
     *   [Correr la Base de Datos](#correr-la-base-de-datos)
