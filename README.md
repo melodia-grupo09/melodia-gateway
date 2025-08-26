@@ -28,7 +28,7 @@ Tabla de Contenido
 Introducción
 ------------
 
-La solución implementa una API REST utilizando **NestJS**, un framework de Node.js que favorece la escalabilidad y la modularidad. La elección de este framework por sobre Express, fue motivada no solo por la filosofía modular que tiene el framework, sino también por todo el set de herramientas que incluye. El objetivo principal fue construir una base sólida y documentada, complementada por una estrategia de testing de integración. Para ello, se utilizó **Cucumber**, que permite definir el comportamiento esperado de la API en un lenguaje natural (Gherkin), permitiendo que los que se está queriendo probar pueda ser leido de forma sencilla, e incluso escrito por alguien no-técnico
+La solución implementa una API REST utilizando [**Nest.JS**](https://nestjs.com/), un framework de Node.js que favorece la escalabilidad y la modularidad. La elección de este framework por sobre Express, fue motivada no solo por la filosofía modular que tiene el framework, sino también por todo el set de herramientas que incluye. El objetivo principal fue construir una base sólida y documentada, complementada por una estrategia de testing de integración. Para ello, utilizamos [**Cucumber**](https://cucumber.io/docs/), que permite definir el comportamiento esperado de la API en un lenguaje natural (Gherkin), permitiendo que los que se está queriendo probar pueda ser leido de forma sencilla, e incluso escrito por alguien no-técnico
 
 El Mayor Desafío
 ----------------
