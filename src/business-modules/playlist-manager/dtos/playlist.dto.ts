@@ -5,6 +5,8 @@ import {
   IsBoolean,
   IsDate,
   IsString,
+  MaxLength,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 import { SongDTO } from 'src/business-modules/song-manager/dtos/song.dto';
@@ -69,6 +71,12 @@ export class CreatePlaylistDTO {
   @ApiProperty({
     description: 'The description of the playlist',
     example: 'A collection of my favorite songs',
+  })
+  @MinLength(50, {
+    message: 'Description must be between 50 and 255 characters long',
+  })
+  @MaxLength(255, {
+    message: 'Description must be between 50 and 255 characters long',
   })
   @IsString()
   description: string;
