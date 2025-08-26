@@ -1,12 +1,12 @@
-import { Module } from "@nestjs/common";
-import { SongModule } from "src/entity-modules/song/song.module";
-import { PlaylistModule } from "src/entity-modules/playlist/playlist.module";
-import { PlaylistManagerController } from "./playlist-manager.controller";
-import { GetPlaylistsUseCase } from "./use-cases/get-playlists.use-case";
-import { GetPlaylistByIdUseCase } from "./use-cases/get-playlist-by-id.use-case";
-import { CreatePlaylistUseCase } from "./use-cases/create-playlist.use-case";
-import { DeletePlaylistUseCase } from "./use-cases/delete-playlist.use-case";
-import { AddSongToPlaylistUseCase } from "./use-cases/add-song-to-playlist.use-case";
+import { Module } from '@nestjs/common';
+import { SongModule } from 'src/entity-modules/song/song.module';
+import { PlaylistModule } from 'src/entity-modules/playlist/playlist.module';
+import { PlaylistManagerController } from './playlist-manager.controller';
+import { GetPlaylistsUseCase } from './use-cases/get-playlists.use-case';
+import { GetPlaylistByIdUseCase } from './use-cases/get-playlist-by-id.use-case';
+import { CreatePlaylistUseCase } from './use-cases/create-playlist.use-case';
+import { DeletePlaylistUseCase } from './use-cases/delete-playlist.use-case';
+import { AddSongToPlaylistUseCase } from './use-cases/add-song-to-playlist.use-case';
 
 @Module({
   controllers: [PlaylistManagerController],
@@ -15,7 +15,7 @@ import { AddSongToPlaylistUseCase } from "./use-cases/add-song-to-playlist.use-c
     GetPlaylistByIdUseCase,
     CreatePlaylistUseCase,
     DeletePlaylistUseCase,
-    AddSongToPlaylistUseCase
+    AddSongToPlaylistUseCase,
   ],
   imports: [SongModule, PlaylistModule],
 })

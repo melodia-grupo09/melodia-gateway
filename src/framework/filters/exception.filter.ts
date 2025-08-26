@@ -1,5 +1,9 @@
-
-import { ExceptionFilter as NestExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common';
+import {
+  ExceptionFilter as NestExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 
 @Catch(HttpException)
@@ -10,14 +14,12 @@ export class ExceptionFilter implements NestExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
 
-    response
-      .status(status)
-      .json({
-        type: "about:blank",
-        title: exception.name,
-        detail: exception.message,
-        status,
-        instance: request.path,
-      });
+    response.status(status).json({
+      type: 'about:blank',
+      title: exception.name,
+      detail: exception.message,
+      status,
+      instance: request.path,
+    });
   }
 }

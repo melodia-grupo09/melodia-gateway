@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
@@ -22,7 +22,7 @@ import { PlaylistManagerModule } from './business-modules/playlist-manager/playl
       provide: APP_INTERCEPTOR,
       useClass: ResponseFormatInterceptor,
     },
-    AppService
+    AppService,
   ],
 })
 export class AppModule {}

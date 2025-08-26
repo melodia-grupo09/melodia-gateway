@@ -1,7 +1,8 @@
 import { EntityRepository } from '@mikro-orm/postgresql';
 
-export class BaseRepository<Entity extends object> extends EntityRepository<Entity> {
-
+export class BaseRepository<
+  Entity extends object,
+> extends EntityRepository<Entity> {
   persist(entity: Entity): void {
     this.getEntityManager().persist(entity);
   }
@@ -18,5 +19,4 @@ export class BaseRepository<Entity extends object> extends EntityRepository<Enti
   delete(entity: Entity): void {
     this.getEntityManager().remove(entity);
   }
-
 }

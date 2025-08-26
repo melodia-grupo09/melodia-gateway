@@ -1,12 +1,12 @@
-import "reflect-metadata";
-import { instanceToPlain, plainToInstance } from "class-transformer";
+import 'reflect-metadata';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import {
   validateSync,
   ValidationError,
   ValidatorOptions,
-} from "class-validator";
-import { BaseEntity } from "@mikro-orm/core";
-import { BadRequestException } from "@nestjs/common";
+} from 'class-validator';
+import { BaseEntity } from '@mikro-orm/core';
+import { BadRequestException } from '@nestjs/common';
 export type ClassCtor<T extends object> = new (...args: never[]) => T;
 
 /**
