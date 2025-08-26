@@ -7,6 +7,10 @@ import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { MIKRO_ORM_MODULE_OPTIONS } from "@mikro-orm/nestjs";
 import { AppModule } from "src/app.module";
 import { MikroORM } from "@mikro-orm/core";
+import assert from "assert";
+import { PlaylistDTO } from "src/business-modules/playlist-manager/dtos/playlist.dto";
+import { SongDTO } from "src/business-modules/song-manager/dtos/song.dto";
+import supertest from "supertest";
 
 Before(async function () {
   try {
@@ -52,6 +56,23 @@ After(async function () {
 
 export class TestWorld {
   public app!: INestApplication;
+  public playlists: Map<string, PlaylistDTO>;
+  public songs: Map<string, SongDTO>;
+  public response?: supertest.Response;
+  public createdPlaylist?: PlaylistDTO;
+  public createdSong?: SongDTO;
+
+  constructor() {
+    this.playlists = new Map<string, PlaylistDTO>();
+    this.songs = new Map<string, SongDTO>();
+  }
+
 }
 
 setWorldConstructor(TestWorld);
+
+// Common step definitions
+
+Then('the response status code is {int}', function (statusCode: number) {
+  assert.strictEqual(this.response.status, statusCode, `Expected status code ${statusCode} but got ${this.response.status}`);
+});
