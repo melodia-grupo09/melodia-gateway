@@ -48,7 +48,7 @@ Para levantar el entorno de desarrollo y correr el proyecto localmente, necesita
 Biblioteca de Testing
 -------------------
 
-Las pruebas de integración se desarrollaron utilizando **Cucumber.js**, una herramienta que implementa el paradigma de Behavior-Driven Development (BDD). Permite escribir casos de prueba en un lenguaje natural y comprensible llamado Gherkin.
+Las pruebas de integración se desarrollaron utilizando **Cucumber**, una herramienta que implementa el paradigma de Behavior-Driven Development (BDD). Permite escribir casos de prueba en un lenguaje natural y comprensible llamado Gherkin.
 
 *   **Link a la documentación oficial:** [Cucumber.io](https://cucumber.io/docs/)
     
