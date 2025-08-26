@@ -31,12 +31,14 @@ export class Playlist extends BaseEntity<
 
   @OneToMany(() => PlaylistSong, (playlistSong) => playlistSong.playlist, {
     serializer: (value: PlaylistSong[]) =>
-      value.map(
-        (link: PlaylistSong) =>
-          Object.assign(link.song, { addedAt: link.addedAt }) as Song & {
-            addedAt: Date;
-          },
-      ),
+      value
+        .map(
+          (link: PlaylistSong) =>
+            Object.assign(link.song, { addedAt: link.addedAt }) as Song & {
+              addedAt: Date;
+            },
+        )
+        .sort((a, b) => a.addedAt.getTime() - b.addedAt.getTime()),
   })
   songs = new Collection<PlaylistSong>(this);
 
