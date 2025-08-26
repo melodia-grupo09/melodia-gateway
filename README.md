@@ -1,7 +1,7 @@
 Melodía Backend App
 =========================================================
 
-Repositorio de la API REST de Melodía, hecha con **NestJS**.
+Repositorio de la API REST de Melodía, hecha con [**Nest.JS**](https://nestjs.com/).
 
 Tabla de Contenido
 ------------------
