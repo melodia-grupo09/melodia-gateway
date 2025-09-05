@@ -16,6 +16,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.enableShutdownHooks();
   const mikroORM: MikroORM = app.get(MikroORM);
   await mikroORM.checkConnection();
   await mikroORM.migrator.up();
