@@ -53,12 +53,34 @@ Biblioteca de Testing
 Las pruebas de integración se desarrollaron utilizando **Cucumber**, una herramienta que implementa el paradigma de Behavior-Driven Development (BDD). Permite escribir casos de prueba en un lenguaje natural y comprensible llamado Gherkin.
 
 *   **Link a la documentación oficial:** [Cucumber.io](https://cucumber.io/docs/)
-    
+
+### Correr los tests
+Para correr los test desde el ambiente local tenemos que crear el archivo .env con la url de la db apuntando a localhost
+```bash
+cp .env.local .env
+docker compose up -d postgres
+npm install
+npm run test:e2e
+```
+
+Correr la app para desarrollo
+-------------------
+Para correr la aplicación sin docker y en modo desarrollo necesitamos modificar el .env con `DATABASE_HOST=localhost`
+```bash
+cp .env.local .env
+sed -i '' 's/^DATABASE_HOST=.*/DATABASE_HOST=localhost/' .env # Si no funciona el comando modificar a mano en el .env
+docker compose up -d postgres
+npm install
+npm run start:dev
+```
 
 Comandos de Docker
 ------------------
 
 A continuación, se detallan los comandos necesarios para construir y ejecutar la aplicación utilizando Docker.
+```bash
+cp .env.local .env
+```
 
 ### Construir y correr la app
 Con este comando vamos a construir la imagen del servicio, levantar postgres, y por ultimo levantar el servicio.
@@ -93,5 +115,8 @@ Para iniciar el contenedor de la aplicación (con la ultima version construida d
 docker compose build
 docker compose up -d app
 ```
-Si queremos iniciarlo desde la imagen que construimos en el paso anterior podemos hacerlo con
-`docker run -v './.env:/app/.env' --network=host fiuba-melodia-backend`. Antes de hacerlo tenemos que crear el .env desde el .env.local modificando el `DATABASE_HOST` para correrlo local. El .env.local no sirve porque tiene como `DATABASE_HOST` el nombre del contenedor de docker que está en la misma red al levantarlo con docker compose. Como no estamos usando docker compose acá, no está por defecto en la misma red (podríamos ponerlo, pero recomiendo no hacerlo y usar docker compose para todo). Usamos el `--network=host` para que el contenedor pueda acceder a la db sin estar dentro de la misma red de docker. Podríamos crear una red de docker en el docker compose y despues ver el nombre para usarlo en el comando de `docker run` (porque el nombre de la red que se crea con docker compose depende del nombre del directorio donde está) y así evitarnos poner el contenedor en la red del host, pero hacer todo esto para levantar la app me parecio innecesario dado que podemos o hacerlo con docker compose, o levantar la app en un Node local, con la db bindeada al puerto del host.
+
+Si queremos iniciarlo desde la imagen que construimos en el paso anterior podemos hacerlo con:
+```bash
+docker run -it --rm -v './.env.local:/app/.env' --network=fiuba-melodia-backend_default fiuba-melodia-backend
+```
