@@ -55,13 +55,14 @@ Las pruebas de integración se desarrollaron utilizando **Cucumber**, una herram
 *   **Link a la documentación oficial:** [Cucumber.io](https://cucumber.io/docs/)
 
 ### Correr los tests
-Para correr los test desde el ambiente local tenemos que crear el archivo .env con la url de la db apuntando a localhost
+Para correr los test desde el ambiente local tenemos que crear el archivo .env con la url de la db de testing apuntando a `localhost`
 ```bash
 cp .env.local .env
 docker compose up -d postgres
 npm install
 npm run test:e2e
 ```
+Si ya habiamos levantado el contenedor de postgres sin haber creado el `.env` debemos eliminar los volumenes con `docker compose down -v` y luego crear el archivo antes de volver a levantar postgres.
 
 Correr la app para desarrollo
 -------------------
