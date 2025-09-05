@@ -48,6 +48,9 @@ Before(async function (this: TestWorld) {
 });
 
 After(async function (this: TestWorld) {
+  const orm = this.app.get(MikroORM);
+  const generator = orm.getSchemaGenerator();
+  await generator.dropSchema();
   await this.app.close();
 });
 
