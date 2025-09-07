@@ -23,7 +23,7 @@ async function bootstrap() {
   const mikroORM: MikroORM = app.get(MikroORM);
   await mikroORM.checkConnection();
   await mikroORM.migrator.up();
-  // @ts-ignore
+  // @ts-expect-error - process is defined at runtime
   const port = process.env.PORT || process.env.NODE_PORT || 3000;
   await app.listen(port);
 }
