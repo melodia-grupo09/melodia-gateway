@@ -30,11 +30,6 @@ Introducción
 
 La solución implementa una API REST utilizando [**Nest.JS**](https://nestjs.com/), un framework de Node.js que favorece la escalabilidad y la modularidad. La elección de este framework por sobre Express, fue motivada no solo por la filosofía modular que tiene el framework, sino también por todo el set de herramientas que incluye. El objetivo principal fue construir una base sólida y documentada, complementada por una estrategia de testing de integración. Para ello, utilizamos [**Cucumber**](https://cucumber.io/docs/), que permite definir el comportamiento esperado de la API en un lenguaje natural (Gherkin), permitiendo que los que se está queriendo probar pueda ser leido de forma sencilla, e incluso escrito por alguien no-técnico
 
-El Mayor Desafío
-----------------
-
-Tengo bastante experiencia con este stack (Nest, Cucumber, Docker, MikroORM) y la forma de trabajarlo, por lo que no hubo nada particularmente desafiante desde el lado tecnológico. Lo más entretenido desde mi punto de vista fue la parte de entender los requerimientos del proyecto y desarrollarlo. Lo más tedioso (aunque no por eso desafiante) fue hacer la configuración inicial de Cucumber y armar el pipeline de CI, por ser algo que, si bien lo hago en el trabajo, no lo hago todos los días.
-
 Pre-requisitos
 --------------
 
