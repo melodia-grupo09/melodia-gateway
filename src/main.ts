@@ -23,7 +23,9 @@ async function bootstrap() {
   const mikroORM: MikroORM = app.get(MikroORM);
   await mikroORM.checkConnection();
   await mikroORM.migrator.up();
-  await app.listen(process.env.NODE_PORT ?? 3000);
+  // @ts-ignore
+  const port = process.env.PORT || process.env.NODE_PORT || 3000;
+  await app.listen(port);
 }
 
 function startSwaggerDocs(app: INestApplication) {
