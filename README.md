@@ -8,8 +8,6 @@ Tabla de Contenido
 
 *   [Introducción](#introducción)
     
-*   [El Mayor Desafío](#el-mayor-desafío)
-    
 *   [Pre-requisitos](#pre-requisitos)
     
 *   [Biblioteca de Testing](#biblioteca-de-testing)
