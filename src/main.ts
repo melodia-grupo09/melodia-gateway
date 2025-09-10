@@ -20,12 +20,8 @@ async function bootstrap() {
 
   startSwaggerDocs(app);
   app.enableShutdownHooks();
-  //  const mikroORM: MikroORM = app.get(MikroORM);
-  //  await mikroORM.checkConnection();
-  //  await mikroORM.migrator.up();
-  //  const port = process.env.PORT || process.env.NODE_PORT || 3000;
-  //  await app.listen(port);
-  const port = process.env.PORT || process.env.NODE_PORT || 3000;
+  app.enableCors();
+  const port = process.env.PORT || 3000;
   await app.listen(port);
   console.log(`Application is running on port ${port}`);
 }
