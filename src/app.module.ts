@@ -5,8 +5,10 @@ import { SongManagerModule } from './business-modules/song-manager/song-manager.
 import { ResponseFormatInterceptor } from './framework/interceptors/response-format.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { PlaylistManagerModule } from './business-modules/playlist-manager/playlist-manager.module';
+import { AppController } from './app.controller';
 
 @Module({
+  controllers: [AppController],
   imports: [
     MikroOrmModule.forRoot({
       ...mikroOrmConfig,
