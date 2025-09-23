@@ -21,11 +21,11 @@ describe('AppController (e2e)', () => {
   });
 
   describe('/ (GET)', () => {
-    it('should return 200 with status ok wrapped in data object', () => {
+    it('should return 200 with status ok', () => {
       return request(app.getHttpServer())
         .get('/')
         .expect(200)
-        .expect({ data: { status: 'ok' } });
+        .expect({ status: 'ok' });
     });
 
     it('should have correct response headers', () => {
