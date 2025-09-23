@@ -1,9 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 // import { MikroORM } from '@mikro-orm/postgresql';
-import { ExceptionFilter } from './framework/filters/exception.filter';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ExceptionFilter } from './framework/filters/exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -33,8 +33,8 @@ function startSwaggerDocs(app: INestApplication) {
     .setVersion('1.0')
     .addTag('melodia')
     .build();
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, documentFactory);
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
