@@ -1,16 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ResponseFormatInterceptor } from './framework/interceptors/response-format.interceptor';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
+import { UsersModule } from './users/users.module';
 
 @Module({
   controllers: [AppController],
-  imports: [],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: ResponseFormatInterceptor,
-    },
-  ],
+  imports: [UsersModule],
+  providers: [],
 })
 export class AppModule {}
