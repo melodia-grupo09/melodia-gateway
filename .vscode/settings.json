@@ -1,10 +1,4 @@
 {
-  "cucumber.features": [
-    "test/business-modules/**/*.feature"
-  ],
-  "cucumber.glue": [
-    "test/step-definitions/**/*.ts"
-  ],
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
