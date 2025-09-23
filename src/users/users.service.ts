@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { AxiosError } from 'axios';
 import { firstValueFrom } from 'rxjs';
+import { LoginUserDto, LoginUserResponseDto } from './dto/login-user.dto';
 import {
   RegisterUserDto,
   RegisterUserResponseDto,
@@ -22,6 +23,32 @@ interface FastApiUserResponse {
 
 @Injectable()
 export class UsersService {
+  async loginUser(loginUserDto: LoginUserDto): Promise<LoginUserResponseDto> {
+    try {
+      // TODO Update the correct user service URL
+      const response = await firstValueFrom(
+        this.httpService.post<{ access_token: string }>('/users/login', {
+          email: loginUserDto.email,
+          password: loginUserDto.password,
+        }),
+      );
+      this.logger.log('User logged in successfully via microservice');
+      return {
+        accessToken: response.data.access_token,
+      };
+    } catch (error) {
+      this.logger.error('Error logging in user:', error);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
+          throw new BadRequestException('Incorrect credentials');
+        }
+        if (error.response?.status === 404) {
+          throw new BadRequestException('Email not found');
+        }
+      }
+      throw new BadRequestException('Error logging in user');
+    }
+  }
   private readonly logger = new Logger(UsersService.name);
 
   constructor(private readonly httpService: HttpService) {}
