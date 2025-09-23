@@ -1,10 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { AxiosError } from 'axios';
 import { firstValueFrom } from 'rxjs';
 import { LoginUserDto, LoginUserResponseDto } from './dto/login-user.dto';
@@ -79,7 +74,7 @@ export class UsersService {
 
       if (error instanceof AxiosError) {
         if (error.response?.status === 409) {
-          throw new ConflictException('Email already registered');
+          throw new BadRequestException('Email already registered');
         }
         if (error.response?.status === 400) {
           const errorMessage = (error.response.data as { message?: string })
