@@ -310,10 +310,10 @@ describe('Users Registration', () => {
     });
   });
 
-  describe('/users/forgot-password (POST)', () => {
+  describe('/users/reset-password (POST)', () => {
     it('should send reset email successfully', () => {
       return request(app.getHttpServer())
-        .post('/users/forgot-password')
+        .post('/users/reset-password')
         .send({ email: 'user@example.com' })
         .expect(200)
         .expect((res) => {
@@ -325,7 +325,7 @@ describe('Users Registration', () => {
 
     it('should return 400 when email is invalid', () => {
       return request(app.getHttpServer())
-        .post('/users/forgot-password')
+        .post('/users/reset-password')
         .send({ email: 'invalid-email' })
         .expect(400)
         .expect((res) => {
@@ -336,7 +336,7 @@ describe('Users Registration', () => {
 
     it('should return 400 when email is missing', () => {
       return request(app.getHttpServer())
-        .post('/users/forgot-password')
+        .post('/users/reset-password')
         .send({})
         .expect(400)
         .expect((res) => {
