@@ -1,13 +1,22 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginUserDto, LoginUserResponseDto } from './dto/login-user.dto';
 import {
   RegisterUserDto,
   RegisterUserResponseDto,
 } from './dto/register-user.dto';
+import { HttpErrorInterceptor } from './interceptors/http-error.interceptor';
 import { UsersService } from './users.service';
 
 @ApiTags('users')
+@UseInterceptors(HttpErrorInterceptor)
 @Controller('users')
 export class UsersController {
   @Post('login')

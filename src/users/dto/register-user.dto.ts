@@ -49,26 +49,11 @@ export class RegisterUserDto {
 
 export class RegisterUserResponseDto {
   @ApiProperty({
-    description: 'Created user ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'Result string from external service',
+    example: 'User created successfully',
   })
-  id: string;
-
-  @ApiProperty({
-    description: 'Username',
-    example: 'johndoe',
-  })
-  username: string;
-
-  @ApiProperty({
-    description: 'User email address',
-    example: 'john.doe@example.com',
-  })
-  email: string;
-
-  @ApiProperty({
-    description: 'User creation timestamp',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  createdAt: string;
+  result?: string;
+  status?: string;
+  message?: string;
+  code?: string;
 }
