@@ -7,6 +7,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ForgotPasswordDto,
+  ForgotPasswordResponseDto,
+} from './dto/forgot-password.dto';
 import { LoginUserDto, LoginUserResponseDto } from './dto/login-user.dto';
 import {
   RegisterUserDto,
@@ -58,5 +62,23 @@ export class UsersController {
     @Body() registerUserDto: RegisterUserDto,
   ): Promise<RegisterUserResponseDto> {
     return this.usersService.registerUser(registerUserDto);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset' })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset email sent',
+    type: ForgotPasswordResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid email',
+  })
+  async forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<ForgotPasswordResponseDto> {
+    return this.usersService.forgotPassword(forgotPasswordDto);
   }
 }

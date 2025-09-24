@@ -85,6 +85,9 @@ describe('Users Registration', () => {
         }
         throw new BadRequestException('Incorrect credentials');
       }),
+      forgotPassword: jest.fn(() => {
+        return Promise.resolve({ message: 'Password reset email sent' });
+      }),
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -303,6 +306,42 @@ describe('Users Registration', () => {
               'Password is required',
             ]),
           );
+        });
+    });
+  });
+
+  describe('/users/forgot-password (POST)', () => {
+    it('should send reset email successfully', () => {
+      return request(app.getHttpServer())
+        .post('/users/forgot-password')
+        .send({ email: 'user@example.com' })
+        .expect(200)
+        .expect((res) => {
+          expect((res.body as { message: string }).message).toBe(
+            'Password reset email sent',
+          );
+        });
+    });
+
+    it('should return 400 when email is invalid', () => {
+      return request(app.getHttpServer())
+        .post('/users/forgot-password')
+        .send({ email: 'invalid-email' })
+        .expect(400)
+        .expect((res) => {
+          const body = res.body as ErrorResponse;
+          expect(body.message).toContain('email must be an email');
+        });
+    });
+
+    it('should return 400 when email is missing', () => {
+      return request(app.getHttpServer())
+        .post('/users/forgot-password')
+        .send({})
+        .expect(400)
+        .expect((res) => {
+          const body = res.body as ErrorResponse;
+          expect(body.message).toContain('email must be an email');
         });
     });
   });

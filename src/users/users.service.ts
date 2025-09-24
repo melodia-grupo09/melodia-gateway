@@ -1,6 +1,10 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import {
+  ForgotPasswordDto,
+  ForgotPasswordResponseDto,
+} from './dto/forgot-password.dto';
 import { LoginUserDto, LoginUserResponseDto } from './dto/login-user.dto';
 import {
   RegisterUserDto,
@@ -35,6 +39,19 @@ export class UsersService {
     );
     return {
       accessToken: response.data.access_token,
+    };
+  }
+
+  async forgotPassword(
+    forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<ForgotPasswordResponseDto> {
+    const response = await firstValueFrom(
+      this.httpService.post<{ message: string }>('/auth/reset-password', {
+        email: forgotPasswordDto.email,
+      }),
+    );
+    return {
+      message: response.data.message,
     };
   }
 }
