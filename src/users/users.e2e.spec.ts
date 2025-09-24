@@ -5,14 +5,15 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
+import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
 import { UsersModule } from '../users/users.module';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UsersService } from './users.service';
 
 interface ErrorResponse {
+  status: number;
   message: string | string[];
-  error: string;
-  statusCode: number;
+  code?: string;
 }
 
 interface UserResponse {
@@ -103,6 +104,8 @@ describe('Users Registration', () => {
         transform: true,
       }),
     );
+
+    app.useGlobalFilters(new HttpExceptionFilter());
 
     await app.init();
   });

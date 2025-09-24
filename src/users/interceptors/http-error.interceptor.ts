@@ -14,11 +14,12 @@ import { catchError } from 'rxjs/operators';
 export class HttpErrorInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-      catchError((error: AxiosError) => {
-        if (error.response) {
-          const { status, data } = error.response;
+      catchError((error) => {
+        if (error instanceof AxiosError && error.response) {
+          const status = (error.response as { status?: number })?.status;
+          const data = (error.response as { data?: unknown })?.data;
 
-          const errorMapping = this.mapExternalError(status, data);
+          const errorMapping = this.mapExternalError(status ?? 500, data);
 
           throw new HttpException(
             {
@@ -30,15 +31,8 @@ export class HttpErrorInterceptor implements NestInterceptor {
           );
         }
 
-        // Timeout / network error
-        throw new HttpException(
-          {
-            status: 'error',
-            message: 'Service temporarily unavailable',
-            code: 'service_unavailable',
-          },
-          HttpStatus.SERVICE_UNAVAILABLE,
-        );
+        // Re-throw non-Axios errors
+        throw error;
       }),
     );
   }
