@@ -9,7 +9,6 @@ import { UsersService } from './users.service';
     HttpModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         baseURL: configService.get<string>('USER_SERVICE_URL') ?? '',
         timeout: 5000,
         headers: {
@@ -23,8 +22,4 @@ import { UsersService } from './users.service';
   providers: [UsersService],
   exports: [UsersService],
 })
-export class UsersModule {
-  constructor() {
-    console.log('USER_SERVICE_URL:', process.env.USER_SERVICE_URL);
-  }
-}
+export class UsersModule {}
