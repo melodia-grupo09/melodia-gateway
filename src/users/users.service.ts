@@ -32,13 +32,17 @@ export class UsersService {
 
   async loginUser(loginUserDto: LoginUserDto): Promise<LoginUserResponseDto> {
     const response = await firstValueFrom(
-      this.httpService.post<{ access_token: string }>('/auth/login', {
+      this.httpService.post<{
+        message: string;
+        token: string;
+        user: { uid: string; email: string; nombre: string };
+      }>('/auth/login', {
         email: loginUserDto.email,
         password: loginUserDto.password,
       }),
     );
     return {
-      accessToken: response.data.access_token,
+      accessToken: response.data.token,
     };
   }
 
