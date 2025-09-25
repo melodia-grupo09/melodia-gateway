@@ -7,10 +7,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  ForgotPasswordDto,
-  ForgotPasswordResponseDto,
-} from './dto/forgot-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginUserDto, LoginUserResponseDto } from './dto/login-user.dto';
 import {
   RegisterUserDto,
@@ -34,6 +31,13 @@ export class UsersController {
   @ApiResponse({
     status: 400,
     description: 'Invalid credentials or email not found',
+    schema: {
+      example: {
+        status: 'error',
+        message: 'Incorrect credentials',
+        code: 'bad_request',
+      },
+    },
   })
   async loginUser(
     @Body() loginUserDto: LoginUserDto,
@@ -52,11 +56,14 @@ export class UsersController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid input data',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Email already registered',
+    description: 'Invalid input data or email already registered',
+    schema: {
+      example: {
+        status: 'error',
+        message: 'El correo electrónico ya está registrado',
+        code: 'email_already_registered',
+      },
+    },
   })
   async registerUser(
     @Body() registerUserDto: RegisterUserDto,
@@ -70,15 +77,26 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'Password reset email sent',
-    type: ForgotPasswordResponseDto,
+    schema: {
+      example: {
+        message: 'Password reset email sent',
+      },
+    },
   })
   @ApiResponse({
     status: 400,
     description: 'Invalid email',
+    schema: {
+      example: {
+        status: 'error',
+        message: 'User not found',
+        code: 'bad_request',
+      },
+    },
   })
   async forgotPassword(
     @Body() forgotPasswordDto: ForgotPasswordDto,
-  ): Promise<ForgotPasswordResponseDto> {
+  ): Promise<{ message: string }> {
     return this.usersService.forgotPassword(forgotPasswordDto);
   }
 }
