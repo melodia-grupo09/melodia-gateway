@@ -49,7 +49,7 @@ For comprehensive API documentation, including all endpoints, request/response s
 
 Comprehensive test coverage tracked automatically via Codecov:
 
-![Code Coverage](https://codecov.io/gh/melodia-grupo09/melodia-gateway/graphs/sunburst.svg?token=BQ641ZU5EK)
+![Code Coverage](https://codecov.io/gh/melodia-grupo09/melodia-gateway/graphs/sunburst.svg?token=DTFTGGZX5L)
 
 ## Dependencies
 
