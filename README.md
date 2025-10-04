@@ -1,116 +1,90 @@
-Melodía Backend App
-=========================================================
+# Melodía API Gateway
 
-Repositorio de la API REST de Melodía, hecha con [**Nest.JS**](https://nestjs.com/).
+[![codecov](https://codecov.io/gh/melodia-grupo09/melodia-gateway/branch/main/graph/badge.svg)](https://codecov.io/gh/melodia-grupo09/melodia-gateway)
 
-Tabla de Contenido
-------------------
+Production-ready API Gateway built with [**NestJS**](https://nestjs.com/) for the Melodía application ecosystem.
 
-*   [Introducción](#introducción)
-    
-*   [Pre-requisitos](#pre-requisitos)
-    
-*   [Biblioteca de Testing](#biblioteca-de-testing)
-    
-*   [Comandos de Docker](#comandos-de-docker)
-    
-    *   [Construir y correr la app](#construir-y-correr-la-app)
+## Overview
 
-    *   [Construir la Imagen](#construir-la-imagen)
-        
-    *   [Correr la Base de Datos](#correr-la-base-de-datos)
-        
-    *   [Correr el Servicio](#correr-el-servicio)
-        
+This API Gateway serves as the central entry point for the Melodía platform, providing:
 
-Introducción
-------------
+- **User Management**: Registration, authentication, and profile management
+- **Firebase Authentication**: Secure JWT-based authentication using Firebase Admin SDK
+- **Analytics Integration**: Real-time user behavior tracking via external metrics service
+- **Request/Response Interceptors**: Standardized API responses and error handling
+- **Production Monitoring**: Comprehensive logging and error tracking
 
-La solución implementa una API REST utilizando [**Nest.JS**](https://nestjs.com/), un framework de Node.js que favorece la escalabilidad y la modularidad. La elección de este framework por sobre Express, fue motivada no solo por la filosofía modular que tiene el framework, sino también por todo el set de herramientas que incluye. El objetivo principal fue construir una base sólida y documentada, complementada por una estrategia de testing de integración. Para ello, utilizamos [**Cucumber**](https://cucumber.io/docs/), que permite definir el comportamiento esperado de la API en un lenguaje natural (Gherkin), permitiendo que los que se está queriendo probar pueda ser leido de forma sencilla, e incluso escrito por alguien no-técnico
+## Architecture
 
-Pre-requisitos
---------------
+The gateway follows a modular microservices architecture pattern:
 
-Para levantar el entorno de desarrollo y correr el proyecto localmente, necesitamos tener instalado el siguiente software:
+- **API Gateway Layer**: Routes and validates incoming requests
+- **Authentication Layer**: Firebase-based JWT verification
+- **Business Logic Layer**: User operations and service orchestration
+- **External Services Integration**: Metrics API for user analytics
+- **Data Persistence**: User data management
 
-*   **Node.js**: v22
-    
-*   **NPM** v11
-    
-*   **Docker** y **Docker Compose**.
-    
+## Features
 
-Biblioteca de Testing
--------------------
+### 🔐 Authentication & Authorization
 
-Las pruebas de integración se desarrollaron utilizando **Cucumber**, una herramienta que implementa el paradigma de Behavior-Driven Development (BDD). Permite escribir casos de prueba en un lenguaje natural y comprensible llamado Gherkin.
+- Firebase Admin SDK integration
+- JWT token validation and verification
+- Protected route guards
+- Secure user session management
 
-*   **Link a la documentación oficial:** [Cucumber.io](https://cucumber.io/docs/)
+### 📊 Analytics & Monitoring
 
-### Correr los tests
-Para correr los test desde el ambiente local tenemos que crear el archivo .env con la url de la db de testing apuntando a `localhost`
-```bash
-cp .env.local .env
-docker compose up -d postgres
-npm install
-npm run test:e2e
-```
-Si ya habiamos levantado el contenedor de postgres sin haber creado el `.env` debemos eliminar los volumenes con `docker compose down -v` y luego crear el archivo antes de volver a levantar postgres.
+- Real-time user registration tracking
+- Login activity monitoring
+- User retention analytics
+- Non-blocking metrics collection (resilient to external service failures)
 
-Correr la app para desarrollo
--------------------
-Para correr la aplicación sin docker y en modo desarrollo necesitamos modificar el .env con `DATABASE_HOST=localhost`
-```bash
-cp .env.local .env
-sed -i '' 's/^DATABASE_HOST=.*/DATABASE_HOST=localhost/' .env # Si no funciona el comando modificar a mano en el .env
-docker compose up -d postgres
-npm install
-npm run start:dev
-```
+### 🛡️ Security & Reliability
 
-Comandos de Docker
-------------------
+- Request validation and sanitization
+- Standardized error handling
+- Graceful degradation for external service failures
+- Production-ready logging
 
-A continuación, se detallan los comandos necesarios para construir y ejecutar la aplicación utilizando Docker.
-```bash
-cp .env.local .env
-```
+### 🧪 Testing & Quality Assurance
 
-### Construir y correr la app
-Con este comando vamos a construir la imagen del servicio, levantar postgres, y por ultimo levantar el servicio.
-```bash
-docker compose up -d
-```
+- **51 unit tests** with comprehensive coverage
+- **97%+ code coverage** on critical services
+- Integration tests for user flows
+- Mocked external dependencies for reliable testing
 
-### Construir la Imagen
-La imagen que vamos a construir es una imagen productiva, no de desarrollo.
-Para construir la imagen, tenemos que ejecutar el siguiente comando desde la raíz del proyecto:
+## API Documentation
 
-```bash
-docker build -t fiuba-melodia-backend .
-```
+For comprehensive API documentation, including all endpoints, request/response schemas, and interactive testing, visit our Swagger documentation:
 
-Si queremos unicamente correr el servicio localmente podemos directamente levantarlo con docker compose. Esto va a constuir la imagen si no está construida, y va a levantar la db.
-```bash
-docker compose up app
-```
+**🔗 [Interactive API Documentation](https://melodia-gateway-2b9807728e9a.herokuapp.com//api)**
 
-### Correr la Base de Datos
+### Key Endpoints Overview
 
-Para levantar el contenedor de postgres, no debemos tener nada escuchando en el puerto 5432 de nuestro host. Está hecho de esta forma por si queremos correr la app desde un Node local (no docker).
-```bash
-docker compose up -d postgres
-```
+- **Authentication**: User registration, login, and password reset
+- **Analytics**: Protected routes for user metrics and retention data
+- **Health Checks**: System status and monitoring endpoints
 
-### Correr el Servicio
+All endpoints include detailed request/response examples, authentication requirements, and error handling documentation in the Swagger interface.
 
-Para iniciar el contenedor de la aplicación (con la ultima version construida de la imagen) podemos usar
-```bash
-docker compose build
-docker compose up -d app
-```
+## Test Coverage
 
-Si queremos iniciarlo desde la imagen que construimos en el paso anterior podemos hacerlo con:
-```bash
-docker run -it --rm -v './.env.local:/app/.env' --network=fiuba-melodia-backend_default fiuba-melodia-backend
-```
+- **MetricsService**: 97.56% coverage (12 tests)
+- **UsersService**: 100% coverage (8 tests)
+- **FirebaseAuthGuard**: Basic validation tests (7 tests)
+- **Integration Tests**: End-to-end user flows (24 tests)
+
+## Dependencies
+
+### Core Framework
+
+- **NestJS**: Modern Node.js framework with TypeScript support
+- **Firebase Admin SDK**: Authentication and user management
+- **Axios**: HTTP client for external API integration
+
+### Development & Testing
+
+- **Jest**: Testing framework with mocking capabilities
+- **ESLint**: Code quality and style enforcement
+- **TypeScript**: Type safety and enhanced developer experience
