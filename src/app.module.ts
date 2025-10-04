@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
+import { MetricsModule } from './metrics/metrics.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -10,6 +11,7 @@ import { UsersModule } from './users/users.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    MetricsModule,
     UsersModule,
   ],
   providers: [],

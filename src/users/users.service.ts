@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { MetricsService } from '../metrics/metrics.service';
 import {
   ForgotPasswordDto,
   ForgotPasswordResponseDto,
@@ -13,7 +14,10 @@ import {
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly metricsService: MetricsService,
+  ) {}
 
   async registerUser(
     registerUserDto: RegisterUserDto,
@@ -25,6 +29,19 @@ export class UsersService {
         nombre: registerUserDto.username,
       }),
     );
+
+    // Track user registration in metrics service
+    // TODO: We need to extract userId from the response or use email as identifier
+    // This depends on what the user service returns
+    try {
+      // Assuming the response contains user data or we use email as userId
+      // You might need to adjust this based on your user service response
+      await this.metricsService.recordUserRegistration(registerUserDto.email);
+    } catch (error) {
+      // Metrics tracking failure shouldn't break the registration flow
+      console.error('Failed to track user registration:', error);
+    }
+
     return {
       result: response.data,
     };
@@ -41,6 +58,18 @@ export class UsersService {
         password: loginUserDto.password,
       }),
     );
+
+    // Track user login and activity in metrics service
+    try {
+      const userId = response.data.user.uid || response.data.user.email;
+      await Promise.all([
+        this.metricsService.recordUserLogin(userId),
+        this.metricsService.recordUserActivity(userId),
+      ]);
+    } catch (error) {
+      console.error('Failed to track user login/activity:', error);
+    }
+
     return {
       accessToken: response.data.token,
     };
