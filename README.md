@@ -22,7 +22,6 @@ The gateway follows a modular microservices architecture pattern:
 - **Authentication Layer**: Firebase-based JWT verification
 - **Business Logic Layer**: User operations and service orchestration
 - **External Services Integration**: Metrics API for user analytics
-- **Data Persistence**: User data management
 
 ## Features
 
@@ -40,40 +39,11 @@ The gateway follows a modular microservices architecture pattern:
 - User retention analytics
 - Non-blocking metrics collection (resilient to external service failures)
 
-### 🛡️ Security & Reliability
-
-- Request validation and sanitization
-- Standardized error handling
-- Graceful degradation for external service failures
-- Production-ready logging
-
-### 🧪 Testing & Quality Assurance
-
-- **51 unit tests** with comprehensive coverage
-- **97%+ code coverage** on critical services
-- Integration tests for user flows
-- Mocked external dependencies for reliable testing
-
 ## API Documentation
 
 For comprehensive API documentation, including all endpoints, request/response schemas, and interactive testing, visit our Swagger documentation:
 
 **🔗 [Interactive API Documentation](https://melodia-gateway-2b9807728e9a.herokuapp.com//api)**
-
-### Key Endpoints Overview
-
-- **Authentication**: User registration, login, and password reset
-- **Analytics**: Protected routes for user metrics and retention data
-- **Health Checks**: System status and monitoring endpoints
-
-All endpoints include detailed request/response examples, authentication requirements, and error handling documentation in the Swagger interface.
-
-## Test Coverage
-
-- **MetricsService**: 97.56% coverage (12 tests)
-- **UsersService**: 100% coverage (8 tests)
-- **FirebaseAuthGuard**: Basic validation tests (7 tests)
-- **Integration Tests**: End-to-end user flows (24 tests)
 
 ## Dependencies
 
