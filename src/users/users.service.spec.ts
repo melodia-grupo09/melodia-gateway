@@ -21,6 +21,9 @@ describe('UsersService', () => {
   };
 
   beforeEach(async () => {
+    // Mock console.error to suppress error logs during tests
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
@@ -39,6 +42,10 @@ describe('UsersService', () => {
 
     // Clear all mocks before each test
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('registerUser', () => {

@@ -1,4 +1,5 @@
 import { HttpService } from '@nestjs/axios';
+import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { of, throwError } from 'rxjs';
 import { MetricsService } from './metrics.service';
@@ -12,6 +13,9 @@ describe('MetricsService', () => {
   };
 
   beforeEach(async () => {
+    // Mock Logger to suppress error logs during tests
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MetricsService,
@@ -25,6 +29,10 @@ describe('MetricsService', () => {
     service = module.get<MetricsService>(MetricsService);
 
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('recordUserRegistration', () => {
