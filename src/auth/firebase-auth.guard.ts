@@ -24,7 +24,6 @@ export class FirebaseAuthGuard implements CanActivate {
     }
     const token = authHeader.replace('Bearer ', '');
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       const decodedToken = await admin.auth().verifyIdToken(token);
       request.user = decodedToken;
       return true;
