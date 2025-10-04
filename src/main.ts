@@ -28,7 +28,7 @@ async function bootstrap() {
 
 function startSwaggerDocs(app: INestApplication) {
   const config = new DocumentBuilder()
-    .setTitle('FIUBA Melodia Backend')
+    .setTitle('FIUBA Melodia Gateway')
     .setDescription('The FIUBA Melodia API description')
     .setVersion('1.0')
     .addTag('melodia')
