@@ -45,6 +45,12 @@ For comprehensive API documentation, including all endpoints, request/response s
 
 **🔗 [Interactive API Documentation](https://melodia-gateway-2b9807728e9a.herokuapp.com//api)**
 
+## Test Coverage
+
+Comprehensive test coverage tracked automatically via Codecov:
+
+![Code Coverage](https://codecov.io/gh/melodia-grupo09/melodia-gateway/graphs/sunburst.svg?token=BQ641ZU5EK)
+
 ## Dependencies
 
 ### Core Framework
