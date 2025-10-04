@@ -1,6 +1,22 @@
 # Melodía API Gateway
 
-[![codecov](https://codecov.io/gh/melodia-grupo09/melodia-gateway/graph/badge.svg?token=DTFTGGZX5L)](https://codecov.io/gh/melodia-grupo09/melodia-gateway)
+<p align="center">
+  <a href="https://github.com/melodia-grupo09/melodia-gateway/actions/workflows/ci.yaml" target="_blank">
+    <img src="https://img.shields.io/github/actions/workflow/status/melodia-grupo09/melodia-gateway/ci.yaml?branch=main&label=CI%2FCD%20Pipeline" alt="CI/CD Status" />
+  </a>
+  <a href="https://app.codecov.io/github/melodia-grupo09/melodia-gateway" target="_blank">
+    <img src="https://codecov.io/gh/melodia-grupo09/melodia-gateway/graph/badge.svg?token=DTFTGGZX5L" alt="Coverage Status" />
+  </a>
+  <a href="https://nodejs.org" target="_blank">
+    <img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node.js Version" />
+  </a>
+  <a href="https://nestjs.com" target="_blank">
+    <img src="https://img.shields.io/badge/NestJS-10.0-E0234E.svg" alt="NestJS Version" />
+  </a>
+  <a href="https://www.typescriptlang.org" target="_blank">
+    <img src="https://img.shields.io/badge/TypeScript-5.1-007ACC.svg" alt="TypeScript Version" />
+  </a>
+</p>
 
 Production-ready API Gateway built with [**NestJS**](https://nestjs.com/) for the Melodía application ecosystem.
 
