@@ -1,6 +1,6 @@
 # Melodía API Gateway
 
-[![codecov](https://codecov.io/gh/melodia-grupo09/melodia-gateway/branch/main/graph/badge.svg)](https://codecov.io/gh/melodia-grupo09/melodia-gateway)
+[![codecov](https://codecov.io/gh/melodia-grupo09/melodia-gateway/graph/badge.svg?token=DTFTGGZX5L)](https://codecov.io/gh/melodia-grupo09/melodia-gateway)
 
 Production-ready API Gateway built with [**NestJS**](https://nestjs.com/) for the Melodía application ecosystem.
 
@@ -49,7 +49,11 @@ For comprehensive API documentation, including all endpoints, request/response s
 
 Comprehensive test coverage tracked automatically via Codecov:
 
-![Code Coverage](https://codecov.io/gh/melodia-grupo09/melodia-gateway/graphs/sunburst.svg?token=DTFTGGZX5L)
+[![Test Coverage](https://codecov.io/gh/melodia-grupo09/melodia-gateway/graph/badge.svg?token=DTFTGGZX5L)](https://codecov.io/gh/melodia-grupo09/melodia-gateway)
+
+**📊 [View Detailed Coverage Report & Interactive Graphs](https://app.codecov.io/gh/melodia-grupo09/melodia-gateway)**
+
+![Coverage Sunburst](https://codecov.io/gh/melodia-grupo09/melodia-gateway/graphs/sunburst.svg?token=DTFTGGZX5L)
 
 ## Dependencies
 
