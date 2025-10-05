@@ -1,6 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MetricsController } from './metrics.controller';
 import { MetricsService } from './metrics.service';
 
 @Global()
@@ -18,6 +19,7 @@ import { MetricsService } from './metrics.service';
       inject: [ConfigService],
     }),
   ],
+  controllers: [MetricsController],
   providers: [MetricsService],
   exports: [MetricsService],
 })

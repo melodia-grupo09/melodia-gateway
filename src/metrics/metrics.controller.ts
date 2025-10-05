@@ -1,0 +1,114 @@
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { MetricsService } from './metrics.service';
+
+@ApiTags('metrics')
+@Controller('metrics')
+@UseGuards(FirebaseAuthGuard)
+export class MetricsController {
+  constructor(private readonly metricsService: MetricsService) {}
+
+  @Get('users/analytics/registrations')
+  @ApiOperation({
+    summary: 'Get new registrations',
+    description:
+      'Retrieve the count of new user registrations within a date range',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: true,
+    type: String,
+    example: '2024-01-01',
+    description: 'Start date for the analytics period (YYYY-MM-DD format)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: true,
+    type: String,
+    example: '2024-12-31',
+    description: 'End date for the analytics period (YYYY-MM-DD format)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'New registrations count retrieved successfully',
+  })
+  async getNewRegistrations(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ): Promise<unknown> {
+    return this.metricsService.getNewRegistrations(startDate, endDate);
+  }
+
+  @Get('users/analytics/active')
+  @ApiOperation({
+    summary: 'Get active users',
+    description: 'Retrieve the count of active users within a date range',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: true,
+    type: String,
+    example: '2024-01-01',
+    description: 'Start date for the analytics period (YYYY-MM-DD format)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: true,
+    type: String,
+    example: '2024-12-31',
+    description: 'End date for the analytics period (YYYY-MM-DD format)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Active users count retrieved successfully',
+  })
+  async getActiveUsers(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ): Promise<unknown> {
+    return this.metricsService.getActiveUsers(startDate, endDate);
+  }
+
+  @Get('users/analytics/retention')
+  @ApiOperation({
+    summary: 'Get user retention',
+    description: 'Retrieve user retention metrics for a specific cohort',
+  })
+  @ApiQuery({
+    name: 'cohortStartDate',
+    required: true,
+    type: String,
+    example: '2024-01-01',
+    description: 'Start date of the cohort period (YYYY-MM-DD format)',
+  })
+  @ApiQuery({
+    name: 'cohortEndDate',
+    required: true,
+    type: String,
+    example: '2024-01-31',
+    description: 'End date of the cohort period (YYYY-MM-DD format)',
+  })
+  @ApiQuery({
+    name: 'daysAfter',
+    required: false,
+    type: Number,
+    example: 7,
+    description: 'Days after registration to check retention (optional)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User retention metrics retrieved successfully',
+  })
+  async getUserRetention(
+    @Query('cohortStartDate') cohortStartDate: string,
+    @Query('cohortEndDate') cohortEndDate: string,
+    @Query('daysAfter') daysAfter?: number,
+  ): Promise<unknown> {
+    return this.metricsService.getUserRetention(
+      cohortStartDate,
+      cohortEndDate,
+      daysAfter,
+    );
+  }
+}
