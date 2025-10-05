@@ -69,7 +69,7 @@ For comprehensive API documentation, including all endpoints, request/response s
 
 **🔗 [Interactive API Documentation](https://melodia-gateway-2b9807728e9a.herokuapp.com//api)**
 
-## Test Coverage
+## Code Coverage
 
 Comprehensive test coverage tracked automatically via Codecov:
 
@@ -77,7 +77,15 @@ Comprehensive test coverage tracked automatically via Codecov:
 
 **📊 [View Detailed Coverage Report & Interactive Graphs](https://app.codecov.io/gh/melodia-grupo09/melodia-gateway)**
 
-![Coverage Sunburst](https://codecov.io/gh/melodia-grupo09/melodia-gateway/graphs/sunburst.svg?token=DTFTGGZX5L)
+<h3>📊 Graph</h3>
+<div align="center">
+  
+  <a href="https://app.codecov.io/gh/melodia-grupo09/melodia-gateway" target="_blank">
+    <img src="https://codecov.io/gh/melodia-grupo09/melodia-gateway/graphs/sunburst.svg?token=DTFTGGZX5L" alt="Coverage Sunburst" width="600" />
+  </a>
+  
+</div>
+<p><a href="https://app.codecov.io/gh/melodia-grupo09/melodia-gateway">Ver reporte detallado</a></p>
 
 ## Dependencies
 
