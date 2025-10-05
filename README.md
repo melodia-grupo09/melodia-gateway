@@ -45,6 +45,7 @@ The gateway integrates with the following external services:
 
 - **Users Service**: [https://backend-user-service-a01239c9445a.herokuapp.com](https://backend-user-service-a01239c9445a.herokuapp.com)
 - **Songs Service**: [https://melodia-songs-service-f31b1c1f9a24.herokuapp.com](https://melodia-songs-service-f31b1c1f9a24.herokuapp.com)
+- **Artists Service**: [https://melodia-artists-64869ccb2e15.herokuapp.com](https://melodia-artists-64869ccb2e15.herokuapp.com)
 - **Metrics Service**: [https://melodia-metrics-e9ca6dea743b.herokuapp.com](https://melodia-metrics-e9ca6dea743b.herokuapp.com)
 
 ## Features
