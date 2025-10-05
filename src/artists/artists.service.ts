@@ -10,11 +10,7 @@ export class ArtistsService {
 
   async createArtist(createArtistData: FormData): Promise<any> {
     const response = await firstValueFrom(
-      this.httpService.post('/artists', createArtistData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }),
+      this.httpService.post('/artists', createArtistData),
     );
     return response.data;
   }
@@ -49,22 +45,14 @@ export class ArtistsService {
 
   async updateArtistImage(id: string, imageData: FormData): Promise<any> {
     const response = await firstValueFrom(
-      this.httpService.patch(`/artists/${id}/image`, imageData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }),
+      this.httpService.patch(`/artists/${id}/image`, imageData),
     );
     return response.data;
   }
 
   async updateArtistCover(id: string, coverData: FormData): Promise<any> {
     const response = await firstValueFrom(
-      this.httpService.patch(`/artists/${id}/cover`, coverData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }),
+      this.httpService.patch(`/artists/${id}/cover`, coverData),
     );
     return response.data;
   }
@@ -124,11 +112,6 @@ export class ArtistsService {
       this.httpService.patch(
         `/artists/${artistId}/releases/${releaseId}/cover`,
         coverData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
       ),
     );
     return response.data;
