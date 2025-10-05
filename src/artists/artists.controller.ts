@@ -21,8 +21,10 @@ import {
 import { HttpErrorInterceptor } from '../users/interceptors/http-error.interceptor';
 import { ArtistsService } from './artists.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
+import { CreateReleaseDto } from './dto/create-release.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { UpdateBioDto } from './dto/update-bio.dto';
+import { UpdateReleaseDto } from './dto/update-release.dto';
 
 @ApiTags('artists')
 @UseInterceptors(HttpErrorInterceptor)
@@ -240,5 +242,240 @@ export class ArtistsController {
     }
 
     return this.artistsService.updateArtistCover(id, formData);
+  }
+
+  // Release endpoints
+  @Get(':artistId/releases')
+  @ApiOperation({ summary: 'Get all releases for an artist' })
+  @ApiParam({
+    name: 'artistId',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Releases retrieved successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist not found',
+  })
+  async getArtistReleases(@Param('artistId') artistId: string): Promise<any> {
+    return this.artistsService.getArtistReleases(artistId);
+  }
+
+  @Post(':artistId/releases')
+  @ApiOperation({ summary: 'Create a new release for an artist' })
+  @ApiParam({
+    name: 'artistId',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Release created successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist not found',
+  })
+  async createRelease(
+    @Param('artistId') artistId: string,
+    @Body() createReleaseDto: CreateReleaseDto,
+  ): Promise<any> {
+    return this.artistsService.createRelease(artistId, createReleaseDto);
+  }
+
+  @Get(':artistId/releases/:releaseId')
+  @ApiOperation({ summary: 'Get a specific release' })
+  @ApiParam({
+    name: 'artistId',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiParam({
+    name: 'releaseId',
+    description: 'Release UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Release retrieved successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist or release not found',
+  })
+  async getArtistRelease(
+    @Param('artistId') artistId: string,
+    @Param('releaseId') releaseId: string,
+  ): Promise<any> {
+    return this.artistsService.getArtistRelease(artistId, releaseId);
+  }
+
+  @Patch(':artistId/releases/:releaseId')
+  @ApiOperation({ summary: 'Update a release' })
+  @ApiParam({
+    name: 'artistId',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiParam({
+    name: 'releaseId',
+    description: 'Release UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Release updated successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist or release not found',
+  })
+  async updateRelease(
+    @Param('artistId') artistId: string,
+    @Param('releaseId') releaseId: string,
+    @Body() updateReleaseDto: UpdateReleaseDto,
+  ): Promise<any> {
+    return this.artistsService.updateRelease(
+      artistId,
+      releaseId,
+      updateReleaseDto,
+    );
+  }
+
+  @Delete(':artistId/releases/:releaseId')
+  @ApiOperation({ summary: 'Delete a release' })
+  @ApiParam({
+    name: 'artistId',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiParam({
+    name: 'releaseId',
+    description: 'Release UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Release deleted successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist or release not found',
+  })
+  async deleteRelease(
+    @Param('artistId') artistId: string,
+    @Param('releaseId') releaseId: string,
+  ): Promise<any> {
+    return this.artistsService.deleteRelease(artistId, releaseId);
+  }
+
+  @Patch(':artistId/releases/:releaseId/cover')
+  @UseInterceptors(FileInterceptor('cover'))
+  @ApiOperation({ summary: 'Update release cover image' })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({
+    name: 'artistId',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiParam({
+    name: 'releaseId',
+    description: 'Release UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Release cover updated successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist or release not found',
+  })
+  async updateReleaseCover(
+    @Param('artistId') artistId: string,
+    @Param('releaseId') releaseId: string,
+    @UploadedFile() cover: any,
+  ): Promise<any> {
+    const formData = new FormData();
+
+    if (
+      cover &&
+      typeof cover === 'object' &&
+      'buffer' in cover &&
+      'originalname' in cover
+    ) {
+      const coverFile = cover as { buffer: Buffer; originalname: string };
+      const blob = new Blob([new Uint8Array(coverFile.buffer)]);
+      formData.append('cover', blob, coverFile.originalname);
+    }
+
+    return this.artistsService.updateReleaseCover(
+      artistId,
+      releaseId,
+      formData,
+    );
+  }
+
+  @Post(':artistId/releases/:releaseId/songs')
+  @ApiOperation({ summary: 'Add songs to a release' })
+  @ApiParam({
+    name: 'artistId',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiParam({
+    name: 'releaseId',
+    description: 'Release UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Songs added to release successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist or release not found',
+  })
+  async addSongsToRelease(
+    @Param('artistId') artistId: string,
+    @Param('releaseId') releaseId: string,
+    @Body() songData: { songIds: string[] },
+  ): Promise<any> {
+    return this.artistsService.addSongsToRelease(artistId, releaseId, songData);
+  }
+
+  @Delete(':artistId/releases/:releaseId/songs')
+  @ApiOperation({ summary: 'Remove songs from a release' })
+  @ApiParam({
+    name: 'artistId',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiParam({
+    name: 'releaseId',
+    description: 'Release UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Songs removed from release successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist or release not found',
+  })
+  async removeSongsFromRelease(
+    @Param('artistId') artistId: string,
+    @Param('releaseId') releaseId: string,
+    @Body() songData: { songIds: string[] },
+  ): Promise<any> {
+    return this.artistsService.removeSongsFromRelease(
+      artistId,
+      releaseId,
+      songData,
+    );
   }
 }

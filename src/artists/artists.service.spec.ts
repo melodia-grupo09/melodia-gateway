@@ -236,4 +236,241 @@ describe('ArtistsService', () => {
       expect(result).toEqual(mockResponse.data);
     });
   });
+
+  describe('getArtistReleases', () => {
+    it('should get artist releases successfully', async () => {
+      const artistId = '123';
+      const mockResponse = {
+        data: [
+          {
+            id: 'release-1',
+            title: 'Album 1',
+            type: 'album',
+            releaseDate: '2024-01-01',
+          },
+        ],
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = (await service.getArtistReleases(artistId)) as any[];
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases`,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('createRelease', () => {
+    it('should create a release successfully', async () => {
+      const artistId = '123';
+      const createReleaseDto = {
+        title: 'New Album',
+        type: 'album' as const,
+        releaseDate: '2024-01-01',
+        coverUrl: 'https://example.com/cover.jpg',
+        artistId: '123',
+        songIds: ['song-1', 'song-2'],
+      };
+      const mockResponse = {
+        data: {
+          id: 'release-123',
+          ...createReleaseDto,
+        },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = (await service.createRelease(
+        artistId,
+        createReleaseDto,
+      )) as {
+        id: string;
+        title: string;
+        type: string;
+        releaseDate: string;
+        coverUrl: string;
+        artistId: string;
+        songIds: string[];
+      };
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases`,
+        createReleaseDto,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('getArtistRelease', () => {
+    it('should get a specific release successfully', async () => {
+      const artistId = '123';
+      const releaseId = 'release-123';
+      const mockResponse = {
+        data: {
+          id: releaseId,
+          title: 'Album 1',
+          type: 'album',
+          releaseDate: '2024-01-01',
+        },
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = (await service.getArtistRelease(artistId, releaseId)) as {
+        id: string;
+        title: string;
+        type: string;
+        releaseDate: string;
+      };
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases/${releaseId}`,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('updateRelease', () => {
+    it('should update a release successfully', async () => {
+      const artistId = '123';
+      const releaseId = 'release-123';
+      const updateReleaseDto = {
+        title: 'Updated Album Title',
+        type: 'album' as const,
+      };
+      const mockResponse = {
+        data: {
+          id: releaseId,
+          ...updateReleaseDto,
+        },
+      };
+
+      mockHttpService.patch.mockReturnValue(of(mockResponse));
+
+      const result = (await service.updateRelease(
+        artistId,
+        releaseId,
+        updateReleaseDto,
+      )) as {
+        id: string;
+        title: string;
+        type: string;
+      };
+
+      expect(mockHttpService.patch).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases/${releaseId}`,
+        updateReleaseDto,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('deleteRelease', () => {
+    it('should delete a release successfully', async () => {
+      const artistId = '123';
+      const releaseId = 'release-123';
+      const mockResponse = {
+        data: { message: 'Release deleted successfully' },
+      };
+
+      mockHttpService.delete.mockReturnValue(of(mockResponse));
+
+      const result = (await service.deleteRelease(artistId, releaseId)) as {
+        message: string;
+      };
+
+      expect(mockHttpService.delete).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases/${releaseId}`,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('updateReleaseCover', () => {
+    it('should update release cover successfully', async () => {
+      const artistId = '123';
+      const releaseId = 'release-123';
+      const coverData = new FormData();
+      const mockResponse = {
+        data: { message: 'Release cover updated successfully' },
+      };
+
+      mockHttpService.patch.mockReturnValue(of(mockResponse));
+
+      const result = (await service.updateReleaseCover(
+        artistId,
+        releaseId,
+        coverData,
+      )) as {
+        message: string;
+      };
+
+      expect(mockHttpService.patch).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases/${releaseId}/cover`,
+        coverData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('addSongsToRelease', () => {
+    it('should add songs to release successfully', async () => {
+      const artistId = '123';
+      const releaseId = 'release-123';
+      const songData = { songIds: ['song-1', 'song-2', 'song-3'] };
+      const mockResponse = {
+        data: { message: 'Songs added to release successfully' },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = (await service.addSongsToRelease(
+        artistId,
+        releaseId,
+        songData,
+      )) as {
+        message: string;
+      };
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases/${releaseId}/songs`,
+        songData,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('removeSongsFromRelease', () => {
+    it('should remove songs from release successfully', async () => {
+      const artistId = '123';
+      const releaseId = 'release-123';
+      const songData = { songIds: ['song-1', 'song-2'] };
+      const mockResponse = {
+        data: { message: 'Songs removed from release successfully' },
+      };
+
+      mockHttpService.delete.mockReturnValue(of(mockResponse));
+
+      const result = (await service.removeSongsFromRelease(
+        artistId,
+        releaseId,
+        songData,
+      )) as {
+        message: string;
+      };
+
+      expect(mockHttpService.delete).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases/${releaseId}/songs`,
+        { data: songData },
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
 });
