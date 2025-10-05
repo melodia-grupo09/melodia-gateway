@@ -2,15 +2,9 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MetricsService } from '../metrics/metrics.service';
-import {
-  ForgotPasswordDto,
-  ForgotPasswordResponseDto,
-} from './dto/forgot-password.dto';
-import { LoginUserDto, LoginUserResponseDto } from './dto/login-user.dto';
-import {
-  RegisterUserDto,
-  RegisterUserResponseDto,
-} from './dto/register-user.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -19,49 +13,43 @@ export class UsersService {
     private readonly metricsService: MetricsService,
   ) {}
 
-  async registerUser(
-    registerUserDto: RegisterUserDto,
-  ): Promise<RegisterUserResponseDto> {
+  async registerUser(registerUserDto: RegisterUserDto): Promise<any> {
     const response = await firstValueFrom(
-      this.httpService.post<string>('/auth/register', {
+      this.httpService.post('/auth/register', {
         email: registerUserDto.email,
         password: registerUserDto.password,
         nombre: registerUserDto.username,
       }),
     );
 
-    // Track user registration in metrics service
-    // TODO: We need to extract userId from the response or use email as identifier
-    // This depends on what the user service returns
     try {
-      // Assuming the response contains user data or we use email as userId
-      // You might need to adjust this based on your user service response
       await this.metricsService.recordUserRegistration(registerUserDto.email);
     } catch (error) {
-      // Metrics tracking failure shouldn't break the registration flow
       console.error('Failed to track user registration:', error);
     }
 
-    return {
-      result: response.data,
-    };
+    return response.data;
   }
 
-  async loginUser(loginUserDto: LoginUserDto): Promise<LoginUserResponseDto> {
+  async loginUser(loginUserDto: LoginUserDto): Promise<any> {
     const response = await firstValueFrom(
-      this.httpService.post<{
-        message: string;
-        token: string;
-        user: { uid: string; email: string; nombre: string };
-      }>('/auth/login', {
-        email: loginUserDto.email,
-        password: loginUserDto.password,
-      }),
+      this.httpService.post<{ user?: { uid?: string; email?: string } }>(
+        '/auth/login',
+        {
+          email: loginUserDto.email,
+          password: loginUserDto.password,
+        },
+      ),
     );
 
-    // Track user login and activity in metrics service
     try {
-      const userId = response.data.user.uid || response.data.user.email;
+      const user = response.data?.user as
+        | { uid?: string; email?: string }
+        | undefined;
+      const userId: string =
+        (typeof user?.uid === 'string' && user.uid) ||
+        (typeof user?.email === 'string' && user.email) ||
+        loginUserDto.email;
       await Promise.all([
         this.metricsService.recordUserLogin(userId),
         this.metricsService.recordUserActivity(userId),
@@ -70,21 +58,15 @@ export class UsersService {
       console.error('Failed to track user login/activity:', error);
     }
 
-    return {
-      accessToken: response.data.token,
-    };
+    return response.data;
   }
 
-  async forgotPassword(
-    forgotPasswordDto: ForgotPasswordDto,
-  ): Promise<ForgotPasswordResponseDto> {
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<any> {
     const response = await firstValueFrom(
-      this.httpService.post<{ message: string }>('/auth/reset-password', {
+      this.httpService.post('/auth/reset-password', {
         email: forgotPasswordDto.email,
       }),
     );
-    return {
-      message: response.data.message,
-    };
+    return response.data;
   }
 }

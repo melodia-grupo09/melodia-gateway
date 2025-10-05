@@ -8,11 +8,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { LoginUserDto, LoginUserResponseDto } from './dto/login-user.dto';
-import {
-  RegisterUserDto,
-  RegisterUserResponseDto,
-} from './dto/register-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
 import { HttpErrorInterceptor } from './interceptors/http-error.interceptor';
 import { UsersService } from './users.service';
 
@@ -26,7 +23,6 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'Login successful',
-    type: LoginUserResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -39,9 +35,7 @@ export class UsersController {
       },
     },
   })
-  async loginUser(
-    @Body() loginUserDto: LoginUserDto,
-  ): Promise<LoginUserResponseDto> {
+  async loginUser(@Body() loginUserDto: LoginUserDto): Promise<any> {
     return this.usersService.loginUser(loginUserDto);
   }
   constructor(private readonly usersService: UsersService) {}
@@ -52,7 +46,6 @@ export class UsersController {
   @ApiResponse({
     status: 201,
     description: 'User registered successfully',
-    type: RegisterUserResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -65,9 +58,7 @@ export class UsersController {
       },
     },
   })
-  async registerUser(
-    @Body() registerUserDto: RegisterUserDto,
-  ): Promise<RegisterUserResponseDto> {
+  async registerUser(@Body() registerUserDto: RegisterUserDto): Promise<any> {
     return this.usersService.registerUser(registerUserDto);
   }
 
@@ -96,7 +87,7 @@ export class UsersController {
   })
   async forgotPassword(
     @Body() forgotPasswordDto: ForgotPasswordDto,
-  ): Promise<{ message: string }> {
+  ): Promise<any> {
     return this.usersService.forgotPassword(forgotPasswordDto);
   }
 }

@@ -63,7 +63,7 @@ describe('UsersService', () => {
       mockHttpService.post.mockReturnValue(of(mockResponse));
       mockMetricsService.recordUserRegistration.mockResolvedValue(undefined);
 
-      const result = await service.registerUser(registerDto);
+      const result = (await service.registerUser(registerDto)) as string;
 
       expect(mockHttpService.post).toHaveBeenCalledWith('/auth/register', {
         email: registerDto.email,
@@ -75,9 +75,7 @@ describe('UsersService', () => {
         registerDto.email,
       );
 
-      expect(result).toEqual({
-        result: 'User registered successfully',
-      });
+      expect(result).toEqual('User registered successfully');
     });
 
     it('should register user even if metrics tracking fails', async () => {
@@ -96,11 +94,9 @@ describe('UsersService', () => {
         new Error('Metrics error'),
       );
 
-      const result = await service.registerUser(registerDto);
+      const result = (await service.registerUser(registerDto)) as string;
 
-      expect(result).toEqual({
-        result: 'User registered successfully',
-      });
+      expect(result).toEqual('User registered successfully');
     });
 
     it('should throw error if user service fails', async () => {
@@ -144,7 +140,11 @@ describe('UsersService', () => {
       mockMetricsService.recordUserLogin.mockResolvedValue(undefined);
       mockMetricsService.recordUserActivity.mockResolvedValue(undefined);
 
-      const result = await service.loginUser(loginDto);
+      const result = (await service.loginUser(loginDto)) as {
+        message: string;
+        token: string;
+        user: { uid: string; email: string; nombre: string };
+      };
 
       expect(mockHttpService.post).toHaveBeenCalledWith('/auth/login', {
         email: loginDto.email,
@@ -159,7 +159,13 @@ describe('UsersService', () => {
       );
 
       expect(result).toEqual({
-        accessToken: 'jwt-token-123',
+        message: 'Login successful',
+        token: 'jwt-token-123',
+        user: {
+          uid: 'user-123',
+          email: 'test@example.com',
+          nombre: 'testuser',
+        },
       });
     });
 
@@ -189,10 +195,20 @@ describe('UsersService', () => {
         new Error('Metrics error'),
       );
 
-      const result = await service.loginUser(loginDto);
+      const result = (await service.loginUser(loginDto)) as {
+        message: string;
+        token: string;
+        user: { uid: string; email: string; nombre: string };
+      };
 
       expect(result).toEqual({
-        accessToken: 'jwt-token-123',
+        message: 'Login successful',
+        token: 'jwt-token-123',
+        user: {
+          uid: 'user-123',
+          email: 'test@example.com',
+          nombre: 'testuser',
+        },
       });
     });
 
@@ -243,7 +259,9 @@ describe('UsersService', () => {
 
       mockHttpService.post.mockReturnValue(of(mockResponse));
 
-      const result = await service.forgotPassword(forgotPasswordDto);
+      const result = (await service.forgotPassword(forgotPasswordDto)) as {
+        message: string;
+      };
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
         '/auth/reset-password',
