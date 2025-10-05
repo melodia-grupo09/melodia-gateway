@@ -51,11 +51,7 @@ describe('ArtistsService', () => {
         createdAt: string;
       };
 
-      expect(mockHttpService.post).toHaveBeenCalledWith('/artists', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      expect(mockHttpService.post).toHaveBeenCalledWith('/artists', formData);
       expect(result).toEqual(mockResponse.data);
     });
 
@@ -200,11 +196,6 @@ describe('ArtistsService', () => {
       expect(mockHttpService.patch).toHaveBeenCalledWith(
         `/artists/${artistId}/image`,
         imageData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -227,11 +218,6 @@ describe('ArtistsService', () => {
       expect(mockHttpService.patch).toHaveBeenCalledWith(
         `/artists/${artistId}/cover`,
         coverData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -410,11 +396,6 @@ describe('ArtistsService', () => {
       expect(mockHttpService.patch).toHaveBeenCalledWith(
         `/artists/${artistId}/releases/${releaseId}/cover`,
         coverData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
       );
       expect(result).toEqual(mockResponse.data);
     });
