@@ -304,7 +304,18 @@ describe('ArtistsController', () => {
 
       mockArtistsService.createRelease.mockResolvedValue(mockResult);
 
-      const result = await controller.createRelease(artistId, createReleaseDto);
+      const result = (await controller.createRelease(
+        artistId,
+        createReleaseDto,
+      )) as {
+        id: string;
+        title: string;
+        type: string;
+        releaseDate: string;
+        coverUrl: string;
+        artistId: string;
+        songIds: string[];
+      };
 
       expect(mockArtistsService.createRelease).toHaveBeenCalledWith(
         artistId,
@@ -327,7 +338,15 @@ describe('ArtistsController', () => {
 
       mockArtistsService.getArtistRelease.mockResolvedValue(mockResult);
 
-      const result = await controller.getArtistRelease(artistId, releaseId);
+      const result = (await controller.getArtistRelease(
+        artistId,
+        releaseId,
+      )) as {
+        id: string;
+        title: string;
+        type: string;
+        releaseDate: string;
+      };
 
       expect(mockArtistsService.getArtistRelease).toHaveBeenCalledWith(
         artistId,
@@ -353,11 +372,15 @@ describe('ArtistsController', () => {
 
       mockArtistsService.updateRelease.mockResolvedValue(mockResult);
 
-      const result = await controller.updateRelease(
+      const result = (await controller.updateRelease(
         artistId,
         releaseId,
         updateReleaseDto,
-      );
+      )) as {
+        id: string;
+        title: string;
+        type: string;
+      };
 
       expect(mockArtistsService.updateRelease).toHaveBeenCalledWith(
         artistId,
@@ -376,7 +399,9 @@ describe('ArtistsController', () => {
 
       mockArtistsService.deleteRelease.mockResolvedValue(mockResult);
 
-      const result = await controller.deleteRelease(artistId, releaseId);
+      const result = (await controller.deleteRelease(artistId, releaseId)) as {
+        message: string;
+      };
 
       expect(mockArtistsService.deleteRelease).toHaveBeenCalledWith(
         artistId,
@@ -399,11 +424,13 @@ describe('ArtistsController', () => {
 
       mockArtistsService.updateReleaseCover.mockResolvedValue(mockResult);
 
-      const result = await controller.updateReleaseCover(
+      const result = (await controller.updateReleaseCover(
         artistId,
         releaseId,
         mockCover,
-      );
+      )) as {
+        message: string;
+      };
 
       expect(mockArtistsService.updateReleaseCover).toHaveBeenCalledWith(
         artistId,
@@ -424,11 +451,13 @@ describe('ArtistsController', () => {
 
       mockArtistsService.addSongsToRelease.mockResolvedValue(mockResult);
 
-      const result = await controller.addSongsToRelease(
+      const result = (await controller.addSongsToRelease(
         artistId,
         releaseId,
         songData,
-      );
+      )) as {
+        message: string;
+      };
 
       expect(mockArtistsService.addSongsToRelease).toHaveBeenCalledWith(
         artistId,
@@ -449,11 +478,13 @@ describe('ArtistsController', () => {
 
       mockArtistsService.removeSongsFromRelease.mockResolvedValue(mockResult);
 
-      const result = await controller.removeSongsFromRelease(
+      const result = (await controller.removeSongsFromRelease(
         artistId,
         releaseId,
         songData,
-      );
+      )) as {
+        message: string;
+      };
 
       expect(mockArtistsService.removeSongsFromRelease).toHaveBeenCalledWith(
         artistId,
