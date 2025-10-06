@@ -8,7 +8,7 @@ export class SongsService {
 
   async streamSong(songId: string): Promise<unknown> {
     const response = await firstValueFrom(
-      this.httpService.get(`/songs/stream/${songId}`),
+      this.httpService.get(`/songs/player/play/${songId}`),
     );
     return response.data;
   }
