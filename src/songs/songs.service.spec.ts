@@ -47,7 +47,9 @@ describe('SongsService', () => {
       const result = await service.streamSong(songId);
 
       expect(result).toEqual(mockResponse.data);
-      expect(mockHttpService.get).toHaveBeenCalledWith('/songs/stream/song123');
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        '/songs/player/play/song123',
+      );
     });
 
     it('should handle errors when streaming fails', async () => {
@@ -59,7 +61,9 @@ describe('SongsService', () => {
       await expect(service.streamSong(songId)).rejects.toThrow(
         'Song not found',
       );
-      expect(mockHttpService.get).toHaveBeenCalledWith('/songs/stream/song123');
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        '/songs/player/play/song123',
+      );
     });
 
     it('should call correct endpoint with songId parameter', async () => {
@@ -71,7 +75,7 @@ describe('SongsService', () => {
       await service.streamSong(songId);
 
       expect(mockHttpService.get).toHaveBeenCalledWith(
-        `/songs/stream/${songId}`,
+        `/songs/player/play/${songId}`,
       );
     });
   });
