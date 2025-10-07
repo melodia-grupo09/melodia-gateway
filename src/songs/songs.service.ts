@@ -10,9 +10,9 @@ export class SongsService {
 
   async streamSong(
     songId: string,
-    range: string | undefined,
+    range: string | string[] | undefined,
   ): Promise<AxiosResponse<Readable>> {
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string | string[]> = {};
     // Si el cliente pide un rango específico
     if (range) {
       headers['range'] = range;
