@@ -26,7 +26,6 @@ The application is deployed on Heroku and accessible at: [https://melodia-gatewa
 
 This API Gateway serves as the central entry point for the Melodía platform, providing:
 
-
 - **Firebase Authentication**: Secure JWT-based authentication using Firebase Admin SDK
 - **Request/Response Interceptors**: Standardized API responses and error handling
 - **Production Monitoring**: Comprehensive logging and error tracking
