@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, IsNumber } from 'class-validator';
+import { IsNumber, IsUUID } from 'class-validator';
 
 export class ReorderSongDto {
   @ApiProperty({ description: 'Song ID' })

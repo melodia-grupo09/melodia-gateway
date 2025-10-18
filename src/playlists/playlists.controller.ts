@@ -12,14 +12,21 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags, ApiParam, ApiQuery, ApiHeader } from '@nestjs/swagger';
+import {
+  ApiHeader,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
-import { PlaylistsService } from './playlists.service';
-import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
-import { ReorderSongDto } from './dto/reorder-song.dto';
-import { CreateLikedSongDto } from './dto/create-liked-song.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
+import { CreateLikedSongDto } from './dto/create-liked-song.dto';
+import { CreatePlaylistDto } from './dto/create-playlist.dto';
+import { ReorderSongDto } from './dto/reorder-song.dto';
+import { PlaylistsService } from './playlists.service';
 
 @ApiTags('playlists')
 @UseGuards(FirebaseAuthGuard)
@@ -41,7 +48,11 @@ export class PlaylistsController {
   @Get()
   @ApiOperation({ summary: 'Get all playlists' })
   @ApiResponse({ status: 200, description: 'Playlists retrieved successfully' })
-  @ApiQuery({ name: 'user_id', required: false, description: 'Filter by user ID' })
+  @ApiQuery({
+    name: 'user_id',
+    required: false,
+    description: 'Filter by user ID',
+  })
   async getPlaylists(@Query('user_id') userId?: string) {
     return this.playlistsService.getPlaylists(userId);
   }
@@ -69,7 +80,10 @@ export class PlaylistsController {
 
   @Post(':playlistId/songs')
   @ApiOperation({ summary: 'Add a song to playlist' })
-  @ApiResponse({ status: 201, description: 'Song added to playlist successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Song added to playlist successfully',
+  })
   @ApiParam({ name: 'playlistId', description: 'Playlist ID' })
   async addSongToPlaylist(
     @Param('playlistId') playlistId: string,
@@ -81,7 +95,10 @@ export class PlaylistsController {
   @Delete(':playlistId/songs/:songId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a song from playlist' })
-  @ApiResponse({ status: 204, description: 'Song removed from playlist successfully' })
+  @ApiResponse({
+    status: 204,
+    description: 'Song removed from playlist successfully',
+  })
   @ApiParam({ name: 'playlistId', description: 'Playlist ID' })
   @ApiParam({ name: 'songId', description: 'Song ID' })
   async removeSongFromPlaylist(
@@ -99,13 +116,19 @@ export class PlaylistsController {
     @Param('playlistId') playlistId: string,
     @Body() songPositions: ReorderSongDto[],
   ) {
-    return this.playlistsService.reorderPlaylistSongs(playlistId, songPositions);
+    return this.playlistsService.reorderPlaylistSongs(
+      playlistId,
+      songPositions,
+    );
   }
 
   // Liked songs endpoints
   @Get('liked-songs')
   @ApiOperation({ summary: 'Get all liked songs' })
-  @ApiResponse({ status: 200, description: 'Liked songs retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Liked songs retrieved successfully',
+  })
   @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
   async getLikedSongs(@Headers('user-id') userId: string) {
     return this.playlistsService.getLikedSongs(userId);
@@ -113,7 +136,10 @@ export class PlaylistsController {
 
   @Post('liked-songs')
   @ApiOperation({ summary: 'Add a song to liked songs' })
-  @ApiResponse({ status: 201, description: 'Song added to liked songs successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Song added to liked songs successfully',
+  })
   @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
   async addLikedSong(
     @Headers('user-id') userId: string,
@@ -125,7 +151,10 @@ export class PlaylistsController {
   @Delete('liked-songs/:songId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a song from liked songs' })
-  @ApiResponse({ status: 204, description: 'Song removed from liked songs successfully' })
+  @ApiResponse({
+    status: 204,
+    description: 'Song removed from liked songs successfully',
+  })
   @ApiParam({ name: 'songId', description: 'Song ID' })
   @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
   async removeLikedSong(
@@ -137,7 +166,10 @@ export class PlaylistsController {
 
   @Put('liked-songs/reorder')
   @ApiOperation({ summary: 'Reorder liked songs' })
-  @ApiResponse({ status: 200, description: 'Liked songs reordered successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Liked songs reordered successfully',
+  })
   @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
   async reorderLikedSongs(
     @Headers('user-id') userId: string,
@@ -157,7 +189,10 @@ export class PlaylistsController {
 
   @Post('history')
   @ApiOperation({ summary: 'Add a song to playback history' })
-  @ApiResponse({ status: 201, description: 'Song added to history successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Song added to history successfully',
+  })
   @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
   async addToHistory(
     @Headers('user-id') userId: string,
@@ -178,7 +213,10 @@ export class PlaylistsController {
   @Delete('history/:songId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a song from history' })
-  @ApiResponse({ status: 204, description: 'Song removed from history successfully' })
+  @ApiResponse({
+    status: 204,
+    description: 'Song removed from history successfully',
+  })
   @ApiParam({ name: 'songId', description: 'Song ID' })
   @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
   async removeFromHistory(

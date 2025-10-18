@@ -1,11 +1,11 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
-import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
-import { ReorderSongDto } from './dto/reorder-song.dto';
-import { CreateLikedSongDto } from './dto/create-liked-song.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
+import { CreateLikedSongDto } from './dto/create-liked-song.dto';
+import { CreatePlaylistDto } from './dto/create-playlist.dto';
+import { ReorderSongDto } from './dto/reorder-song.dto';
 
 @Injectable()
 export class PlaylistsService {
@@ -63,9 +63,15 @@ export class PlaylistsService {
     return response.data;
   }
 
-  async reorderPlaylistSongs(playlistId: string, songPositions: ReorderSongDto[]) {
+  async reorderPlaylistSongs(
+    playlistId: string,
+    songPositions: ReorderSongDto[],
+  ) {
     const response = await firstValueFrom(
-      this.httpService.put(`/playlists/${playlistId}/songs/reorder`, songPositions),
+      this.httpService.put(
+        `/playlists/${playlistId}/songs/reorder`,
+        songPositions,
+      ),
     );
     return response.data;
   }
@@ -117,7 +123,10 @@ export class PlaylistsService {
     return response.data;
   }
 
-  async addToHistory(userId: string, createHistoryEntryDto: CreateHistoryEntryDto) {
+  async addToHistory(
+    userId: string,
+    createHistoryEntryDto: CreateHistoryEntryDto,
+  ) {
     const response = await firstValueFrom(
       this.httpService.post('/history/', createHistoryEntryDto, {
         headers: { 'user-id': userId },
