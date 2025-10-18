@@ -1,5 +1,22 @@
-import { Controller, Get, Param, Req, Res } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  BadRequestException,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  Param,
+  ParseIntPipe,
+  Query,
+  Req,
+  Res,
+} from '@nestjs/common';
+import {
+  ApiOperation,
+  ApiParam,
+  ApiProperty,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Response } from 'express';
 import { pipeline } from 'stream/promises';
 import { SongsService } from './songs.service';
@@ -8,6 +25,43 @@ import { SongsService } from './songs.service';
 @Controller('songs')
 export class SongsController {
   constructor(private readonly songsService: SongsService) {}
+
+  @Get('search')
+  @ApiQuery({
+    name: 'query',
+    required: true,
+    description: 'Search query for songs',
+  })
+  @ApiProperty({
+    name: 'page',
+    required: false,
+    default: 1,
+    description: 'Page number for pagination',
+  })
+  @ApiProperty({
+    name: 'limit',
+    required: false,
+    default: 20,
+    description: 'Number of results per page',
+  })
+  async searchSongs(
+    @Query('query') query: string,
+    @Query('page', new DefaultValuePipe(1), new ParseIntPipe())
+    page: number,
+    @Query('limit', new DefaultValuePipe(20), new ParseIntPipe())
+    limit: number,
+  ): Promise<any[]> {
+    if (!query) {
+      throw new BadRequestException('Query parameter is required');
+    }
+    if (page < 1) {
+      throw new BadRequestException('Page must be greater than 0');
+    }
+    if (limit < 1 || limit > 100) {
+      throw new BadRequestException('Limit must be between 1 and 100');
+    }
+    return this.songsService.searchSongs(query, limit, page);
+  }
 
   @Get('player/play/:songId')
   @ApiOperation({ summary: 'Stream a song' })

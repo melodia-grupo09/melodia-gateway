@@ -8,6 +8,19 @@ import { Readable } from 'stream';
 export class SongsService {
   constructor(private readonly httpService: HttpService) {}
 
+  async searchSongs(
+    query: string,
+    limit: number,
+    page: number,
+  ): Promise<any[]> {
+    const response = await firstValueFrom(
+      this.httpService.get<any[]>('/songs/search', {
+        params: { query, limit, page },
+      }),
+    );
+    return response.data;
+  }
+
   async streamSong(
     songId: string,
     range: string | string[] | undefined,
