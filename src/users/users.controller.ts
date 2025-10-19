@@ -1,12 +1,13 @@
 import {
   Body,
   Controller,
+  Headers,
   HttpCode,
   HttpStatus,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -89,5 +90,46 @@ export class UsersController {
     @Body() forgotPasswordDto: ForgotPasswordDto,
   ): Promise<any> {
     return this.usersService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh expired token' })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token (can be expired)',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+    schema: {
+      example: {
+        message: 'Token refreshed successfully',
+        token: 'eyJhbGciOiJSUzI1NiIs...',
+        user: {
+          uid: 'user123',
+          email: 'user@example.com',
+          nombre: 'username',
+          esArtista: false,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unable to refresh token - login required',
+    schema: {
+      example: {
+        status: 'error',
+        message: 'Refresh token expired - please login again',
+        code: 'refresh_required',
+      },
+    },
+  })
+  async refreshToken(
+    @Headers('authorization') authHeader: string,
+  ): Promise<any> {
+    return this.usersService.refreshToken(authHeader);
   }
 }

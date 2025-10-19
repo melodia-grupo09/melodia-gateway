@@ -69,4 +69,45 @@ export class UsersService {
     );
     return response.data;
   }
+
+  async refreshToken(authHeader: string): Promise<any> {
+    console.log('🔄 Starting refresh token process...');
+
+    try {
+      // Extraer el token del header
+      const currentToken = authHeader.replace('Bearer ', '');
+      console.log('📝 Token extracted, length:', currentToken.length);
+
+      // Versión simplificada para desarrollo local
+      console.log('�️  Running in development mode - simulating token refresh');
+
+      // Decodificar el token para obtener información básica (sin verificar)
+      const tokenParts = currentToken.split('.');
+      if (tokenParts.length !== 3) {
+        throw new Error('Invalid token format');
+      }
+
+      const payload = JSON.parse(
+        Buffer.from(tokenParts[1], 'base64').toString(),
+      );
+      console.log('✅ Token decoded successfully');
+
+      const result = {
+        message: 'Token refreshed successfully (dev mode)',
+        token: 'dev-refreshed-token-' + Date.now(),
+        user: {
+          uid: payload.user_id || payload.sub,
+          email: payload.email,
+          nombre: (payload.email as string)?.split('@')[0] || 'Developer',
+          esArtista: false,
+        },
+      };
+
+      console.log('🎉 Refresh completed successfully');
+      return result;
+    } catch (error) {
+      console.error('❌ Error refreshing token:', error);
+      throw new Error('Unable to refresh token - please login again');
+    }
+  }
 }

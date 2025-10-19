@@ -288,4 +288,133 @@ describe('UsersService', () => {
       );
     });
   });
+
+  describe('refreshToken', () => {
+    // Mock Firebase admin
+    const mockVerifyIdToken = jest.fn();
+    const mockCreateCustomToken = jest.fn();
+    const mockGetUser = jest.fn();
+
+    beforeEach(() => {
+      // Mock the Firebase module import
+      jest.doMock('../auth/firebase', () => ({
+        default: {
+          auth: () => ({
+            verifyIdToken: mockVerifyIdToken,
+            createCustomToken: mockCreateCustomToken,
+            getUser: mockGetUser,
+          }),
+        },
+      }));
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should successfully refresh token for valid user', async () => {
+      const authHeader = 'Bearer valid-token-123';
+      const mockDecodedToken = {
+        uid: 'user-123',
+        email: 'test@example.com',
+      };
+      const mockUserRecord = {
+        uid: 'user-123',
+        email: 'test@example.com',
+        displayName: 'Test User',
+      };
+      const mockCustomToken = 'new-custom-token-456';
+
+      mockVerifyIdToken.mockResolvedValue(mockDecodedToken);
+      mockGetUser.mockResolvedValue(mockUserRecord);
+      mockCreateCustomToken.mockResolvedValue(mockCustomToken);
+
+      const result = await service.refreshToken(authHeader);
+
+      expect(result).toEqual({
+        message: 'Token refreshed successfully',
+        token: mockCustomToken,
+        user: {
+          uid: 'user-123',
+          email: 'test@example.com',
+          nombre: 'Test User',
+          esArtista: false,
+        },
+      });
+
+      expect(mockVerifyIdToken).toHaveBeenCalledWith('valid-token-123', false);
+      expect(mockGetUser).toHaveBeenCalledWith('user-123');
+      expect(mockCreateCustomToken).toHaveBeenCalledWith('user-123');
+    });
+
+    it('should handle user without displayName', async () => {
+      const authHeader = 'Bearer valid-token-123';
+      const mockDecodedToken = {
+        uid: 'user-123',
+        email: 'test@example.com',
+      };
+      const mockUserRecord = {
+        uid: 'user-123',
+        email: 'test@example.com',
+        displayName: null,
+      };
+      const mockCustomToken = 'new-custom-token-456';
+
+      mockVerifyIdToken.mockResolvedValue(mockDecodedToken);
+      mockGetUser.mockResolvedValue(mockUserRecord);
+      mockCreateCustomToken.mockResolvedValue(mockCustomToken);
+
+      const result = await service.refreshToken(authHeader);
+
+      expect(result.user.nombre).toBe('test');
+    });
+
+    it('should throw error when token verification fails', async () => {
+      const authHeader = 'Bearer invalid-token';
+
+      mockVerifyIdToken.mockRejectedValue(new Error('Invalid token'));
+
+      await expect(service.refreshToken(authHeader)).rejects.toThrow(
+        'Unable to refresh token - please login again',
+      );
+    });
+
+    it('should throw error when user retrieval fails', async () => {
+      const authHeader = 'Bearer valid-token-123';
+      const mockDecodedToken = {
+        uid: 'user-123',
+        email: 'test@example.com',
+      };
+
+      mockVerifyIdToken.mockResolvedValue(mockDecodedToken);
+      mockGetUser.mockRejectedValue(new Error('User not found'));
+
+      await expect(service.refreshToken(authHeader)).rejects.toThrow(
+        'Unable to refresh token - please login again',
+      );
+    });
+
+    it('should throw error when custom token creation fails', async () => {
+      const authHeader = 'Bearer valid-token-123';
+      const mockDecodedToken = {
+        uid: 'user-123',
+        email: 'test@example.com',
+      };
+      const mockUserRecord = {
+        uid: 'user-123',
+        email: 'test@example.com',
+        displayName: 'Test User',
+      };
+
+      mockVerifyIdToken.mockResolvedValue(mockDecodedToken);
+      mockGetUser.mockResolvedValue(mockUserRecord);
+      mockCreateCustomToken.mockRejectedValue(
+        new Error('Token creation failed'),
+      );
+
+      await expect(service.refreshToken(authHeader)).rejects.toThrow(
+        'Unable to refresh token - please login again',
+      );
+    });
+  });
 });
