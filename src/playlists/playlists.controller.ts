@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Body,
   Controller,
@@ -34,11 +37,25 @@ import { PlaylistsService } from './playlists.service';
 export class PlaylistsController {
   constructor(private readonly playlistsService: PlaylistsService) {}
 
+  // Liked songs endpoints (must be before dynamic routes)
   @Get('liked-songs')
-  @ApiOperation({ summary: 'Get all liked songs' })
+  @ApiOperation({ summary: 'Get all liked songs for a user' })
   @ApiResponse({
     status: 200,
     description: 'Liked songs retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          song_id: { type: 'string' },
+          id: { type: 'string' },
+          user_id: { type: 'string' },
+          position: { type: 'number' },
+          created_at: { type: 'string', format: 'date-time' },
+        },
+      },
+    },
   })
   @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
   async getLikedSongs(@Headers('user-id') userId: string) {
@@ -46,10 +63,23 @@ export class PlaylistsController {
   }
 
   @Post('liked-songs')
-  @ApiOperation({ summary: 'Add a song to liked songs' })
+  @ApiOperation({
+    summary: 'Add a song to liked songs',
+    description: "Adds a song to the user's liked songs collection",
+  })
   @ApiResponse({
     status: 201,
     description: 'Song added to liked songs successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        song_id: { type: 'string' },
+        id: { type: 'string' },
+        user_id: { type: 'string' },
+        position: { type: 'number' },
+        created_at: { type: 'string', format: 'date-time' },
+      },
+    },
   })
   @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
   async addLikedSong(
@@ -223,83 +253,5 @@ export class PlaylistsController {
       playlistId,
       songPositions,
     );
-  }
-
-  @Delete('liked-songs/:songId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Remove a song from liked songs' })
-  @ApiResponse({
-    status: 204,
-    description: 'Song removed from liked songs successfully',
-  })
-  @ApiParam({ name: 'songId', description: 'Song ID' })
-  @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
-  async removeLikedSong(
-    @Param('songId') songId: string,
-    @Headers('user-id') userId: string,
-  ) {
-    return this.playlistsService.removeLikedSong(songId, userId);
-  }
-
-  @Put('liked-songs/reorder')
-  @ApiOperation({ summary: 'Reorder liked songs' })
-  @ApiResponse({
-    status: 200,
-    description: 'Liked songs reordered successfully',
-  })
-  @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
-  async reorderLikedSongs(
-    @Headers('user-id') userId: string,
-    @Body() songPositions: ReorderSongDto[],
-  ) {
-    return this.playlistsService.reorderLikedSongs(userId, songPositions);
-  }
-
-  // History endpoints
-  @Get('history')
-  @ApiOperation({ summary: 'Get playback history' })
-  @ApiResponse({ status: 200, description: 'History retrieved successfully' })
-  @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
-  async getHistory(@Headers('user-id') userId: string) {
-    return this.playlistsService.getHistory(userId);
-  }
-
-  @Post('history')
-  @ApiOperation({ summary: 'Add a song to playback history' })
-  @ApiResponse({
-    status: 201,
-    description: 'Song added to history successfully',
-  })
-  @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
-  async addToHistory(
-    @Headers('user-id') userId: string,
-    @Body() createHistoryEntryDto: CreateHistoryEntryDto,
-  ) {
-    return this.playlistsService.addToHistory(userId, createHistoryEntryDto);
-  }
-
-  @Delete('history')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Clear all history' })
-  @ApiResponse({ status: 204, description: 'History cleared successfully' })
-  @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
-  async clearHistory(@Headers('user-id') userId: string) {
-    return this.playlistsService.clearHistory(userId);
-  }
-
-  @Delete('history/:songId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Remove a song from history' })
-  @ApiResponse({
-    status: 204,
-    description: 'Song removed from history successfully',
-  })
-  @ApiParam({ name: 'songId', description: 'Song ID' })
-  @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
-  async removeFromHistory(
-    @Param('songId') songId: string,
-    @Headers('user-id') userId: string,
-  ) {
-    return this.playlistsService.removeFromHistory(songId, userId);
   }
 }

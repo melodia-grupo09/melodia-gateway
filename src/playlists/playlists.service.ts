@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
@@ -38,12 +39,11 @@ export class PlaylistsService {
   }
 
   async deletePlaylist(playlistId: string, userId: string) {
-    const response = await firstValueFrom(
+    await firstValueFrom(
       this.httpService.delete(`/playlists/${playlistId}`, {
         headers: { 'user-id': userId },
       }),
     );
-    return response.data;
   }
 
   async addSongToPlaylist(
@@ -57,10 +57,9 @@ export class PlaylistsService {
   }
 
   async removeSongFromPlaylist(playlistId: string, songId: string) {
-    const response = await firstValueFrom(
+    await firstValueFrom(
       this.httpService.delete(`/playlists/${playlistId}/songs/${songId}`),
     );
-    return response.data;
   }
 
   async reorderPlaylistSongs(
@@ -96,12 +95,11 @@ export class PlaylistsService {
   }
 
   async removeLikedSong(songId: string, userId: string) {
-    const response = await firstValueFrom(
+    await firstValueFrom(
       this.httpService.delete(`/liked-songs/${songId}`, {
         headers: { 'user-id': userId },
       }),
     );
-    return response.data;
   }
 
   async reorderLikedSongs(userId: string, songPositions: ReorderSongDto[]) {
@@ -136,20 +134,18 @@ export class PlaylistsService {
   }
 
   async clearHistory(userId: string) {
-    const response = await firstValueFrom(
+    await firstValueFrom(
       this.httpService.delete('/history/', {
         headers: { 'user-id': userId },
       }),
     );
-    return response.data;
   }
 
   async removeFromHistory(songId: string, userId: string) {
-    const response = await firstValueFrom(
+    await firstValueFrom(
       this.httpService.delete(`/history/${songId}`, {
         headers: { 'user-id': userId },
       }),
     );
-    return response.data;
   }
 }
