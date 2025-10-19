@@ -9,7 +9,7 @@ import { PlaylistsService } from './playlists.service';
     HttpModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        baseURL: configService.get<string>('PLAYLIST_SERVICE_URL') ?? '',
+        baseURL: configService.get<string>('PLAYLISTS_SERVICE_URL') ?? '',
         timeout: 5000,
         headers: {
           'Content-Type': 'application/json',
