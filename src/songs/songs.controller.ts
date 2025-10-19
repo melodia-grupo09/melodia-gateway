@@ -12,7 +12,6 @@ import {
 import {
   ApiOperation,
   ApiParam,
-  ApiProperty,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -27,22 +26,41 @@ export class SongsController {
   constructor(private readonly songsService: SongsService) {}
 
   @Get('search')
+  @ApiOperation({ summary: 'Search for songs' })
   @ApiQuery({
     name: 'query',
     required: true,
     description: 'Search query for songs',
   })
-  @ApiProperty({
+  @ApiQuery({
     name: 'page',
     required: false,
-    default: 1,
     description: 'Page number for pagination',
   })
-  @ApiProperty({
+  @ApiQuery({
     name: 'limit',
     required: false,
-    default: 20,
     description: 'Number of results per page',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Songs found successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          title: { type: 'string' },
+          artist: { type: 'string' },
+          duration: { type: 'number' },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Invalid query parameters',
   })
   async searchSongs(
     @Query('query') query: string,
