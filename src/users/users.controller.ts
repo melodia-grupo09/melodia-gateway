@@ -102,11 +102,13 @@ export class UsersController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Token refreshed successfully',
+    description:
+      'Token refreshed successfully - Use the new token for future requests',
     schema: {
       example: {
         message: 'Token refreshed successfully',
-        token: 'eyJhbGciOiJSUzI1NiIs...',
+        token:
+          'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0...',
         user: {
           uid: 'user123',
           email: 'user@example.com',
