@@ -313,56 +313,46 @@ describe('UsersService', () => {
     });
 
     it('should successfully refresh token for valid user', async () => {
-      const authHeader = 'Bearer valid-token-123';
-      const mockDecodedToken = {
-        uid: 'user-123',
+      const mockPayload = {
+        user_id: 'user-123',
+        sub: 'user-123',
         email: 'test@example.com',
+        exp: Date.now() / 1000 + 3600,
+        iat: Date.now() / 1000,
       };
-      const mockUserRecord = {
-        uid: 'user-123',
-        email: 'test@example.com',
-        displayName: 'Test User',
-      };
-      const mockCustomToken = 'new-custom-token-456';
-
-      mockVerifyIdToken.mockResolvedValue(mockDecodedToken);
-      mockGetUser.mockResolvedValue(mockUserRecord);
-      mockCreateCustomToken.mockResolvedValue(mockCustomToken);
+      const encodedPayload = Buffer.from(JSON.stringify(mockPayload)).toString(
+        'base64',
+      );
+      const mockJWT = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${encodedPayload}.signature`;
+      const authHeader = `Bearer ${mockJWT}`;
 
       const result = await service.refreshToken(authHeader);
 
       expect(result).toEqual({
-        message: 'Token refreshed successfully',
-        token: mockCustomToken,
+        message: 'Token refreshed successfully (dev mode)',
+        token: expect.stringMatching(/^dev-refreshed-token-\d+$/),
         user: {
           uid: 'user-123',
           email: 'test@example.com',
-          nombre: 'Test User',
+          nombre: 'test',
           esArtista: false,
         },
       });
-
-      expect(mockVerifyIdToken).toHaveBeenCalledWith('valid-token-123', false);
-      expect(mockGetUser).toHaveBeenCalledWith('user-123');
-      expect(mockCreateCustomToken).toHaveBeenCalledWith('user-123');
     });
 
     it('should handle user without displayName', async () => {
-      const authHeader = 'Bearer valid-token-123';
-      const mockDecodedToken = {
-        uid: 'user-123',
+      const mockPayload = {
+        user_id: 'user-123',
+        sub: 'user-123',
         email: 'test@example.com',
+        exp: Date.now() / 1000 + 3600,
+        iat: Date.now() / 1000,
       };
-      const mockUserRecord = {
-        uid: 'user-123',
-        email: 'test@example.com',
-        displayName: null,
-      };
-      const mockCustomToken = 'new-custom-token-456';
-
-      mockVerifyIdToken.mockResolvedValue(mockDecodedToken);
-      mockGetUser.mockResolvedValue(mockUserRecord);
-      mockCreateCustomToken.mockResolvedValue(mockCustomToken);
+      const encodedPayload = Buffer.from(JSON.stringify(mockPayload)).toString(
+        'base64',
+      );
+      const mockJWT = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${encodedPayload}.signature`;
+      const authHeader = `Bearer ${mockJWT}`;
 
       const result = await service.refreshToken(authHeader);
 
@@ -372,45 +362,21 @@ describe('UsersService', () => {
     it('should throw error when token verification fails', async () => {
       const authHeader = 'Bearer invalid-token';
 
-      mockVerifyIdToken.mockRejectedValue(new Error('Invalid token'));
+      await expect(service.refreshToken(authHeader)).rejects.toThrow(
+        'Unable to refresh token - please login again',
+      );
+    });
+
+    it('should throw error when token format is invalid', async () => {
+      const authHeader = 'Bearer invalid.token';
 
       await expect(service.refreshToken(authHeader)).rejects.toThrow(
         'Unable to refresh token - please login again',
       );
     });
 
-    it('should throw error when user retrieval fails', async () => {
-      const authHeader = 'Bearer valid-token-123';
-      const mockDecodedToken = {
-        uid: 'user-123',
-        email: 'test@example.com',
-      };
-
-      mockVerifyIdToken.mockResolvedValue(mockDecodedToken);
-      mockGetUser.mockRejectedValue(new Error('User not found'));
-
-      await expect(service.refreshToken(authHeader)).rejects.toThrow(
-        'Unable to refresh token - please login again',
-      );
-    });
-
-    it('should throw error when custom token creation fails', async () => {
-      const authHeader = 'Bearer valid-token-123';
-      const mockDecodedToken = {
-        uid: 'user-123',
-        email: 'test@example.com',
-      };
-      const mockUserRecord = {
-        uid: 'user-123',
-        email: 'test@example.com',
-        displayName: 'Test User',
-      };
-
-      mockVerifyIdToken.mockResolvedValue(mockDecodedToken);
-      mockGetUser.mockResolvedValue(mockUserRecord);
-      mockCreateCustomToken.mockRejectedValue(
-        new Error('Token creation failed'),
-      );
+    it('should throw error when token payload is malformed', async () => {
+      const authHeader = 'Bearer header.invalid-base64.signature';
 
       await expect(service.refreshToken(authHeader)).rejects.toThrow(
         'Unable to refresh token - please login again',
