@@ -11,15 +11,13 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
       process.env.FIREBASE_SERVICE_ACCOUNT,
     ) as admin.ServiceAccount;
     credential = admin.credential.cert(serviceAccount);
-    console.log('✅ Firebase Admin SDK inicializado con Service Account');
   } catch (error) {
-    console.error('❌ Error parsing FIREBASE_SERVICE_ACCOUNT:', error);
+    console.error(
+      'Error parsing FIREBASE_SERVICE_ACCOUNT, using applicationDefault',
+    );
     credential = admin.credential.applicationDefault();
   }
 } else {
-  console.log(
-    '⚠️ FIREBASE_SERVICE_ACCOUNT no encontrado, usando applicationDefault()',
-  );
   credential = admin.credential.applicationDefault();
 }
 

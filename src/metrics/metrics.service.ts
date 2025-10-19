@@ -16,8 +16,8 @@ export class MetricsService {
       this.logger.log(`User registration recorded for userId: ${userId}`);
     } catch (error) {
       this.logger.error(
-        `Failed to record user registration for userId: ${userId}`,
-        error,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `Failed to record user registration for userId: ${userId}: ${error?.message || error}`,
       );
       // Don't throw error to avoid breaking the main flow
     }
@@ -31,8 +31,8 @@ export class MetricsService {
       this.logger.log(`User login recorded for userId: ${userId}`);
     } catch (error) {
       this.logger.error(
-        `Failed to record user login for userId: ${userId}`,
-        error,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `Failed to record user login for userId: ${userId}: ${error?.message || error}`,
       );
       // Don't throw error to avoid breaking the main flow
     }
@@ -46,8 +46,8 @@ export class MetricsService {
       this.logger.log(`User activity recorded for userId: ${userId}`);
     } catch (error) {
       this.logger.error(
-        `Failed to record user activity for userId: ${userId}`,
-        error,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `Failed to record user activity for userId: ${userId}: ${error?.message || error}`,
       );
       // Don't throw error to avoid breaking the main flow
     }
@@ -62,8 +62,8 @@ export class MetricsService {
       );
     } catch (error) {
       this.logger.error(
-        `Failed to track user activity for userId: ${userId}${action ? ` (${action})` : ''}`,
-        error,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `Failed to track user activity for userId: ${userId}${action ? ` (${action})` : ''}: ${error?.message || error}`,
       );
     }
   }

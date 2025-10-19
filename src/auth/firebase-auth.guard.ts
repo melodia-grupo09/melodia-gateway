@@ -22,7 +22,6 @@ export class FirebaseAuthGuard implements CanActivate {
       request.headers['authorization'] || request.headers['Authorization'];
 
     if (!authHeader) {
-      console.error('No Authorization header found');
       throw new UnauthorizedException('Missing Authorization header');
     }
 
@@ -30,7 +29,6 @@ export class FirebaseAuthGuard implements CanActivate {
     const headerValue = Array.isArray(authHeader) ? authHeader[0] : authHeader;
 
     if (!headerValue || !headerValue.startsWith('Bearer ')) {
-      console.error('Authorization header does not start with Bearer');
       throw new UnauthorizedException(
         'Invalid Authorization header format. Use: Bearer <token>',
       );
@@ -39,7 +37,6 @@ export class FirebaseAuthGuard implements CanActivate {
     const token = headerValue.replace('Bearer ', '');
 
     if (!token || token.length === 0) {
-      console.error('Token is empty after removing Bearer prefix');
       throw new UnauthorizedException('Token is empty');
     }
 
@@ -48,6 +45,7 @@ export class FirebaseAuthGuard implements CanActivate {
       request.user = decodedToken;
       return true;
     } catch (error: any) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       console.error('Token verification failed:', error?.message || error);
       throw new UnauthorizedException('Invalid or expired token');
     }
