@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class CreateHistoryEntryDto {
   @ApiProperty({ description: 'Song ID to add to history' })
-  @IsUUID()
+  @IsString()
   song_id: string;
 }
