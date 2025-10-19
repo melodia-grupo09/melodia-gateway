@@ -46,7 +46,9 @@ describe('FirebaseAuthGuard', () => {
       };
 
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
-        new UnauthorizedException('Missing Authorization header'),
+        new UnauthorizedException(
+          'Invalid Authorization header format. Use: Bearer <token>',
+        ),
       );
     });
 
@@ -56,7 +58,9 @@ describe('FirebaseAuthGuard', () => {
       };
 
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
-        new UnauthorizedException('Missing Authorization header'),
+        new UnauthorizedException(
+          'Invalid Authorization header format. Use: Bearer <token>',
+        ),
       );
     });
 
