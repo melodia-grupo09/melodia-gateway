@@ -7,7 +7,7 @@ import {
   Post,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -94,11 +94,10 @@ export class UsersController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Refresh expired token' })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token (can be expired)',
-    required: true,
+  @ApiOperation({
+    summary: 'Refresh expired token',
+    description:
+      'Send your token in Authorization header: "Bearer <your_token>" (expired tokens accepted)',
   })
   @ApiResponse({
     status: 200,
