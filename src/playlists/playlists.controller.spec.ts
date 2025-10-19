@@ -7,6 +7,16 @@ import { ReorderSongDto } from './dto/reorder-song.dto';
 import { PlaylistsController } from './playlists.controller';
 import { PlaylistsService } from './playlists.service';
 
+interface PlaylistResponse {
+  id: string;
+  name: string;
+  cover_url: string;
+  is_public: boolean;
+  owner_id: string;
+  created_at: string;
+  songs: unknown[];
+}
+
 describe('PlaylistsController', () => {
   let controller: PlaylistsController;
 
@@ -57,7 +67,7 @@ describe('PlaylistsController', () => {
         is_public: true,
       };
 
-      const expectedResult = {
+      const expectedResult: PlaylistResponse = {
         id: 'playlist-123',
         name: 'Test Playlist',
         cover_url: 'https://example.com/cover.jpg',
@@ -69,7 +79,10 @@ describe('PlaylistsController', () => {
 
       mockPlaylistsService.createPlaylist.mockResolvedValue(expectedResult);
 
-      const result = await controller.createPlaylist(userId, createPlaylistDto);
+      const result: PlaylistResponse = await controller.createPlaylist(
+        userId,
+        createPlaylistDto,
+      );
 
       expect(mockPlaylistsService.createPlaylist).toHaveBeenCalledWith(
         userId,

@@ -11,7 +11,7 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
       process.env.FIREBASE_SERVICE_ACCOUNT,
     ) as admin.ServiceAccount;
     credential = admin.credential.cert(serviceAccount);
-  } catch (error) {
+  } catch {
     console.error(
       'Error parsing FIREBASE_SERVICE_ACCOUNT, using applicationDefault',
     );

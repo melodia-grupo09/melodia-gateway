@@ -16,9 +16,18 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import type { Response } from 'express';
+import { AxiosResponse } from 'axios';
+import type { Request, Response } from 'express';
+import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { SongsService } from './songs.service';
+
+interface ErrorWithResponse {
+  response?: {
+    status: number;
+    data: unknown;
+  };
+}
 
 @ApiTags('songs')
 @Controller('songs')
@@ -98,16 +107,16 @@ export class SongsController {
   ) {
     try {
       const range = req.headers['range'] as string | string[] | undefined;
-      const responseFromService = await this.songsService.streamSong(
-        songId,
-        range,
-      );
+      const responseFromService: AxiosResponse<Readable> =
+        await this.songsService.streamSong(songId, range);
 
       const headers = {
-        'Content-Type': responseFromService.headers['content-type'],
-        'Content-Length': responseFromService.headers['content-length'],
-        'Content-Range': responseFromService.headers['content-range'],
-        'Accept-Ranges': responseFromService.headers['accept-ranges'],
+        'Content-Type': responseFromService.headers['content-type'] as string,
+        'Content-Length': responseFromService.headers[
+          'content-length'
+        ] as string,
+        'Content-Range': responseFromService.headers['content-range'] as string,
+        'Accept-Ranges': responseFromService.headers['accept-ranges'] as string,
       };
 
       const cleanHeaders = Object.fromEntries(
@@ -116,10 +125,13 @@ export class SongsController {
 
       res.writeHead(responseFromService.status, cleanHeaders);
       await pipeline(responseFromService.data, res);
-    } catch (error) {
+    } catch (error: unknown) {
       if (!res.headersSent) {
-        if (error.response) {
-          res.status(error.response.status).send(error.response.data);
+        const errorWithResponse = error as ErrorWithResponse;
+        if (errorWithResponse.response) {
+          res
+            .status(errorWithResponse.response.status)
+            .send(errorWithResponse.response.data);
         } else {
           res.status(500).send('An unexpected error occurred while streaming.');
         }
