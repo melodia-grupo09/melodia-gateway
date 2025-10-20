@@ -47,6 +47,25 @@ export class SongsController {
     return this.songsService.getSongById(id);
   }
 
+  @Get('random')
+  @HttpCode(HttpStatus.OK)
+  @ApiQuery({
+    name: 'limit',
+    description: 'Number of random songs to retrieve',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'page',
+    description: 'Page number for pagination',
+    required: false,
+  })
+  async getRandom(
+    @Query('limit') limit?: number,
+    @Query('page') page?: number,
+  ): Promise<any> {
+    return this.songsService.getRandom(limit, page);
+  }
+
   @Get('search')
   @ApiOperation({ summary: 'Search for songs' })
   @ApiQuery({

@@ -15,6 +15,17 @@ export class SongsService {
     return response.data;
   }
 
+  async getRandom(limit?: number, page?: number): Promise<any[]> {
+    const params: Record<string, number> = {};
+    if (limit !== undefined) params['limit'] = limit;
+    if (page !== undefined) params['page'] = page;
+
+    const response = await firstValueFrom(
+      this.httpService.get<any[]>('/songs/random', { params }),
+    );
+    return response.data;
+  }
+
   async searchSongs(
     query: string,
     limit: number,
