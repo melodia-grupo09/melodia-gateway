@@ -3,6 +3,8 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Query,
@@ -33,6 +35,17 @@ interface ErrorWithResponse {
 @Controller('songs')
 export class SongsController {
   constructor(private readonly songsService: SongsService) {}
+
+  @Get('id/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiParam({
+    name: 'id',
+    description: 'ID of the song to retrieve',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  async getSongById(@Param('id') id: string): Promise<any> {
+    return this.songsService.getSongById(id);
+  }
 
   @Get('search')
   @ApiOperation({ summary: 'Search for songs' })

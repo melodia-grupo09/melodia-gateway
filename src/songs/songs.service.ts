@@ -8,6 +8,13 @@ import { Readable } from 'stream';
 export class SongsService {
   constructor(private readonly httpService: HttpService) {}
 
+  async getSongById(songId: string): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.get<any>(`/songs/id/${songId}`),
+    );
+    return response.data;
+  }
+
   async searchSongs(
     query: string,
     limit: number,
