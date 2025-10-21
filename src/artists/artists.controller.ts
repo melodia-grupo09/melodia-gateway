@@ -7,9 +7,13 @@ import {
   Patch,
   Post,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import {
   ApiBody,
   ApiConsumes,
@@ -212,7 +216,12 @@ export class ArtistsController {
   }
 
   @Patch(':id/media')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'image', maxCount: 1 },
+      { name: 'cover', maxCount: 1 },
+    ]),
+  )
   @ApiOperation({ summary: 'Update artist media (profile image and/or cover)' })
   @ApiConsumes('multipart/form-data')
   @ApiParam({
@@ -247,31 +256,36 @@ export class ArtistsController {
   })
   async updateArtistMedia(
     @Param('id') id: string,
-    @UploadedFile() image?: any,
-    @UploadedFile() cover?: any,
+    @UploadedFiles() files?: any,
   ): Promise<any> {
     const formData = new FormData();
 
-    if (
-      image &&
-      typeof image === 'object' &&
-      'buffer' in image &&
-      'originalname' in image
-    ) {
-      const imageFile = image as { buffer: Buffer; originalname: string };
-      const blob = new Blob([new Uint8Array(imageFile.buffer)]);
-      formData.append('image', blob, imageFile.originalname);
+    if (files?.image?.[0]) {
+      const imageFile = files.image[0];
+      if (
+        imageFile &&
+        typeof imageFile === 'object' &&
+        'buffer' in imageFile &&
+        'originalname' in imageFile
+      ) {
+        const file = imageFile as { buffer: Buffer; originalname: string };
+        const blob = new Blob([new Uint8Array(file.buffer)]);
+        formData.append('image', blob, file.originalname);
+      }
     }
 
-    if (
-      cover &&
-      typeof cover === 'object' &&
-      'buffer' in cover &&
-      'originalname' in cover
-    ) {
-      const coverFile = cover as { buffer: Buffer; originalname: string };
-      const blob = new Blob([new Uint8Array(coverFile.buffer)]);
-      formData.append('cover', blob, coverFile.originalname);
+    if (files?.cover?.[0]) {
+      const coverFile = files.cover[0];
+      if (
+        coverFile &&
+        typeof coverFile === 'object' &&
+        'buffer' in coverFile &&
+        'originalname' in coverFile
+      ) {
+        const file = coverFile as { buffer: Buffer; originalname: string };
+        const blob = new Blob([new Uint8Array(file.buffer)]);
+        formData.append('cover', blob, file.originalname);
+      }
     }
 
     return this.artistsService.updateArtistMedia(id, formData);
