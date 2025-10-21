@@ -256,36 +256,33 @@ export class ArtistsController {
   })
   async updateArtistMedia(
     @Param('id') id: string,
-    @UploadedFiles() files?: any,
+    @UploadedFiles()
+    files?: { image?: any[]; cover?: any[] },
   ): Promise<any> {
     const formData = new FormData();
 
-    if (files?.image?.[0]) {
-      const imageFile = files.image[0];
-      if (
-        imageFile &&
-        typeof imageFile === 'object' &&
-        'buffer' in imageFile &&
-        'originalname' in imageFile
-      ) {
-        const file = imageFile as { buffer: Buffer; originalname: string };
-        const blob = new Blob([new Uint8Array(file.buffer)]);
-        formData.append('image', blob, file.originalname);
-      }
+    const imageFile = files?.image?.[0];
+    if (
+      imageFile &&
+      typeof imageFile === 'object' &&
+      'buffer' in imageFile &&
+      'originalname' in imageFile
+    ) {
+      const file = imageFile as { buffer: Buffer; originalname: string };
+      const blob = new Blob([new Uint8Array(file.buffer)]);
+      formData.append('image', blob, file.originalname);
     }
 
-    if (files?.cover?.[0]) {
-      const coverFile = files.cover[0];
-      if (
-        coverFile &&
-        typeof coverFile === 'object' &&
-        'buffer' in coverFile &&
-        'originalname' in coverFile
-      ) {
-        const file = coverFile as { buffer: Buffer; originalname: string };
-        const blob = new Blob([new Uint8Array(file.buffer)]);
-        formData.append('cover', blob, file.originalname);
-      }
+    const coverFile = files?.cover?.[0];
+    if (
+      coverFile &&
+      typeof coverFile === 'object' &&
+      'buffer' in coverFile &&
+      'originalname' in coverFile
+    ) {
+      const file = coverFile as { buffer: Buffer; originalname: string };
+      const blob = new Blob([new Uint8Array(file.buffer)]);
+      formData.append('cover', blob, file.originalname);
     }
 
     return this.artistsService.updateArtistMedia(id, formData);

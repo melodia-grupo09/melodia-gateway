@@ -148,76 +148,65 @@ describe('ArtistsService', () => {
     });
   });
 
-  describe('updateArtistBio', () => {
-    it('should update artist bio successfully', async () => {
+  describe('updateArtistMedia', () => {
+    it('should update artist media successfully', async () => {
       const artistId = '123';
-      const bioData = {
-        bio: 'Updated bio',
-        socialLinks: { instagram: 'https://instagram.com/artist' },
-      };
+      const mediaData = new FormData();
       const mockResponse = {
-        data: {
-          id: '123',
-          bio: 'Updated bio',
-          socialLinks: { instagram: 'https://instagram.com/artist' },
-        },
+        data: { message: 'Media updated successfully' },
       };
 
       mockHttpService.patch.mockReturnValue(of(mockResponse));
 
-      const result = (await service.updateArtistBio(artistId, bioData)) as {
-        id: string;
-        bio: string;
-        socialLinks: { instagram: string };
+      const result = (await service.updateArtistMedia(artistId, mediaData)) as {
+        message: string;
       };
 
       expect(mockHttpService.patch).toHaveBeenCalledWith(
-        `/artists/${artistId}/bio`,
-        bioData,
+        `/artists/${artistId}/media`,
+        mediaData,
       );
       expect(result).toEqual(mockResponse.data);
     });
   });
 
-  describe('updateArtistImage', () => {
-    it('should update artist image successfully', async () => {
+  describe('followArtist', () => {
+    it('should follow an artist successfully', async () => {
       const artistId = '123';
-      const imageData = new FormData();
       const mockResponse = {
-        data: { message: 'Image updated successfully' },
+        data: { followersCount: 1 },
       };
 
       mockHttpService.patch.mockReturnValue(of(mockResponse));
 
-      const result = (await service.updateArtistImage(artistId, imageData)) as {
-        message: string;
+      const result = (await service.followArtist(artistId)) as {
+        followersCount: number;
       };
 
       expect(mockHttpService.patch).toHaveBeenCalledWith(
-        `/artists/${artistId}/image`,
-        imageData,
+        `/artists/${artistId}/follow`,
+        {},
       );
       expect(result).toEqual(mockResponse.data);
     });
   });
 
-  describe('updateArtistCover', () => {
-    it('should update artist cover successfully', async () => {
+  describe('unfollowArtist', () => {
+    it('should unfollow an artist successfully', async () => {
       const artistId = '123';
-      const coverData = new FormData();
       const mockResponse = {
-        data: { message: 'Cover updated successfully' },
+        data: { followersCount: 0 },
       };
 
       mockHttpService.patch.mockReturnValue(of(mockResponse));
 
-      const result = (await service.updateArtistCover(artistId, coverData)) as {
-        message: string;
+      const result = (await service.unfollowArtist(artistId)) as {
+        followersCount: number;
       };
 
       expect(mockHttpService.patch).toHaveBeenCalledWith(
-        `/artists/${artistId}/cover`,
-        coverData,
+        `/artists/${artistId}/unfollow`,
+        {},
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -410,7 +399,7 @@ describe('ArtistsService', () => {
         data: { message: 'Songs added to release successfully' },
       };
 
-      mockHttpService.post.mockReturnValue(of(mockResponse));
+      mockHttpService.patch.mockReturnValue(of(mockResponse));
 
       const result = (await service.addSongsToRelease(
         artistId,
@@ -420,8 +409,8 @@ describe('ArtistsService', () => {
         message: string;
       };
 
-      expect(mockHttpService.post).toHaveBeenCalledWith(
-        `/artists/${artistId}/releases/${releaseId}/songs`,
+      expect(mockHttpService.patch).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases/${releaseId}/songs/add`,
         songData,
       );
       expect(result).toEqual(mockResponse.data);
@@ -437,7 +426,7 @@ describe('ArtistsService', () => {
         data: { message: 'Songs removed from release successfully' },
       };
 
-      mockHttpService.delete.mockReturnValue(of(mockResponse));
+      mockHttpService.patch.mockReturnValue(of(mockResponse));
 
       const result = (await service.removeSongsFromRelease(
         artistId,
@@ -447,9 +436,9 @@ describe('ArtistsService', () => {
         message: string;
       };
 
-      expect(mockHttpService.delete).toHaveBeenCalledWith(
-        `/artists/${artistId}/releases/${releaseId}/songs`,
-        { data: songData },
+      expect(mockHttpService.patch).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases/${releaseId}/songs/remove`,
+        songData,
       );
       expect(result).toEqual(mockResponse.data);
     });

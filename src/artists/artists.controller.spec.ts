@@ -4,7 +4,6 @@ import { ArtistsService } from './artists.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { CreateReleaseDto } from './dto/create-release.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { UpdateBioDto } from './dto/update-bio.dto';
 import { UpdateReleaseDto } from './dto/update-release.dto';
 
 describe('ArtistsController', () => {
@@ -15,9 +14,9 @@ describe('ArtistsController', () => {
     getArtist: jest.fn(),
     updateArtist: jest.fn(),
     deleteArtist: jest.fn(),
-    updateArtistBio: jest.fn(),
-    updateArtistImage: jest.fn(),
-    updateArtistCover: jest.fn(),
+    updateArtistMedia: jest.fn(),
+    followArtist: jest.fn(),
+    unfollowArtist: jest.fn(),
     // Release methods
     getArtistReleases: jest.fn(),
     createRelease: jest.fn(),
@@ -170,63 +169,36 @@ describe('ArtistsController', () => {
     });
   });
 
-  describe('updateArtistBio', () => {
-    it('should update artist bio', async () => {
+  describe('updateArtistMedia', () => {
+    it('should update artist media', async () => {
       const artistId = '123';
-      const updateBioDto: UpdateBioDto = {
-        bio: 'Updated bio',
-        socialLinks: {
-          instagram: 'https://instagram.com/artist',
-        },
+      const mockFiles = {
+        image: [
+          {
+            buffer: Buffer.from('test'),
+            originalname: 'test.jpg',
+          },
+        ],
+        cover: [
+          {
+            buffer: Buffer.from('cover'),
+            originalname: 'cover.jpg',
+          },
+        ],
       };
 
-      const mockResult = {
-        id: '123',
-        bio: 'Updated bio',
-        socialLinks: {
-          instagram: 'https://instagram.com/artist',
-        },
-      };
+      const mockResult = { message: 'Media updated successfully' };
 
-      mockArtistsService.updateArtistBio.mockResolvedValue(mockResult);
+      mockArtistsService.updateArtistMedia.mockResolvedValue(mockResult);
 
-      const result = (await controller.updateArtistBio(
+      const result = (await controller.updateArtistMedia(
         artistId,
-        updateBioDto,
-      )) as {
-        id: string;
-        bio: string;
-        socialLinks: { instagram: string };
-      };
-
-      expect(mockArtistsService.updateArtistBio).toHaveBeenCalledWith(
-        artistId,
-        updateBioDto,
-      );
-      expect(result).toEqual(mockResult);
-    });
-  });
-
-  describe('updateArtistImage', () => {
-    it('should update artist image', async () => {
-      const artistId = '123';
-      const mockImage = {
-        buffer: Buffer.from('test'),
-        originalname: 'test.jpg',
-      };
-
-      const mockResult = { message: 'Image updated successfully' };
-
-      mockArtistsService.updateArtistImage.mockResolvedValue(mockResult);
-
-      const result = (await controller.updateArtistImage(
-        artistId,
-        mockImage,
+        mockFiles,
       )) as {
         message: string;
       };
 
-      expect(mockArtistsService.updateArtistImage).toHaveBeenCalledWith(
+      expect(mockArtistsService.updateArtistMedia).toHaveBeenCalledWith(
         artistId,
         expect.any(FormData),
       );
@@ -234,29 +206,30 @@ describe('ArtistsController', () => {
     });
   });
 
-  describe('updateArtistCover', () => {
-    it('should update artist cover', async () => {
+  describe('followArtist', () => {
+    it('should follow an artist', async () => {
       const artistId = '123';
-      const mockCover = {
-        buffer: Buffer.from('test'),
-        originalname: 'cover.jpg',
-      };
+      const mockResult = { followersCount: 1 };
 
-      const mockResult = { message: 'Cover updated successfully' };
+      mockArtistsService.followArtist.mockResolvedValue(mockResult);
 
-      mockArtistsService.updateArtistCover.mockResolvedValue(mockResult);
+      const result = await controller.followArtist(artistId);
 
-      const result = (await controller.updateArtistCover(
-        artistId,
-        mockCover,
-      )) as {
-        message: string;
-      };
+      expect(mockArtistsService.followArtist).toHaveBeenCalledWith(artistId);
+      expect(result).toEqual(mockResult);
+    });
+  });
 
-      expect(mockArtistsService.updateArtistCover).toHaveBeenCalledWith(
-        artistId,
-        expect.any(FormData),
-      );
+  describe('unfollowArtist', () => {
+    it('should unfollow an artist', async () => {
+      const artistId = '123';
+      const mockResult = { followersCount: 0 };
+
+      mockArtistsService.unfollowArtist.mockResolvedValue(mockResult);
+
+      const result = await controller.unfollowArtist(artistId);
+
+      expect(mockArtistsService.unfollowArtist).toHaveBeenCalledWith(artistId);
       expect(result).toEqual(mockResult);
     });
   });
