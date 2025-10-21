@@ -36,23 +36,9 @@ export class ArtistsService {
     return response.data;
   }
 
-  async updateArtistBio(id: string, bioData: any): Promise<any> {
+  async updateArtistMedia(id: string, mediaData: FormData): Promise<any> {
     const response = await firstValueFrom(
-      this.httpService.patch(`/artists/${id}/bio`, bioData),
-    );
-    return response.data;
-  }
-
-  async updateArtistImage(id: string, imageData: FormData): Promise<any> {
-    const response = await firstValueFrom(
-      this.httpService.patch(`/artists/${id}/image`, imageData),
-    );
-    return response.data;
-  }
-
-  async updateArtistCover(id: string, coverData: FormData): Promise<any> {
-    const response = await firstValueFrom(
-      this.httpService.patch(`/artists/${id}/cover`, coverData),
+      this.httpService.patch(`/artists/${id}/media`, mediaData),
     );
     return response.data;
   }
@@ -123,8 +109,8 @@ export class ArtistsService {
     songData: { songIds: string[] },
   ): Promise<any> {
     const response = await firstValueFrom(
-      this.httpService.post(
-        `/artists/${artistId}/releases/${releaseId}/songs`,
+      this.httpService.patch(
+        `/artists/${artistId}/releases/${releaseId}/songs/add`,
         songData,
       ),
     );
@@ -137,10 +123,24 @@ export class ArtistsService {
     songData: { songIds: string[] },
   ): Promise<any> {
     const response = await firstValueFrom(
-      this.httpService.delete(
-        `/artists/${artistId}/releases/${releaseId}/songs`,
-        { data: songData },
+      this.httpService.patch(
+        `/artists/${artistId}/releases/${releaseId}/songs/remove`,
+        songData,
       ),
+    );
+    return response.data;
+  }
+
+  async followArtist(id: string): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.patch(`/artists/${id}/follow`, {}),
+    );
+    return response.data;
+  }
+
+  async unfollowArtist(id: string): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.patch(`/artists/${id}/unfollow`, {}),
     );
     return response.data;
   }

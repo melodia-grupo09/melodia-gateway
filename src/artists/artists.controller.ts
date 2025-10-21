@@ -23,7 +23,6 @@ import { ArtistsService } from './artists.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { CreateReleaseDto } from './dto/create-release.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { UpdateBioDto } from './dto/update-bio.dto';
 import { UpdateReleaseDto } from './dto/update-release.dto';
 
 @ApiTags('artists')
@@ -114,9 +113,73 @@ export class ArtistsController {
     description: 'Artist UUID',
     type: String,
   })
+  @ApiBody({
+    description: 'Artist data to update (all fields are optional)',
+    schema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          example: 'J Balvin',
+        },
+        bio: {
+          type: 'string',
+          example:
+            'Colombian reggaeton singer, songwriter, and record producer.',
+        },
+        socialLinks: {
+          type: 'object',
+          example: {
+            instagram: 'https://instagram.com/jbalvin',
+            twitter: 'https://twitter.com/jbalvin',
+            spotify: 'https://open.spotify.com/artist/1vyhD5VmyZ7KMfW5gqLgo5',
+            youtube: 'https://youtube.com/c/JBalvinOfficial',
+            website: 'https://jbalvin.com',
+          },
+        },
+      },
+    },
+    examples: {
+      'Update all fields': {
+        value: {
+          name: 'J Balvin',
+          bio: 'Colombian reggaeton singer, songwriter, and record producer.',
+          socialLinks: {
+            instagram: 'https://instagram.com/jbalvin',
+            twitter: 'https://twitter.com/jbalvin',
+            spotify: 'https://open.spotify.com/artist/1vyhD5VmyZ7KMfW5gqLgo5',
+            youtube: 'https://youtube.com/c/JBalvinOfficial',
+            website: 'https://jbalvin.com',
+          },
+        },
+      },
+      'Update only name': {
+        value: {
+          name: 'New Artist Name',
+        },
+      },
+      'Update only bio': {
+        value: {
+          bio: 'New artist biography with updated information about their career and achievements.',
+        },
+      },
+      'Update only social links': {
+        value: {
+          socialLinks: {
+            instagram: 'https://instagram.com/newhandle',
+            spotify: 'https://open.spotify.com/artist/newid',
+          },
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'Artist updated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - validation error',
   })
   @ApiResponse({
     status: 404,
@@ -148,48 +211,44 @@ export class ArtistsController {
     return this.artistsService.deleteArtist(id);
   }
 
-  @Patch(':id/bio')
-  @ApiOperation({ summary: 'Update artist bio and social links' })
-  @ApiParam({
-    name: 'id',
-    description: 'Artist UUID',
-    type: String,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Bio updated successfully',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Artist not found',
-  })
-  async updateArtistBio(
-    @Param('id') id: string,
-    @Body() updateBioDto: UpdateBioDto,
-  ): Promise<any> {
-    return this.artistsService.updateArtistBio(id, updateBioDto);
-  }
-
-  @Patch(':id/image')
+  @Patch(':id/media')
   @UseInterceptors(FileInterceptor('image'))
-  @ApiOperation({ summary: 'Update artist profile image' })
+  @ApiOperation({ summary: 'Update artist media (profile image and/or cover)' })
   @ApiConsumes('multipart/form-data')
   @ApiParam({
     name: 'id',
     description: 'Artist UUID',
     type: String,
   })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'string',
+          format: 'binary',
+          description: 'Artist profile image',
+        },
+        cover: {
+          type: 'string',
+          format: 'binary',
+          description: 'Artist cover image',
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
-    description: 'Image updated successfully',
+    description: 'Media updated successfully',
   })
   @ApiResponse({
     status: 404,
     description: 'Artist not found',
   })
-  async updateArtistImage(
+  async updateArtistMedia(
     @Param('id') id: string,
-    @UploadedFile() image: any,
+    @UploadedFile() image?: any,
+    @UploadedFile() cover?: any,
   ): Promise<any> {
     const formData = new FormData();
 
@@ -204,32 +263,6 @@ export class ArtistsController {
       formData.append('image', blob, imageFile.originalname);
     }
 
-    return this.artistsService.updateArtistImage(id, formData);
-  }
-
-  @Patch(':id/cover')
-  @UseInterceptors(FileInterceptor('cover'))
-  @ApiOperation({ summary: 'Update artist cover image' })
-  @ApiConsumes('multipart/form-data')
-  @ApiParam({
-    name: 'id',
-    description: 'Artist UUID',
-    type: String,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Cover updated successfully',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Artist not found',
-  })
-  async updateArtistCover(
-    @Param('id') id: string,
-    @UploadedFile() cover: any,
-  ): Promise<any> {
-    const formData = new FormData();
-
     if (
       cover &&
       typeof cover === 'object' &&
@@ -241,7 +274,7 @@ export class ArtistsController {
       formData.append('cover', blob, coverFile.originalname);
     }
 
-    return this.artistsService.updateArtistCover(id, formData);
+    return this.artistsService.updateArtistMedia(id, formData);
   }
 
   // Release endpoints
@@ -419,8 +452,8 @@ export class ArtistsController {
     );
   }
 
-  @Post(':artistId/releases/:releaseId/songs')
-  @ApiOperation({ summary: 'Add songs to a release' })
+  @Patch(':artistId/releases/:releaseId/songs/add')
+  @ApiOperation({ summary: 'Add songs to release' })
   @ApiParam({
     name: 'artistId',
     description: 'Artist UUID',
@@ -431,9 +464,40 @@ export class ArtistsController {
     description: 'Release UUID',
     type: String,
   })
+  @ApiBody({
+    description: 'Song IDs to add to the release',
+    schema: {
+      type: 'object',
+      properties: {
+        songIds: {
+          type: 'array',
+          items: { type: 'string' },
+          example: ['new-song-1', 'new-song-2'],
+          description: 'Array of song IDs to add to the release',
+        },
+      },
+      required: ['songIds'],
+    },
+    examples: {
+      'Add single song': {
+        summary: 'Add single song',
+        description: 'Add one song to the release',
+        value: {
+          songIds: ['bonus-track-id'],
+        },
+      },
+      'Add multiple songs': {
+        summary: 'Add multiple songs',
+        description: 'Add several songs to the release',
+        value: {
+          songIds: ['bonus-track-1', 'bonus-track-2', 'deluxe-song'],
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
-    description: 'Songs added to release successfully',
+    description: 'Songs added successfully',
   })
   @ApiResponse({
     status: 404,
@@ -447,8 +511,8 @@ export class ArtistsController {
     return this.artistsService.addSongsToRelease(artistId, releaseId, songData);
   }
 
-  @Delete(':artistId/releases/:releaseId/songs')
-  @ApiOperation({ summary: 'Remove songs from a release' })
+  @Patch(':artistId/releases/:releaseId/songs/remove')
+  @ApiOperation({ summary: 'Remove songs from release' })
   @ApiParam({
     name: 'artistId',
     description: 'Artist UUID',
@@ -459,9 +523,40 @@ export class ArtistsController {
     description: 'Release UUID',
     type: String,
   })
+  @ApiBody({
+    description: 'Song IDs to remove from the release',
+    schema: {
+      type: 'object',
+      properties: {
+        songIds: {
+          type: 'array',
+          items: { type: 'string' },
+          example: ['song-to-remove-1', 'song-to-remove-2'],
+          description: 'Array of song IDs to remove from the release',
+        },
+      },
+      required: ['songIds'],
+    },
+    examples: {
+      'Remove single song': {
+        summary: 'Remove single song',
+        description: 'Remove one song from the release',
+        value: {
+          songIds: ['unwanted-track-id'],
+        },
+      },
+      'Remove multiple songs': {
+        summary: 'Remove multiple songs',
+        description: 'Remove several songs from the release',
+        value: {
+          songIds: ['old-demo-1', 'old-demo-2', 'duplicate-track'],
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
-    description: 'Songs removed from release successfully',
+    description: 'Songs removed successfully',
   })
   @ApiResponse({
     status: 404,
@@ -477,5 +572,43 @@ export class ArtistsController {
       releaseId,
       songData,
     );
+  }
+
+  @Patch(':id/follow')
+  @ApiOperation({ summary: 'Follow artist (increment followers count)' })
+  @ApiParam({
+    name: 'id',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Follower count incremented successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist not found',
+  })
+  async followArtist(@Param('id') id: string): Promise<any> {
+    return this.artistsService.followArtist(id);
+  }
+
+  @Patch(':id/unfollow')
+  @ApiOperation({ summary: 'Unfollow artist (decrement followers count)' })
+  @ApiParam({
+    name: 'id',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Follower count decremented successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist not found',
+  })
+  async unfollowArtist(@Param('id') id: string): Promise<any> {
+    return this.artistsService.unfollowArtist(id);
   }
 }
