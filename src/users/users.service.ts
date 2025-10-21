@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import admin from '../auth/firebase';
 import { MetricsService } from '../metrics/metrics.service';
@@ -71,8 +71,15 @@ export class UsersService {
     return response.data;
   }
 
-  async refreshToken(authHeader: string): Promise<any> {
+  async refreshToken(authHeader?: string): Promise<any> {
     console.log('Starting refresh token process...');
+
+    if (!authHeader) {
+      throw new HttpException(
+        'Authorization header is required',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
     try {
       const currentToken = authHeader.replace('Bearer ', '');
@@ -133,7 +140,10 @@ export class UsersService {
       };
     } catch (error) {
       console.error('Error refreshing token:', error);
-      throw new Error('Unable to refresh token - please login again');
+      throw new HttpException(
+        'Unable to refresh token - please login again',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
   }
 }

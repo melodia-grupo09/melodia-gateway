@@ -382,5 +382,11 @@ describe('UsersService', () => {
         'Unable to refresh token - please login again',
       );
     });
+
+    it('should throw error when authorization header is missing', async () => {
+      await expect(service.refreshToken(undefined)).rejects.toThrow(
+        'Authorization header is required',
+      );
+    });
   });
 });

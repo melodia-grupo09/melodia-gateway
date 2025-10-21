@@ -9,7 +9,8 @@
 <a href="https://nodejs.org" target="_blank">
   <img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node.js Version" />
 </a>
-<a href="https://nestjs.com" target="_blank">
+<a href="https://nestjs.com" target
+="_blank">
   <img src="https://img.shields.io/badge/NestJS-10.0-E0234E.svg" alt="NestJS Version" />
 </a>
 <a href="https://www.typescriptlang.org" target="_blank">

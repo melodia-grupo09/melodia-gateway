@@ -122,14 +122,24 @@ export class UsersController {
     description: 'Unable to refresh token - login required',
     schema: {
       example: {
-        status: 'error',
-        message: 'Refresh token expired - please login again',
-        code: 'refresh_required',
+        status: 401,
+        message: 'Authorization header is required',
+        code: 'bad_request',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unable to refresh token - invalid or expired token',
+    schema: {
+      example: {
+        status: 401,
+        message: 'Unable to refresh token - please login again',
       },
     },
   })
   async refreshToken(
-    @Headers('authorization') authHeader: string,
+    @Headers('authorization') authHeader?: string,
   ): Promise<any> {
     return this.usersService.refreshToken(authHeader);
   }
