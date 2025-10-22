@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Headers,
   HttpCode,
   HttpStatus,
   Post,
@@ -10,6 +9,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { HttpErrorInterceptor } from './interceptors/http-error.interceptor';
 import { UsersService } from './users.service';
@@ -100,18 +100,18 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Refresh expired token',
-    description:
-      'Send your token in Authorization header: "Bearer <your_token>" (expired tokens accepted)',
+    description: 'Send your refresh token to get new access and refresh tokens',
   })
   @ApiResponse({
     status: 200,
     description:
-      'Token refreshed successfully - Use the new token for future requests',
+      'Token refreshed successfully - Use the new tokens for future requests',
     schema: {
       example: {
         message: 'Token refreshed successfully',
-        token:
-          'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0...',
+        id_token: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refresh_token: 'AMf-vBywFmjorV2yrPzYrB6DkOq6mV7N870sOkhiVQ...',
+        expires_in: '3600',
         user: {
           uid: 'user123',
           email: 'user@example.com',
@@ -122,29 +122,28 @@ export class UsersController {
     },
   })
   @ApiResponse({
-    status: 401,
-    description: 'Unable to refresh token - login required',
+    status: 400,
+    description: 'Refresh token is required',
     schema: {
       example: {
-        status: 401,
-        message: 'Authorization header is required',
+        status: 'error',
+        message: 'Refresh token is required',
         code: 'bad_request',
       },
     },
   })
   @ApiResponse({
     status: 401,
-    description: 'Unable to refresh token - invalid or expired token',
+    description: 'Invalid or expired refresh token',
     schema: {
       example: {
-        status: 401,
-        message: 'Unable to refresh token - please login again',
+        status: 'error',
+        message: 'Invalid or expired refresh token',
+        code: 'unauthorized',
       },
     },
   })
-  async refreshToken(
-    @Headers('authorization') authHeader?: string,
-  ): Promise<any> {
-    return this.usersService.refreshToken(authHeader);
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto): Promise<any> {
+    return this.usersService.refreshToken(refreshTokenDto);
   }
 }

@@ -1,11 +1,18 @@
 import { HttpService } from '@nestjs/axios';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ArtistsService } from '../artists/artists.service';
-import admin from '../auth/firebase';
+
 import { MetricsService } from '../metrics/metrics.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 
 @Injectable()
@@ -209,79 +216,77 @@ export class UsersService {
     return response.data;
   }
 
-  async refreshToken(authHeader?: string): Promise<any> {
-    console.log('Starting refresh token process...');
-
-    if (!authHeader) {
-      throw new HttpException(
-        'Authorization header is required',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
+  async refreshToken(refreshTokenDto: RefreshTokenDto): Promise<any> {
     try {
-      const currentToken = authHeader.replace('Bearer ', '');
-      console.log('Token extracted, length:', currentToken.length);
+      // Call external user service to refresh token
+      const response = await firstValueFrom(
+        this.httpService.post<{
+          user_id?: string;
+          user?: { email?: string; nombre?: string; esArtista?: boolean };
+          id_token?: string;
+          refresh_token?: string;
+          expires_in?: number;
+        }>('/auth/refresh-token', {
+          refresh_token: refreshTokenDto.refresh_token,
+        }),
+      );
 
-      if (
-        process.env.NODE_ENV === 'development' ||
-        !process.env.FIREBASE_SERVICE_ACCOUNT
-      ) {
-        console.log('Running in development mode - simulating token refresh');
+      const refreshData = response.data;
 
-        const tokenParts = currentToken.split('.');
-        if (tokenParts.length !== 3) {
-          throw new Error('Invalid token format');
-        }
+      // Get user data from the refresh response
+      const userEmail =
+        typeof refreshData.user?.email === 'string'
+          ? refreshData.user.email
+          : '';
+      const userName =
+        (typeof refreshData.user?.nombre === 'string' &&
+          refreshData.user.nombre) ||
+        (userEmail ? userEmail.split('@')[0] : '') ||
+        '';
 
-        const payload = JSON.parse(
-          Buffer.from(tokenParts[1], 'base64').toString(),
-        ) as { user_id?: string; sub?: string; email?: string };
-        console.log('Token decoded successfully');
-
-        const result = {
-          message: 'Token refreshed successfully (dev mode)',
-          token: 'dev-refreshed-token-' + Date.now(),
-          user: {
-            uid: payload.user_id || payload.sub || '',
-            email: payload.email || '',
-            nombre: payload.email?.split('@')[0] || 'Developer',
-            esArtista: false,
-          },
-        };
-
-        console.log('Refresh completed successfully');
-        return result;
-      }
-
-      console.log('Running in production mode with Firebase');
-      const decodedToken = await admin
-        .auth()
-        .verifyIdToken(currentToken, false);
-      const uid = decodedToken.uid;
-      const email = decodedToken.email;
-
-      const userInfo = await admin.auth().getUser(uid);
-      const customToken = await admin.auth().createCustomToken(uid);
-
-      console.log('Firebase token refresh completed successfully');
+      const user = {
+        uid: typeof refreshData.user_id === 'string' ? refreshData.user_id : '',
+        email: userEmail,
+        nombre: userName,
+        esArtista: refreshData.user?.esArtista === true,
+      };
 
       return {
         message: 'Token refreshed successfully',
-        token: customToken,
-        user: {
-          uid: userInfo.uid,
-          email: userInfo.email,
-          nombre: userInfo.displayName || email?.split('@')[0] || 'User',
-          esArtista: false,
-        },
+        id_token:
+          typeof refreshData.id_token === 'string' ? refreshData.id_token : '',
+        refresh_token:
+          typeof refreshData.refresh_token === 'string'
+            ? refreshData.refresh_token
+            : '',
+        expires_in:
+          typeof refreshData.expires_in === 'number'
+            ? refreshData.expires_in
+            : 0,
+        user,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error refreshing token:', error);
-      throw new HttpException(
-        'Unable to refresh token - please login again',
-        HttpStatus.UNAUTHORIZED,
-      );
+
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const httpError = error as {
+          response?: { status?: number; data?: { detail?: string } };
+        };
+
+        if (httpError.response?.status === 401) {
+          throw new UnauthorizedException({
+            status: 'error',
+            message: 'Invalid or expired refresh token',
+            code: 'unauthorized',
+          });
+        }
+      }
+
+      throw new BadRequestException({
+        status: 'error',
+        message: 'Unable to refresh token - please try again',
+        code: 'refresh_failed',
+      });
     }
   }
 }

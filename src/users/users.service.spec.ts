@@ -412,102 +412,103 @@ describe('UsersService', () => {
   });
 
   describe('refreshToken', () => {
-    // Mock Firebase admin
-    const mockVerifyIdToken = jest.fn();
-    const mockCreateCustomToken = jest.fn();
-    const mockGetUser = jest.fn();
-
     beforeEach(() => {
-      // Mock the Firebase module import
-      jest.doMock('../auth/firebase', () => ({
-        default: {
-          auth: () => ({
-            verifyIdToken: mockVerifyIdToken,
-            createCustomToken: mockCreateCustomToken,
-            getUser: mockGetUser,
-          }),
-        },
-      }));
+      jest.spyOn(console, 'log').mockImplementation(() => {});
+      jest.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     afterEach(() => {
       jest.clearAllMocks();
     });
 
-    it('should successfully refresh token for valid user', async () => {
-      const mockPayload = {
-        user_id: 'user-123',
-        sub: 'user-123',
-        email: 'test@example.com',
-        exp: Date.now() / 1000 + 3600,
-        iat: Date.now() / 1000,
+    it('should successfully refresh token for valid refresh token', async () => {
+      const refreshTokenDto = { refresh_token: 'valid-refresh-token' };
+      const mockResponse = {
+        data: {
+          id_token: 'new-id-token',
+          refresh_token: 'new-refresh-token',
+          expires_in: 3600,
+          user_id: 'user-123',
+          user: {
+            email: 'test@example.com',
+            nombre: 'testuser',
+            esArtista: false,
+          },
+        },
       };
-      const encodedPayload = Buffer.from(JSON.stringify(mockPayload)).toString(
-        'base64',
-      );
-      const mockJWT = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${encodedPayload}.signature`;
-      const authHeader = `Bearer ${mockJWT}`;
 
-      const result = await service.refreshToken(authHeader);
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = await service.refreshToken(refreshTokenDto);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith('/auth/refresh-token', {
+        refresh_token: 'valid-refresh-token',
+      });
 
       expect(result).toEqual({
-        message: 'Token refreshed successfully (dev mode)',
-        token: expect.stringMatching(/^dev-refreshed-token-\d+$/),
+        message: 'Token refreshed successfully',
+        id_token: 'new-id-token',
+        refresh_token: 'new-refresh-token',
+        expires_in: 3600,
         user: {
           uid: 'user-123',
           email: 'test@example.com',
-          nombre: 'test',
+          nombre: 'testuser',
           esArtista: false,
         },
       });
     });
 
-    it('should handle user without displayName', async () => {
-      const mockPayload = {
-        user_id: 'user-123',
-        sub: 'user-123',
-        email: 'test@example.com',
-        exp: Date.now() / 1000 + 3600,
-        iat: Date.now() / 1000,
+    it('should handle user without nombre and derive from email', async () => {
+      const refreshTokenDto = { refresh_token: 'valid-refresh-token' };
+      const mockResponse = {
+        data: {
+          id_token: 'new-id-token',
+          refresh_token: 'new-refresh-token',
+          expires_in: '3600',
+          user_id: 'user-123',
+          user: {
+            email: 'test@example.com',
+          },
+        },
       };
-      const encodedPayload = Buffer.from(JSON.stringify(mockPayload)).toString(
-        'base64',
-      );
-      const mockJWT = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${encodedPayload}.signature`;
-      const authHeader = `Bearer ${mockJWT}`;
 
-      const result = await service.refreshToken(authHeader);
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = await service.refreshToken(refreshTokenDto);
 
       expect(result.user.nombre).toBe('test');
     });
 
-    it('should throw error when token verification fails', async () => {
-      const authHeader = 'Bearer invalid-token';
+    it('should throw UnauthorizedException for 401 response', async () => {
+      const refreshTokenDto = { refresh_token: 'invalid-refresh-token' };
+      const errorResponse = {
+        response: {
+          status: 401,
+          data: { detail: 'Invalid refresh token' },
+        },
+      };
 
-      await expect(service.refreshToken(authHeader)).rejects.toThrow(
-        'Unable to refresh token - please login again',
+      mockHttpService.post.mockReturnValue(throwError(() => errorResponse));
+
+      await expect(service.refreshToken(refreshTokenDto)).rejects.toThrow(
+        'Invalid or expired refresh token',
       );
     });
 
-    it('should throw error when token format is invalid', async () => {
-      const authHeader = 'Bearer invalid.token';
+    it('should throw BadRequestException for other errors', async () => {
+      const refreshTokenDto = { refresh_token: 'some-refresh-token' };
+      const errorResponse = {
+        response: {
+          status: 500,
+          data: { detail: 'Server error' },
+        },
+      };
 
-      await expect(service.refreshToken(authHeader)).rejects.toThrow(
-        'Unable to refresh token - please login again',
-      );
-    });
+      mockHttpService.post.mockReturnValue(throwError(() => errorResponse));
 
-    it('should throw error when token payload is malformed', async () => {
-      const authHeader = 'Bearer header.invalid-base64.signature';
-
-      await expect(service.refreshToken(authHeader)).rejects.toThrow(
-        'Unable to refresh token - please login again',
-      );
-    });
-
-    it('should throw error when authorization header is missing', async () => {
-      await expect(service.refreshToken(undefined)).rejects.toThrow(
-        'Authorization header is required',
+      await expect(service.refreshToken(refreshTokenDto)).rejects.toThrow(
+        'Unable to refresh token - please try again',
       );
     });
   });
