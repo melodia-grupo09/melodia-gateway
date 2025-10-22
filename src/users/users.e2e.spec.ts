@@ -146,6 +146,8 @@ describe('Users Registration', () => {
           .expect((res) => {
             const body = res.body as ErrorResponse;
             expect(body.message).toBe('Incorrect credentials');
+            expect(body.status).toBe(400);
+            expect(body.code).toBe('bad_request');
           });
       });
 
@@ -161,6 +163,8 @@ describe('Users Registration', () => {
           .expect((res) => {
             const body = res.body as ErrorResponse;
             expect(body.message).toBe('Email not found');
+            expect(body.status).toBe(400);
+            expect(body.code).toBe('bad_request');
           });
       });
 

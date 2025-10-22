@@ -33,33 +33,83 @@ export class UsersService {
   }
 
   async loginUser(loginUserDto: LoginUserDto): Promise<any> {
-    const response = await firstValueFrom(
-      this.httpService.post<{ user?: { uid?: string; email?: string } }>(
-        '/auth/login',
-        {
-          email: loginUserDto.email,
-          password: loginUserDto.password,
-        },
-      ),
-    );
-
     try {
-      const user = response.data?.user as
-        | { uid?: string; email?: string }
-        | undefined;
-      const userId: string =
-        (typeof user?.uid === 'string' && user.uid) ||
-        (typeof user?.email === 'string' && user.email) ||
-        loginUserDto.email;
-      await Promise.all([
-        this.metricsService.recordUserLogin(userId),
-        this.metricsService.recordUserActivity(userId),
-      ]);
-    } catch (error) {
-      console.error('Failed to track user login/activity:', error);
-    }
+      const response = await firstValueFrom(
+        this.httpService.post<{ user?: { uid?: string; email?: string } }>(
+          '/auth/login',
+          {
+            email: loginUserDto.email,
+            password: loginUserDto.password,
+          },
+        ),
+      );
 
-    return response.data;
+      try {
+        const user = response.data?.user as
+          | { uid?: string; email?: string }
+          | undefined;
+        const userId: string =
+          (typeof user?.uid === 'string' && user.uid) ||
+          (typeof user?.email === 'string' && user.email) ||
+          loginUserDto.email;
+        await Promise.all([
+          this.metricsService.recordUserLogin(userId),
+          this.metricsService.recordUserActivity(userId),
+        ]);
+      } catch (error) {
+        console.error('Failed to track user login/activity:', error);
+      }
+
+      return response.data;
+    } catch (error: unknown) {
+      let errorMsg = '';
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error &&
+        typeof (error as { response?: { data?: { message?: unknown } } })
+          .response?.data?.message === 'string'
+      ) {
+        errorMsg = (error as { response: { data: { message: string } } })
+          .response.data.message;
+      }
+      if (
+        typeof errorMsg === 'string' &&
+        (errorMsg.toLowerCase().includes('password') ||
+          errorMsg.toLowerCase().includes('contraseña'))
+      ) {
+        throw new HttpException(
+          {
+            status: 'error',
+            message: 'Incorrect password',
+            code: 'incorrect_password',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      } else if (
+        typeof errorMsg === 'string' &&
+        (errorMsg.toLowerCase().includes('not found') ||
+          errorMsg.toLowerCase().includes('no existe'))
+      ) {
+        throw new HttpException(
+          {
+            status: 'error',
+            message: 'Email not found',
+            code: 'email_not_found',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      } else {
+        throw new HttpException(
+          {
+            status: 'error',
+            message: 'Login failed',
+            code: 'login_failed',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<any> {
