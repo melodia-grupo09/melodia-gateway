@@ -250,6 +250,7 @@ describe('UsersService', () => {
         data: {
           message: 'Login successful',
           token: 'jwt-token-123',
+          refresh_token: 'refresh-token-456',
           user: {
             uid: 'user-123',
             email: 'test@example.com',
@@ -265,6 +266,7 @@ describe('UsersService', () => {
       const result = (await service.loginUser(loginDto)) as {
         message: string;
         token: string;
+        refresh_token: string;
         user: { uid: string; email: string; nombre: string };
       };
 
@@ -283,6 +285,7 @@ describe('UsersService', () => {
       expect(result).toEqual({
         message: 'Login successful',
         token: 'jwt-token-123',
+        refresh_token: 'refresh-token-456',
         user: {
           uid: 'user-123',
           email: 'test@example.com',
@@ -301,6 +304,7 @@ describe('UsersService', () => {
         data: {
           message: 'Login successful',
           token: 'jwt-token-123',
+          refresh_token: 'refresh-token-456',
           user: {
             uid: 'user-123',
             email: 'test@example.com',
@@ -320,12 +324,14 @@ describe('UsersService', () => {
       const result = (await service.loginUser(loginDto)) as {
         message: string;
         token: string;
+        refresh_token: string;
         user: { uid: string; email: string; nombre: string };
       };
 
       expect(result).toEqual({
         message: 'Login successful',
         token: 'jwt-token-123',
+        refresh_token: 'refresh-token-456',
         user: {
           uid: 'user-123',
           email: 'test@example.com',
@@ -344,6 +350,7 @@ describe('UsersService', () => {
         data: {
           message: 'Login successful',
           token: 'jwt-token-123',
+          refresh_token: 'refresh-token-456',
           user: {
             uid: '',
             email: 'test@example.com',

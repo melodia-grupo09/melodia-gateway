@@ -23,7 +23,21 @@ export class UsersController {
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiResponse({
     status: 200,
-    description: 'Login successful',
+    description:
+      'Login successful - Returns both access token and refresh token',
+    schema: {
+      example: {
+        message: 'Login exitoso',
+        token: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refresh_token: 'AMf-vBywFmjorV2yrPzYrB6DkOq6mV7N870sOkhiVQ...',
+        user: {
+          uid: 'user123',
+          email: 'user@example.com',
+          nombre: 'username',
+          esArtista: false,
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 400,
