@@ -3,6 +3,7 @@ import {
   INestApplication,
   ValidationPipe,
 } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
@@ -91,7 +92,13 @@ describe('Users Registration', () => {
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [UsersModule],
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          envFilePath: '.env.test',
+        }),
+        UsersModule,
+      ],
     })
       .overrideProvider(UsersService)
       .useValue(mockUsersService)

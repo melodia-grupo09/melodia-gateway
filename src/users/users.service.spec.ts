@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
 import { of, throwError } from 'rxjs';
+import { ArtistsService } from '../artists/artists.service';
 import { MetricsService } from '../metrics/metrics.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -20,6 +21,10 @@ describe('UsersService', () => {
     recordUserActivity: jest.fn(),
   };
 
+  const mockArtistsService = {
+    createArtist: jest.fn(),
+  };
+
   beforeEach(async () => {
     // Mock console.error to suppress error logs during tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -34,6 +39,10 @@ describe('UsersService', () => {
         {
           provide: MetricsService,
           useValue: mockMetricsService,
+        },
+        {
+          provide: ArtistsService,
+          useValue: mockArtistsService,
         },
       ],
     }).compile();
@@ -57,13 +66,13 @@ describe('UsersService', () => {
       };
 
       const mockResponse = {
-        data: 'User registered successfully',
+        data: { user: { id: 'test-user-id', email: 'test@example.com' } },
       };
 
       mockHttpService.post.mockReturnValue(of(mockResponse));
       mockMetricsService.recordUserRegistration.mockResolvedValue(undefined);
 
-      const result = (await service.registerUser(registerDto)) as string;
+      const result = await service.registerUser(registerDto);
 
       expect(mockHttpService.post).toHaveBeenCalledWith('/auth/register', {
         email: registerDto.email,
@@ -75,7 +84,10 @@ describe('UsersService', () => {
         registerDto.email,
       );
 
-      expect(result).toEqual('User registered successfully');
+      expect(result).toEqual({
+        message: 'User registered successfully',
+        user: { id: 'test-user-id', email: 'test@example.com' },
+      });
     });
 
     it('should register user even if metrics tracking fails', async () => {
@@ -86,7 +98,7 @@ describe('UsersService', () => {
       };
 
       const mockResponse = {
-        data: 'User registered successfully',
+        data: { user: { id: 'test-user-id', email: 'test@example.com' } },
       };
 
       mockHttpService.post.mockReturnValue(of(mockResponse));
@@ -94,9 +106,12 @@ describe('UsersService', () => {
         new Error('Metrics error'),
       );
 
-      const result = (await service.registerUser(registerDto)) as string;
+      const result = await service.registerUser(registerDto);
 
-      expect(result).toEqual('User registered successfully');
+      expect(result).toEqual({
+        message: 'User registered successfully',
+        user: { id: 'test-user-id', email: 'test@example.com' },
+      });
     });
 
     it('should throw error if user service fails', async () => {
@@ -110,7 +125,7 @@ describe('UsersService', () => {
       mockHttpService.post.mockReturnValue(throwError(() => error));
 
       await expect(service.registerUser(registerDto)).rejects.toThrow(
-        'User service error',
+        'Registration failed',
       );
 
       expect(mockMetricsService.recordUserRegistration).not.toHaveBeenCalled();
