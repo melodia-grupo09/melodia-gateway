@@ -1,6 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ArtistsModule } from '../artists/artists.module';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
@@ -17,6 +18,7 @@ import { UsersService } from './users.service';
       }),
       inject: [ConfigService],
     }),
+    ArtistsModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

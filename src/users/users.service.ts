@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { ArtistsService } from '../artists/artists.service';
 import admin from '../auth/firebase';
 import { MetricsService } from '../metrics/metrics.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -12,16 +13,76 @@ export class UsersService {
   constructor(
     private readonly httpService: HttpService,
     private readonly metricsService: MetricsService,
+    private readonly artistsService: ArtistsService,
   ) {}
 
   async registerUser(registerUserDto: RegisterUserDto): Promise<any> {
-    const response = await firstValueFrom(
-      this.httpService.post('/auth/register', {
-        email: registerUserDto.email,
-        password: registerUserDto.password,
-        nombre: registerUserDto.username,
-      }),
-    );
+    let response;
+
+    try {
+      response = await firstValueFrom(
+        this.httpService.post('/auth/register', {
+          email: registerUserDto.email,
+          password: registerUserDto.password,
+          nombre: registerUserDto.username,
+        }),
+      );
+    } catch (error: unknown) {
+      // Handle specific error messages from user service
+      let errorMsg = '';
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error &&
+        typeof (error as { response?: { data?: { detail?: unknown } } })
+          .response?.data?.detail === 'string'
+      ) {
+        errorMsg = (error as { response: { data: { detail: string } } })
+          .response.data.detail;
+      }
+
+      // Check for email already registered (Spanish message from service)
+      if (
+        errorMsg.includes('correo electrónico ya está registrado') ||
+        (errorMsg.toLowerCase().includes('email') &&
+          errorMsg.toLowerCase().includes('registered'))
+      ) {
+        throw new HttpException(
+          {
+            status: 'error',
+            message: 'Email is already registered',
+            code: 'email_already_registered',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      // Check for username already taken (if service ever implements this)
+      else if (
+        errorMsg.toLowerCase().includes('username') ||
+        (errorMsg.toLowerCase().includes('nombre') &&
+          errorMsg.toLowerCase().includes('existe'))
+      ) {
+        throw new HttpException(
+          {
+            status: 'error',
+            message: 'Username is already taken',
+            code: 'username_already_taken',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      // Generic registration error
+      else {
+        throw new HttpException(
+          {
+            status: 'error',
+            message: 'Registration failed',
+            code: 'registration_failed',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
 
     try {
       await this.metricsService.recordUserRegistration(registerUserDto.email);
@@ -29,7 +90,34 @@ export class UsersService {
       console.error('Failed to track user registration:', error);
     }
 
-    return response.data;
+    // If user is an artist, create artist profile
+    if (registerUserDto.isArtist === true && response.data?.user?.uid) {
+      try {
+        const formData = new FormData();
+        formData.append('id', response.data.user.uid);
+        formData.append('name', registerUserDto.username);
+
+        const artistResponse = await this.artistsService.createArtist(formData);
+        console.log('Artist profile created:', artistResponse);
+
+        // Add artist info to the response
+        return {
+          ...response.data,
+          message: 'User registered successfully',
+          artist: artistResponse,
+        };
+      } catch (error) {
+        console.error('Failed to create artist profile:', error);
+        // Don't fail the user registration if artist creation fails
+        // Just log the error and continue
+      }
+    }
+
+    // Return response with English message
+    return {
+      ...response.data,
+      message: 'User registered successfully',
+    };
   }
 
   async loginUser(loginUserDto: LoginUserDto): Promise<any> {

@@ -43,7 +43,11 @@ export class UsersController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new user' })
+  @ApiOperation({
+    summary: 'Register a new user',
+    description:
+      'Register a new user. If isArtist is true, an artist profile will also be created.',
+  })
   @ApiResponse({
     status: 201,
     description: 'User registered successfully',

@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   MinLength,
@@ -45,6 +47,15 @@ export class RegisterUserDto {
     },
   )
   password: string;
+
+  @ApiProperty({
+    description: 'Whether the user is an artist',
+    example: false,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'isArtist must be a boolean' })
+  isArtist?: boolean;
 }
 
 export class RegisterUserResponseDto {
