@@ -127,8 +127,115 @@ describe('UsersService', () => {
       await expect(service.registerUser(registerDto)).rejects.toThrow(
         'Registration failed',
       );
+    });
 
-      expect(mockMetricsService.recordUserRegistration).not.toHaveBeenCalled();
+    it('should create artist profile when isArtist is true', async () => {
+      const registerDto: RegisterUserDto = {
+        email: 'artist@example.com',
+        password: 'password123',
+        username: 'testartist',
+        isArtist: true,
+      };
+
+      const mockResponse = {
+        data: { user: { uid: 'artist-uid-123', email: 'artist@example.com' } },
+      };
+
+      const mockArtistResponse = {
+        id: 'artist-uid-123',
+        name: 'testartist',
+        imageUrl: null,
+        followersCount: 0,
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+      mockMetricsService.recordUserRegistration.mockResolvedValue(undefined);
+      mockArtistsService.createArtist.mockResolvedValue(mockArtistResponse);
+
+      const result = await service.registerUser(registerDto);
+
+      expect(mockArtistsService.createArtist).toHaveBeenCalledWith(
+        expect.any(FormData),
+      );
+
+      expect(result).toEqual({
+        message: 'User registered successfully',
+        user: { uid: 'artist-uid-123', email: 'artist@example.com' },
+        artist: mockArtistResponse,
+      });
+    });
+
+    it('should handle artist creation failure gracefully', async () => {
+      const registerDto: RegisterUserDto = {
+        email: 'artist@example.com',
+        password: 'password123',
+        username: 'testartist',
+        isArtist: true,
+      };
+
+      const mockResponse = {
+        data: { user: { uid: 'artist-uid-123', email: 'artist@example.com' } },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+      mockMetricsService.recordUserRegistration.mockResolvedValue(undefined);
+      mockArtistsService.createArtist.mockRejectedValue(
+        new Error('Artist service error'),
+      );
+
+      const result = await service.registerUser(registerDto);
+
+      expect(mockArtistsService.createArtist).toHaveBeenCalled();
+      expect(result).toEqual({
+        message: 'User registered successfully',
+        user: { uid: 'artist-uid-123', email: 'artist@example.com' },
+      });
+    });
+
+    it('should not create artist profile when isArtist is false', async () => {
+      const registerDto: RegisterUserDto = {
+        email: 'user@example.com',
+        password: 'password123',
+        username: 'testuser',
+        isArtist: false,
+      };
+
+      const mockResponse = {
+        data: { user: { uid: 'user-uid-123', email: 'user@example.com' } },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+      mockMetricsService.recordUserRegistration.mockResolvedValue(undefined);
+
+      const result = await service.registerUser(registerDto);
+
+      expect(mockArtistsService.createArtist).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        message: 'User registered successfully',
+        user: { uid: 'user-uid-123', email: 'user@example.com' },
+      });
+    });
+
+    it('should handle email already registered error', async () => {
+      const registerDto: RegisterUserDto = {
+        email: 'existing@example.com',
+        password: 'password123',
+        username: 'testuser',
+      };
+
+      const error = {
+        response: {
+          data: {
+            detail: 'El correo electrónico ya está registrado',
+          },
+        },
+      };
+
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(service.registerUser(registerDto)).rejects.toThrow(
+        'Email is already registered',
+      );
     });
   });
 
