@@ -43,6 +43,151 @@ describe('SongsService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('getSongById', () => {
+    it('should get a song by id', async () => {
+      const songId = 'song-123';
+      const mockSong = {
+        id: songId,
+        title: 'Test Song',
+        artist: 'Test Artist',
+      };
+      const mockResponse = {
+        data: mockSong,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+      } as unknown as AxiosResponse;
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.getSongById(songId);
+
+      expect(result).toEqual(mockSong);
+      expect(mockHttpService.get).toHaveBeenCalledWith(`/songs/id/${songId}`);
+    });
+
+    it('should handle errors when getting song by id', async () => {
+      const songId = 'nonexistent-song';
+      const error = new Error('Song not found');
+
+      mockHttpService.get.mockReturnValue(throwError(() => error));
+
+      await expect(service.getSongById(songId)).rejects.toThrow(
+        'Song not found',
+      );
+    });
+  });
+
+  describe('getRandom', () => {
+    it('should get random songs without parameters', async () => {
+      const mockSongs = [
+        { id: 'song1', title: 'Song 1' },
+        { id: 'song2', title: 'Song 2' },
+      ];
+      const mockResponse = {
+        data: mockSongs,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+      } as unknown as AxiosResponse;
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.getRandom();
+
+      expect(result).toEqual(mockSongs);
+      expect(mockHttpService.get).toHaveBeenCalledWith('/songs/random', {
+        params: {},
+      });
+    });
+
+    it('should get random songs with limit parameter', async () => {
+      const limit = 5;
+      const mockSongs = [{ id: 'song1', title: 'Song 1' }];
+      const mockResponse = {
+        data: mockSongs,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+      } as unknown as AxiosResponse;
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.getRandom(limit);
+
+      expect(result).toEqual(mockSongs);
+      expect(mockHttpService.get).toHaveBeenCalledWith('/songs/random', {
+        params: { limit },
+      });
+    });
+
+    it('should get random songs with limit and page parameters', async () => {
+      const limit = 10;
+      const page = 2;
+      const mockSongs = [{ id: 'song3', title: 'Song 3' }];
+      const mockResponse = {
+        data: mockSongs,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+      } as unknown as AxiosResponse;
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.getRandom(limit, page);
+
+      expect(result).toEqual(mockSongs);
+      expect(mockHttpService.get).toHaveBeenCalledWith('/songs/random', {
+        params: { limit, page },
+      });
+    });
+
+    it('should handle errors when getting random songs', async () => {
+      const error = new Error('Service unavailable');
+
+      mockHttpService.get.mockReturnValue(throwError(() => error));
+
+      await expect(service.getRandom()).rejects.toThrow('Service unavailable');
+    });
+  });
+
+  describe('searchSongs', () => {
+    it('should search songs with query', async () => {
+      const query = 'test';
+      const limit = 20;
+      const page = 1;
+      const mockSongs = [
+        { id: 'song1', title: 'Test Song 1' },
+        { id: 'song2', title: 'Test Song 2' },
+      ];
+      const mockResponse = {
+        data: mockSongs,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+      } as unknown as AxiosResponse;
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.searchSongs(query, limit, page);
+
+      expect(result).toEqual(mockSongs);
+      expect(mockHttpService.get).toHaveBeenCalledWith('/songs/search', {
+        params: { query, limit, page },
+      });
+    });
+
+    it('should handle errors when searching songs', async () => {
+      const error = new Error('Search failed');
+
+      mockHttpService.get.mockReturnValue(throwError(() => error));
+
+      await expect(service.searchSongs('test', 20, 1)).rejects.toThrow(
+        'Search failed',
+      );
+    });
+  });
+
   describe('streamSong', () => {
     it('should successfully stream a song without range headers', async () => {
       const songId = 'song123';

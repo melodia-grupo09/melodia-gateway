@@ -136,6 +136,15 @@ describe('MetricsService', () => {
         service.trackUserActivity(userId, action),
       ).resolves.toBeUndefined();
     });
+
+    it('should handle errors gracefully without action context', async () => {
+      const userId = 'test-user-123';
+      const error = new Error('Network error');
+
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(service.trackUserActivity(userId)).resolves.toBeUndefined();
+    });
   });
 
   describe('Analytics methods', () => {
@@ -334,6 +343,64 @@ describe('MetricsService', () => {
       mockHttpService.get.mockReturnValue(throwError(() => error));
 
       await expect(service.getTopAlbums()).rejects.toThrow('HTTP error');
+    });
+  });
+
+  describe('recordSongUpload', () => {
+    it('should successfully record song upload', async () => {
+      const songId = 'song-123';
+      const mockResponse = { data: { success: true } };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      await service.recordSongUpload(songId);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/metrics/songs/${songId}`,
+      );
+    });
+
+    it('should handle errors when recording song upload', async () => {
+      const songId = 'song-123';
+      const error = new Error('HTTP error');
+
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      // Should not throw error, just log it
+      await expect(service.recordSongUpload(songId)).resolves.toBeUndefined();
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/metrics/songs/${songId}`,
+      );
+    });
+  });
+
+  describe('recordSongPlay', () => {
+    it('should successfully record song play', async () => {
+      const songId = 'song-456';
+      const mockResponse = { data: { success: true } };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      await service.recordSongPlay(songId);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/metrics/songs/${songId}/plays`,
+      );
+    });
+
+    it('should handle errors when recording song play', async () => {
+      const songId = 'song-456';
+      const error = new Error('HTTP error');
+
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      // Should not throw error, just log it
+      await expect(service.recordSongPlay(songId)).resolves.toBeUndefined();
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/metrics/songs/${songId}/plays`,
+      );
     });
   });
 });
