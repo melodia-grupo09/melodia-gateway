@@ -104,4 +104,31 @@ export class MetricsService {
     );
     return response.data;
   }
+
+  async getTopSongs(limit?: number): Promise<any> {
+    const params: Record<string, number> = {};
+    if (limit !== undefined) {
+      params.limit = limit;
+    }
+
+    const response = await firstValueFrom(
+      this.httpService.get('/metrics/songs', { params }),
+    );
+    return response.data;
+  }
+
+  async getTopAlbums(
+    limit?: number,
+    albumSongs?: Record<string, string[]>,
+  ): Promise<any> {
+    const params: Record<string, number> = {};
+    if (limit !== undefined) {
+      params.limit = limit;
+    }
+
+    const response = await firstValueFrom(
+      this.httpService.post('/metrics/albums/top', { albumSongs }, { params }),
+    );
+    return response.data;
+  }
 }

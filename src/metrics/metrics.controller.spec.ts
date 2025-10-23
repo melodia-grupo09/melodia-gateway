@@ -9,6 +9,8 @@ describe('MetricsController', () => {
     getNewRegistrations: jest.fn(),
     getActiveUsers: jest.fn(),
     getUserRetention: jest.fn(),
+    getTopSongs: jest.fn(),
+    getTopAlbums: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -146,6 +148,122 @@ describe('MetricsController', () => {
       await expect(
         controller.getUserRetention(cohortStartDate, cohortEndDate),
       ).rejects.toThrow('Service error');
+    });
+  });
+
+  describe('getTopSongs', () => {
+    it('should return top songs with default limit', async () => {
+      const expectedResult = {
+        songs: [
+          { id: 'song1', title: 'Song 1', plays: 1000 },
+          { id: 'song2', title: 'Song 2', plays: 800 },
+        ],
+      };
+
+      mockMetricsService.getTopSongs.mockResolvedValue(expectedResult);
+
+      const result = await controller.getTopSongs();
+
+      expect(mockMetricsService.getTopSongs).toHaveBeenCalledWith(undefined);
+      expect(result).toBe(expectedResult);
+    });
+
+    it('should return top songs with custom limit', async () => {
+      const limit = 5;
+      const expectedResult = {
+        songs: [
+          { id: 'song1', title: 'Song 1', plays: 1000 },
+          { id: 'song2', title: 'Song 2', plays: 800 },
+          { id: 'song3', title: 'Song 3', plays: 600 },
+          { id: 'song4', title: 'Song 4', plays: 400 },
+          { id: 'song5', title: 'Song 5', plays: 200 },
+        ],
+      };
+
+      mockMetricsService.getTopSongs.mockResolvedValue(expectedResult);
+
+      const result = await controller.getTopSongs(limit);
+
+      expect(mockMetricsService.getTopSongs).toHaveBeenCalledWith(limit);
+      expect(result).toBe(expectedResult);
+    });
+
+    it('should handle errors when getting top songs', async () => {
+      const error = new Error('Service error');
+
+      mockMetricsService.getTopSongs.mockRejectedValue(error);
+
+      await expect(controller.getTopSongs()).rejects.toThrow('Service error');
+    });
+  });
+
+  describe('getTopAlbums', () => {
+    it('should return top albums with default limit', async () => {
+      const body = {
+        albumSongs: {
+          album1: ['song1', 'song2'],
+          album2: ['song3', 'song4'],
+        },
+      };
+      const expectedResult = {
+        albums: [
+          { id: 'album1', title: 'Album 1', totalPlays: 1800 },
+          { id: 'album2', title: 'Album 2', totalPlays: 1000 },
+        ],
+      };
+
+      mockMetricsService.getTopAlbums.mockResolvedValue(expectedResult);
+
+      const result = await controller.getTopAlbums(body);
+
+      expect(mockMetricsService.getTopAlbums).toHaveBeenCalledWith(
+        undefined,
+        body.albumSongs,
+      );
+      expect(result).toBe(expectedResult);
+    });
+
+    it('should return top albums with custom limit', async () => {
+      const limit = 3;
+      const body = {
+        albumSongs: {
+          album1: ['song1', 'song2'],
+          album2: ['song3', 'song4'],
+          album3: ['song5', 'song6'],
+        },
+      };
+      const expectedResult = {
+        albums: [
+          { id: 'album1', title: 'Album 1', totalPlays: 1800 },
+          { id: 'album2', title: 'Album 2', totalPlays: 1000 },
+          { id: 'album3', title: 'Album 3', totalPlays: 800 },
+        ],
+      };
+
+      mockMetricsService.getTopAlbums.mockResolvedValue(expectedResult);
+
+      const result = await controller.getTopAlbums(body, limit);
+
+      expect(mockMetricsService.getTopAlbums).toHaveBeenCalledWith(
+        limit,
+        body.albumSongs,
+      );
+      expect(result).toBe(expectedResult);
+    });
+
+    it('should handle errors when getting top albums', async () => {
+      const body = {
+        albumSongs: {
+          album1: ['song1', 'song2'],
+        },
+      };
+      const error = new Error('Service error');
+
+      mockMetricsService.getTopAlbums.mockRejectedValue(error);
+
+      await expect(controller.getTopAlbums(body)).rejects.toThrow(
+        'Service error',
+      );
     });
   });
 });

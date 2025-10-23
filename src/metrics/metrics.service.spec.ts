@@ -236,4 +236,120 @@ describe('MetricsService', () => {
       });
     });
   });
+
+  describe('getTopSongs', () => {
+    it('should return top songs without limit', async () => {
+      const mockData = {
+        songs: [
+          { id: 'song1', title: 'Song 1', plays: 1000 },
+          { id: 'song2', title: 'Song 2', plays: 800 },
+        ],
+      };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockData }));
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = await service.getTopSongs();
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/songs', {
+        params: {},
+      });
+      expect(result).toEqual(mockData);
+    });
+
+    it('should return top songs with limit', async () => {
+      const limit = 5;
+      const mockData = {
+        songs: [
+          { id: 'song1', title: 'Song 1', plays: 1000 },
+          { id: 'song2', title: 'Song 2', plays: 800 },
+          { id: 'song3', title: 'Song 3', plays: 600 },
+          { id: 'song4', title: 'Song 4', plays: 400 },
+          { id: 'song5', title: 'Song 5', plays: 200 },
+        ],
+      };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockData }));
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = await service.getTopSongs(limit);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/songs', {
+        params: { limit },
+      });
+      expect(result).toEqual(mockData);
+    });
+
+    it('should handle errors when getting top songs', async () => {
+      const error = new Error('HTTP error');
+      mockHttpService.get.mockReturnValue(throwError(() => error));
+
+      await expect(service.getTopSongs()).rejects.toThrow('HTTP error');
+    });
+  });
+
+  describe('getTopAlbums', () => {
+    it('should return top albums without limit', async () => {
+      const albumSongs = {
+        album1: ['song1', 'song2'],
+        album2: ['song3', 'song4'],
+      };
+      const mockData = {
+        albums: [
+          { id: 'album1', title: 'Album 1', totalPlays: 1800 },
+          { id: 'album2', title: 'Album 2', totalPlays: 1000 },
+        ],
+      };
+
+      mockHttpService.post.mockReturnValue(of({ data: mockData }));
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = await service.getTopAlbums(undefined, albumSongs);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        '/metrics/albums/top',
+        { albumSongs },
+        { params: {} },
+      );
+      expect(result).toEqual(mockData);
+    });
+
+    it('should return top albums with limit', async () => {
+      const limit = 3;
+      const albumSongs = {
+        album1: ['song1', 'song2'],
+        album2: ['song3', 'song4'],
+        album3: ['song5', 'song6'],
+      };
+      const mockData = {
+        albums: [
+          { id: 'album1', title: 'Album 1', totalPlays: 1800 },
+          { id: 'album2', title: 'Album 2', totalPlays: 1000 },
+          { id: 'album3', title: 'Album 3', totalPlays: 800 },
+        ],
+      };
+
+      mockHttpService.post.mockReturnValue(of({ data: mockData }));
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = await service.getTopAlbums(limit, albumSongs);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        '/metrics/albums/top',
+        { albumSongs },
+        { params: { limit } },
+      );
+      expect(result).toEqual(mockData);
+    });
+
+    it('should handle errors when getting top albums', async () => {
+      const albumSongs = { album1: ['song1'] };
+      const error = new Error('HTTP error');
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(service.getTopAlbums(undefined, albumSongs)).rejects.toThrow(
+        'HTTP error',
+      );
+    });
+  });
 });
