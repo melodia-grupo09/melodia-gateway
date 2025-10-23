@@ -25,7 +25,14 @@ describe('AppController (e2e)', () => {
       return request(app.getHttpServer())
         .get('/')
         .expect(200)
-        .expect({ status: 'ok' });
+        .expect((res) => {
+          expect(res.body).toHaveProperty('status', 'ok');
+          // The response should have either topSongs/topAlbums OR metricsError
+          expect(
+            res.body.topSongs !== undefined ||
+              res.body.metricsError !== undefined,
+          ).toBe(true);
+        });
     });
 
     it('should have correct response headers', () => {
