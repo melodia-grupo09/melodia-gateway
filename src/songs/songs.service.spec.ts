@@ -205,10 +205,22 @@ describe('SongsService', () => {
       mockHttpService.get.mockReturnValue(of(mockResponse));
       mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
 
-      const result = await service.streamSong(songId, undefined);
+      const userId = 'test-user';
+      const artistId = 'test-artist';
+
+      const result = await service.streamSong(
+        songId,
+        undefined,
+        userId,
+        artistId,
+      );
 
       expect(result).toEqual(mockResponse);
-      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(songId);
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(
+        songId,
+        userId,
+        artistId,
+      );
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/song123',
         {
@@ -237,10 +249,17 @@ describe('SongsService', () => {
       mockHttpService.get.mockReturnValue(of(mockResponse));
       mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
 
-      const result = await service.streamSong(songId, range);
+      const userId = 'test-user-2';
+      const artistId = 'test-artist-2';
+
+      const result = await service.streamSong(songId, range, userId, artistId);
 
       expect(result).toEqual(mockResponse);
-      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(songId);
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(
+        songId,
+        userId,
+        artistId,
+      );
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/song456',
         {
@@ -266,10 +285,22 @@ describe('SongsService', () => {
       mockHttpService.get.mockReturnValue(of(mockResponse));
       mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
 
-      const result = await service.streamSong(songId, rangeArray);
+      const userId = 'test-user-3';
+      const artistId = 'test-artist-3';
+
+      const result = await service.streamSong(
+        songId,
+        rangeArray,
+        userId,
+        artistId,
+      );
 
       expect(result).toEqual(mockResponse);
-      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(songId);
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(
+        songId,
+        userId,
+        artistId,
+      );
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/song789',
         {
@@ -286,10 +317,17 @@ describe('SongsService', () => {
       mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
       mockHttpService.get.mockReturnValue(throwError(() => error));
 
-      await expect(service.streamSong(songId, undefined)).rejects.toThrow(
-        'Song not found',
+      const userId = 'test-user-4';
+      const artistId = 'test-artist-4';
+
+      await expect(
+        service.streamSong(songId, undefined, userId, artistId),
+      ).rejects.toThrow('Song not found');
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(
+        songId,
+        userId,
+        artistId,
       );
-      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(songId);
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/nonexistent-song',
         {
@@ -312,9 +350,16 @@ describe('SongsService', () => {
       mockHttpService.get.mockReturnValue(of(mockResponse));
       mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
 
-      await service.streamSong(songId, undefined);
+      const userId = 'test-user-5';
+      const artistId = 'test-artist-5';
 
-      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(songId);
+      await service.streamSong(songId, undefined, userId, artistId);
+
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(
+        songId,
+        userId,
+        artistId,
+      );
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/different-song-id-12345',
         {

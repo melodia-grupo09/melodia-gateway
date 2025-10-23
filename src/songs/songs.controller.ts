@@ -29,6 +29,7 @@ import { AxiosResponse } from 'axios';
 import type { Request, Response } from 'express';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
+import { PlaySongDTO } from './dto/play-song.dto';
 import { UploadSongDTO } from './dto/upload-song.dto';
 import { SongsService } from './songs.service';
 
@@ -136,25 +137,35 @@ export class SongsController {
     return this.songsService.searchSongs(query, limit, page);
   }
 
-  @Get('player/play/:songId')
+  @Post('player/play/:songId')
   @ApiOperation({ summary: 'Stream a song' })
   @ApiParam({
     name: 'songId',
     description: 'ID of the song to stream',
     type: String,
   })
+  @ApiBody({
+    description: 'User information for metrics tracking',
+    type: PlaySongDTO,
+  })
   @ApiResponse({ status: 200, description: 'Full song stream' })
   @ApiResponse({ status: 206, description: 'Partial song stream for seeking' })
   @ApiResponse({ status: 404, description: 'Song not found' })
   async streamSong(
     @Param('songId') songId: string,
+    @Body() playSongDto: PlaySongDTO,
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request,
   ) {
     try {
       const range = req.headers['range'] as string | string[] | undefined;
       const responseFromService: AxiosResponse<Readable> =
-        await this.songsService.streamSong(songId, range);
+        await this.songsService.streamSong(
+          songId,
+          range,
+          playSongDto.userId,
+          playSongDto.artistId,
+        );
 
       const headers = {
         'Content-Type': responseFromService.headers['content-type'] as string,

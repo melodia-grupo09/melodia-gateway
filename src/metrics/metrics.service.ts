@@ -142,16 +142,28 @@ export class MetricsService {
     }
   }
 
-  async recordSongPlay(songId: string): Promise<void> {
+  async recordSongPlay(
+    songId: string,
+    userId: string,
+    artistId?: string,
+  ): Promise<void> {
     try {
+      // The metrics service requires artistId and userId in the request body
+      const requestBody = {
+        artistId: artistId || 'unknown',
+        userId: userId,
+      };
+
       await firstValueFrom(
-        this.httpService.post(`/metrics/songs/${songId}/plays`),
+        this.httpService.post(`/metrics/songs/${songId}/plays`, requestBody),
       );
-      this.logger.log(`Song play recorded for songId: ${songId}`);
+      this.logger.log(
+        `Song play recorded for songId: ${songId}, userId: ${userId}`,
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        `Failed to record song play for songId: ${songId}: ${message}`,
+        `Failed to record song play for songId: ${songId}, userId: ${userId}: ${message}`,
       );
       // Don't throw error to avoid breaking the main flow
     }

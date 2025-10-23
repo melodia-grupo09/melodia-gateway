@@ -51,6 +51,8 @@ export class SongsService {
   async streamSong(
     songId: string,
     range: string | string[] | undefined,
+    userId: string,
+    artistId?: string,
   ): Promise<AxiosResponse<Readable>> {
     const headers: Record<string, string | string[]> = {};
     // Si el cliente pide un rango específico
@@ -63,8 +65,8 @@ export class SongsService {
       responseType: 'stream',
     };
 
-    // Record song play metrics
-    await this.metricsService.recordSongPlay(songId);
+    // Record song play metrics with user and artist information
+    await this.metricsService.recordSongPlay(songId, userId, artistId);
 
     return firstValueFrom(
       this.httpService.get<Readable>(`/songs/player/play/${songId}`, config),

@@ -382,10 +382,14 @@ describe('MetricsService', () => {
 
       mockHttpService.post.mockReturnValue(of(mockResponse));
 
-      await service.recordSongPlay(songId);
+      const userId = 'user123';
+      const artistId = 'artist456';
+
+      await service.recordSongPlay(songId, userId, artistId);
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
         `/metrics/songs/${songId}/plays`,
+        { artistId, userId },
       );
     });
 
@@ -395,11 +399,17 @@ describe('MetricsService', () => {
 
       mockHttpService.post.mockReturnValue(throwError(() => error));
 
+      const userId = 'user123';
+      const artistId = 'artist456';
+
       // Should not throw error, just log it
-      await expect(service.recordSongPlay(songId)).resolves.toBeUndefined();
+      await expect(
+        service.recordSongPlay(songId, userId, artistId),
+      ).resolves.toBeUndefined();
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
         `/metrics/songs/${songId}/plays`,
+        { artistId, userId },
       );
     });
   });
