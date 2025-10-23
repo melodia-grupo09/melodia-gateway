@@ -57,4 +57,15 @@ export class SongsService {
       this.httpService.get<Readable>(`/songs/player/play/${songId}`, config),
     );
   }
+
+  async uploadSong(formData: FormData): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.post('/songs/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
+    );
+    return response.data;
+  }
 }

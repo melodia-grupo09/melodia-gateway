@@ -1,6 +1,8 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { Readable } from 'stream';
+import { UploadSongDTO } from './dto/upload-song.dto';
 import { SongsController } from './songs.controller';
 import { SongsService } from './songs.service';
 
@@ -23,6 +25,7 @@ describe('SongsController', () => {
 
   const mockSongsService = {
     streamSong: jest.fn(),
+    uploadSong: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -41,7 +44,7 @@ describe('SongsController', () => {
 
     mockRequest = {
       headers: {},
-    } as unknown as Request;
+    } as Request;
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SongsController],
@@ -111,7 +114,7 @@ describe('SongsController', () => {
 
       const requestWithRange = {
         headers: { range: rangeHeader },
-      } as unknown as Request;
+      } as Request;
 
       mockSongsService.streamSong.mockResolvedValue(mockServiceResponse);
       mockPipeline.mockResolvedValue(undefined);
@@ -224,6 +227,92 @@ describe('SongsController', () => {
       expect(mockSend).toHaveBeenCalledWith(
         'An unexpected error occurred while streaming.',
       );
+    });
+  });
+
+  describe('uploadSong', () => {
+    it('should upload a song successfully', async () => {
+      const uploadDto: UploadSongDTO = {
+        title: 'Test Song',
+        artists: [
+          {
+            id: '123e4567-e89b-12d3-a456-426614174000',
+            name: 'Test Artist',
+          },
+        ],
+        albumId: 'album-123',
+      };
+
+      const mockFile = {
+        buffer: Buffer.from('test audio data'),
+        originalname: 'test-song.mp3',
+        mimetype: 'audio/mpeg',
+      };
+
+      const mockResponse = {
+        id: 'song-123',
+        title: 'Test Song',
+        message: 'Song uploaded successfully',
+      };
+
+      mockSongsService.uploadSong.mockResolvedValue(mockResponse);
+
+      const result: unknown = await controller.uploadSong(uploadDto, mockFile);
+
+      expect(mockSongsService.uploadSong).toHaveBeenCalledWith(
+        expect.any(FormData),
+      );
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should throw BadRequestException when file is missing', async () => {
+      const uploadDto: UploadSongDTO = {
+        title: 'Test Song',
+        artists: [
+          {
+            id: '123e4567-e89b-12d3-a456-426614174000',
+            name: 'Test Artist',
+          },
+        ],
+      };
+
+      await expect(controller.uploadSong(uploadDto, undefined)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(controller.uploadSong(uploadDto, undefined)).rejects.toThrow(
+        'File is required',
+      );
+    });
+
+    it('should handle upload without albumId', async () => {
+      const uploadDto: UploadSongDTO = {
+        title: 'Test Song',
+        artists: [
+          {
+            id: '123e4567-e89b-12d3-a456-426614174000',
+            name: 'Test Artist',
+          },
+        ],
+        // No albumId provided
+      };
+
+      const mockFile = {
+        buffer: Buffer.from('test audio data'),
+        originalname: 'test-song.mp3',
+        mimetype: 'audio/mpeg',
+      };
+
+      const mockResponse = {
+        id: 'song-123',
+        title: 'Test Song',
+        message: 'Song uploaded successfully',
+      };
+
+      mockSongsService.uploadSong.mockResolvedValue(mockResponse);
+
+      const result: unknown = await controller.uploadSong(uploadDto, mockFile);
+
+      expect(result).toEqual(mockResponse);
     });
   });
 });

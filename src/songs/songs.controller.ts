@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   DefaultValuePipe,
   Get,
@@ -7,11 +8,17 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Post,
   Query,
   Req,
   Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -22,6 +29,7 @@ import { AxiosResponse } from 'axios';
 import type { Request, Response } from 'express';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
+import { UploadSongDTO } from './dto/upload-song.dto';
 import { SongsService } from './songs.service';
 
 interface ErrorWithResponse {
@@ -29,6 +37,12 @@ interface ErrorWithResponse {
     status: number;
     data: unknown;
   };
+}
+
+interface UploadedFileData {
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
 }
 
 @ApiTags('songs')
@@ -171,5 +185,74 @@ export class SongsController {
         res.destroy();
       }
     }
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Upload a new song' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Upload a new song',
+    required: true,
+    schema: {
+      type: 'object',
+      properties: {
+        title: {
+          type: 'string',
+          description: 'Title of the song',
+          example: 'My Awesome Song',
+        },
+        artists: {
+          type: 'string',
+          description: 'List of artists (JSON string)',
+          example:
+            '[{"id":"123e4567-e89b-12d3-a456-426614174000","name":"Artist Name"}]',
+        },
+        albumId: {
+          type: 'string',
+          description: 'Album ID',
+          example: '123e4567-e89b-12d3-a456-426614174000',
+        },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'The song file to upload',
+        },
+      },
+      required: ['title', 'artists', 'file'],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Song uploaded successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Invalid data or file',
+  })
+  async uploadSong(
+    @Body() body: UploadSongDTO,
+    @UploadedFile() file?: UploadedFileData,
+  ): Promise<any> {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    const formData = new FormData();
+
+    // Add form fields
+    formData.append('title', body.title);
+    formData.append('artists', JSON.stringify(body.artists));
+    if (body.albumId) {
+      formData.append('albumId', body.albumId);
+    }
+
+    // Add file - create a proper blob from buffer
+    const blob = new Blob([new Uint8Array(file.buffer)], {
+      type: file.mimetype || 'audio/mpeg',
+    });
+    formData.append('file', blob, file.originalname || 'song.mp3');
+
+    return this.songsService.uploadSong(formData);
   }
 }
