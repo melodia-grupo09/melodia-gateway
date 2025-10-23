@@ -29,7 +29,6 @@ import { AxiosResponse } from 'axios';
 import type { Request, Response } from 'express';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
-import { PlaySongDTO } from './dto/play-song.dto';
 import { UploadSongDTO } from './dto/upload-song.dto';
 import { SongsService } from './songs.service';
 
@@ -137,35 +136,39 @@ export class SongsController {
     return this.songsService.searchSongs(query, limit, page);
   }
 
-  @Post('player/play/:songId')
+  @Get('player/play/:songId')
   @ApiOperation({ summary: 'Stream a song' })
   @ApiParam({
     name: 'songId',
     description: 'ID of the song to stream',
     type: String,
   })
-  @ApiBody({
-    description: 'User information for metrics tracking',
-    type: PlaySongDTO,
+  @ApiQuery({
+    name: 'userId',
+    description: 'ID of the user playing the song (for metrics)',
+    required: true,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'artistId',
+    description: 'ID of the artist (optional, for metrics)',
+    required: false,
+    type: String,
   })
   @ApiResponse({ status: 200, description: 'Full song stream' })
   @ApiResponse({ status: 206, description: 'Partial song stream for seeking' })
   @ApiResponse({ status: 404, description: 'Song not found' })
   async streamSong(
     @Param('songId') songId: string,
-    @Body() playSongDto: PlaySongDTO,
+    @Query('userId') userId: string,
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request,
+    @Query('artistId') artistId?: string,
   ) {
     try {
       const range = req.headers['range'] as string | string[] | undefined;
       const responseFromService: AxiosResponse<Readable> =
-        await this.songsService.streamSong(
-          songId,
-          range,
-          playSongDto.userId,
-          playSongDto.artistId,
-        );
+        await this.songsService.streamSong(songId, range, userId, artistId);
 
       const headers = {
         'Content-Type': responseFromService.headers['content-type'] as string,

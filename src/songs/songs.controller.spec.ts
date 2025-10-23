@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import type { Request, Response } from 'express';
 import { Readable } from 'stream';
 import { MetricsService } from '../metrics/metrics.service';
-import { PlaySongDTO } from './dto/play-song.dto';
 import { UploadSongDTO } from './dto/upload-song.dto';
 import { SongsController } from './songs.controller';
 import { SongsService } from './songs.service';
@@ -80,10 +79,8 @@ describe('SongsController', () => {
   describe('streamSong', () => {
     it('should stream a song successfully without range headers', async () => {
       const songId = 'song123';
-      const playDto: PlaySongDTO = {
-        userId: 'user123',
-        artistId: 'artist123',
-      };
+      const userId = 'user123';
+      const artistId = 'artist123';
       const mockStream = new Readable();
       const mockServiceResponse = {
         status: 200,
@@ -98,13 +95,19 @@ describe('SongsController', () => {
       mockSongsService.streamSong.mockResolvedValue(mockServiceResponse);
       mockPipeline.mockResolvedValue(undefined);
 
-      await controller.streamSong(songId, playDto, mockResponse, mockRequest);
+      await controller.streamSong(
+        songId,
+        userId,
+        mockResponse,
+        mockRequest,
+        artistId,
+      );
 
       expect(mockSongsService.streamSong).toHaveBeenCalledWith(
         songId,
         undefined,
-        'user123',
-        'artist123',
+        userId,
+        artistId,
       );
       expect(mockWriteHead).toHaveBeenCalledWith(200, {
         'Content-Type': 'audio/mpeg',
@@ -116,10 +119,8 @@ describe('SongsController', () => {
 
     it('should stream a song successfully with range headers', async () => {
       const songId = 'song456';
-      const playDto: PlaySongDTO = {
-        userId: 'user456',
-        artistId: 'artist456',
-      };
+      const userId = 'user456';
+      const artistId = 'artist456';
       const rangeHeader = 'bytes=0-1023';
       const mockStream = new Readable();
       const mockServiceResponse = {
@@ -142,16 +143,17 @@ describe('SongsController', () => {
 
       await controller.streamSong(
         songId,
-        playDto,
+        userId,
         mockResponse,
         requestWithRange,
+        artistId,
       );
 
       expect(mockSongsService.streamSong).toHaveBeenCalledWith(
         songId,
         rangeHeader,
-        'user456',
-        'artist456',
+        userId,
+        artistId,
       );
       expect(mockWriteHead).toHaveBeenCalledWith(206, {
         'Content-Type': 'audio/mpeg',
@@ -164,10 +166,8 @@ describe('SongsController', () => {
 
     it('should filter out null headers', async () => {
       const songId = 'song789';
-      const playDto: PlaySongDTO = {
-        userId: 'user789',
-        artistId: 'artist789',
-      };
+      const userId = 'user789';
+      const artistId = 'artist789';
       const mockStream = new Readable();
       const mockServiceResponse = {
         status: 200,
@@ -183,7 +183,13 @@ describe('SongsController', () => {
       mockSongsService.streamSong.mockResolvedValue(mockServiceResponse);
       mockPipeline.mockResolvedValue(undefined);
 
-      await controller.streamSong(songId, playDto, mockResponse, mockRequest);
+      await controller.streamSong(
+        songId,
+        userId,
+        mockResponse,
+        mockRequest,
+        artistId,
+      );
 
       expect(mockWriteHead).toHaveBeenCalledWith(200, {
         'Content-Type': 'audio/mpeg',
@@ -193,10 +199,8 @@ describe('SongsController', () => {
 
     it('should handle service error with response object', async () => {
       const songId = 'song404';
-      const playDto: PlaySongDTO = {
-        userId: 'user404',
-        artistId: 'artist404',
-      };
+      const userId = 'user404';
+      const artistId = 'artist404';
       const error = {
         response: {
           status: 404,
@@ -206,7 +210,13 @@ describe('SongsController', () => {
 
       mockSongsService.streamSong.mockRejectedValue(error);
 
-      await controller.streamSong(songId, playDto, mockResponse, mockRequest);
+      await controller.streamSong(
+        songId,
+        userId,
+        mockResponse,
+        mockRequest,
+        artistId,
+      );
 
       expect(mockStatus).toHaveBeenCalledWith(404);
       expect(mockSend).toHaveBeenCalledWith('Song not found');
@@ -214,15 +224,19 @@ describe('SongsController', () => {
 
     it('should handle generic error without response object', async () => {
       const songId = 'song500';
-      const playDto: PlaySongDTO = {
-        userId: 'user500',
-        artistId: 'artist500',
-      };
+      const userId = 'user500';
+      const artistId = 'artist500';
       const error = new Error('Generic error');
 
       mockSongsService.streamSong.mockRejectedValue(error);
 
-      await controller.streamSong(songId, playDto, mockResponse, mockRequest);
+      await controller.streamSong(
+        songId,
+        userId,
+        mockResponse,
+        mockRequest,
+        artistId,
+      );
 
       expect(mockStatus).toHaveBeenCalledWith(500);
       expect(mockSend).toHaveBeenCalledWith(
@@ -232,10 +246,8 @@ describe('SongsController', () => {
 
     it('should destroy response if headers already sent on error', async () => {
       const songId = 'song500';
-      const playDto: PlaySongDTO = {
-        userId: 'user500b',
-        artistId: 'artist500b',
-      };
+      const userId = 'user500b';
+      const artistId = 'artist500b';
       const error = new Error('Pipeline error');
 
       mockSongsService.streamSong.mockResolvedValue({
@@ -248,17 +260,21 @@ describe('SongsController', () => {
       mockResponse.headersSent = true;
       mockPipeline.mockRejectedValue(error);
 
-      await controller.streamSong(songId, playDto, mockResponse, mockRequest);
+      await controller.streamSong(
+        songId,
+        userId,
+        mockResponse,
+        mockRequest,
+        artistId,
+      );
 
       expect(mockDestroy).toHaveBeenCalled();
     });
 
     it('should handle pipeline errors when headers not sent', async () => {
       const songId = 'song500';
-      const playDto: PlaySongDTO = {
-        userId: 'user500c',
-        artistId: 'artist500c',
-      };
+      const userId = 'user500c';
+      const artistId = 'artist500c';
       const mockStream = new Readable();
       const mockServiceResponse = {
         status: 200,
@@ -269,7 +285,13 @@ describe('SongsController', () => {
       mockSongsService.streamSong.mockResolvedValue(mockServiceResponse);
       mockPipeline.mockRejectedValue(new Error('Pipeline failed'));
 
-      await controller.streamSong(songId, playDto, mockResponse, mockRequest);
+      await controller.streamSong(
+        songId,
+        userId,
+        mockResponse,
+        mockRequest,
+        artistId,
+      );
 
       expect(mockStatus).toHaveBeenCalledWith(500);
       expect(mockSend).toHaveBeenCalledWith(
