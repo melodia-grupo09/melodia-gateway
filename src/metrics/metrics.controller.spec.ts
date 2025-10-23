@@ -199,12 +199,6 @@ describe('MetricsController', () => {
 
   describe('getTopAlbums', () => {
     it('should return top albums with default limit', async () => {
-      const body = {
-        albumSongs: {
-          album1: ['song1', 'song2'],
-          album2: ['song3', 'song4'],
-        },
-      };
       const expectedResult = {
         albums: [
           { id: 'album1', title: 'Album 1', totalPlays: 1800 },
@@ -214,24 +208,14 @@ describe('MetricsController', () => {
 
       mockMetricsService.getTopAlbums.mockResolvedValue(expectedResult);
 
-      const result = await controller.getTopAlbums(body);
+      const result = await controller.getTopAlbums();
 
-      expect(mockMetricsService.getTopAlbums).toHaveBeenCalledWith(
-        undefined,
-        body.albumSongs,
-      );
+      expect(mockMetricsService.getTopAlbums).toHaveBeenCalledWith(undefined);
       expect(result).toBe(expectedResult);
     });
 
     it('should return top albums with custom limit', async () => {
       const limit = 3;
-      const body = {
-        albumSongs: {
-          album1: ['song1', 'song2'],
-          album2: ['song3', 'song4'],
-          album3: ['song5', 'song6'],
-        },
-      };
       const expectedResult = {
         albums: [
           { id: 'album1', title: 'Album 1', totalPlays: 1800 },
@@ -242,28 +226,18 @@ describe('MetricsController', () => {
 
       mockMetricsService.getTopAlbums.mockResolvedValue(expectedResult);
 
-      const result = await controller.getTopAlbums(body, limit);
+      const result = await controller.getTopAlbums(limit);
 
-      expect(mockMetricsService.getTopAlbums).toHaveBeenCalledWith(
-        limit,
-        body.albumSongs,
-      );
+      expect(mockMetricsService.getTopAlbums).toHaveBeenCalledWith(limit);
       expect(result).toBe(expectedResult);
     });
 
     it('should handle errors when getting top albums', async () => {
-      const body = {
-        albumSongs: {
-          album1: ['song1', 'song2'],
-        },
-      };
       const error = new Error('Service error');
 
       mockMetricsService.getTopAlbums.mockRejectedValue(error);
 
-      await expect(controller.getTopAlbums(body)).rejects.toThrow(
-        'Service error',
-      );
+      await expect(controller.getTopAlbums()).rejects.toThrow('Service error');
     });
   });
 });

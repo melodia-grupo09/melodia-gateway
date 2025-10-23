@@ -117,17 +117,14 @@ export class MetricsService {
     return response.data;
   }
 
-  async getTopAlbums(
-    limit?: number,
-    albumSongs?: Record<string, string[]>,
-  ): Promise<any> {
+  async getTopAlbums(limit?: number): Promise<any> {
     const params: Record<string, number> = {};
     if (limit !== undefined) {
       params.limit = limit;
     }
 
     const response = await firstValueFrom(
-      this.httpService.post('/metrics/albums/top', { albumSongs }, { params }),
+      this.httpService.get('/metrics/albums/top', { params }),
     );
     return response.data;
   }

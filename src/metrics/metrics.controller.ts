@@ -1,13 +1,6 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
-import {
-  ApiBody,
-  ApiOperation,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
-import { GetTopAlbumsDto } from './dto/get-top-albums.dto';
 import { MetricsService } from './metrics.service';
 
 @ApiTags('metrics')
@@ -139,7 +132,7 @@ export class MetricsController {
     return this.metricsService.getTopSongs(limit);
   }
 
-  @Post('albums/top')
+  @Get('albums/top')
   @ApiOperation({
     summary: 'Get top albums by plays',
     description: 'Retrieve the top albums based on total plays of their songs',
@@ -151,19 +144,11 @@ export class MetricsController {
     example: 10,
     description: 'Number of top albums to return (default: 10)',
   })
-  @ApiBody({
-    type: GetTopAlbumsDto,
-    description:
-      'Mapping of album IDs to their song IDs to calculate total plays',
-  })
   @ApiResponse({
     status: 200,
     description: 'Top albums retrieved successfully',
   })
-  async getTopAlbums(
-    @Body() body: GetTopAlbumsDto,
-    @Query('limit') limit?: number,
-  ): Promise<unknown> {
-    return this.metricsService.getTopAlbums(limit, body.albumSongs);
+  async getTopAlbums(@Query('limit') limit?: number): Promise<unknown> {
+    return this.metricsService.getTopAlbums(limit);
   }
 }

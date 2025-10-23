@@ -290,10 +290,6 @@ describe('MetricsService', () => {
 
   describe('getTopAlbums', () => {
     it('should return top albums without limit', async () => {
-      const albumSongs = {
-        album1: ['song1', 'song2'],
-        album2: ['song3', 'song4'],
-      };
       const mockData = {
         albums: [
           { id: 'album1', title: 'Album 1', totalPlays: 1800 },
@@ -301,26 +297,19 @@ describe('MetricsService', () => {
         ],
       };
 
-      mockHttpService.post.mockReturnValue(of({ data: mockData }));
+      mockHttpService.get.mockReturnValue(of({ data: mockData }));
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const result = await service.getTopAlbums(undefined, albumSongs);
+      const result = await service.getTopAlbums();
 
-      expect(mockHttpService.post).toHaveBeenCalledWith(
-        '/metrics/albums/top',
-        { albumSongs },
-        { params: {} },
-      );
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/albums/top', {
+        params: {},
+      });
       expect(result).toEqual(mockData);
     });
 
     it('should return top albums with limit', async () => {
       const limit = 3;
-      const albumSongs = {
-        album1: ['song1', 'song2'],
-        album2: ['song3', 'song4'],
-        album3: ['song5', 'song6'],
-      };
       const mockData = {
         albums: [
           { id: 'album1', title: 'Album 1', totalPlays: 1800 },
@@ -329,27 +318,22 @@ describe('MetricsService', () => {
         ],
       };
 
-      mockHttpService.post.mockReturnValue(of({ data: mockData }));
+      mockHttpService.get.mockReturnValue(of({ data: mockData }));
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const result = await service.getTopAlbums(limit, albumSongs);
+      const result = await service.getTopAlbums(limit);
 
-      expect(mockHttpService.post).toHaveBeenCalledWith(
-        '/metrics/albums/top',
-        { albumSongs },
-        { params: { limit } },
-      );
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/albums/top', {
+        params: { limit },
+      });
       expect(result).toEqual(mockData);
     });
 
     it('should handle errors when getting top albums', async () => {
-      const albumSongs = { album1: ['song1'] };
       const error = new Error('HTTP error');
-      mockHttpService.post.mockReturnValue(throwError(() => error));
+      mockHttpService.get.mockReturnValue(throwError(() => error));
 
-      await expect(service.getTopAlbums(undefined, albumSongs)).rejects.toThrow(
-        'HTTP error',
-      );
+      await expect(service.getTopAlbums()).rejects.toThrow('HTTP error');
     });
   });
 });
