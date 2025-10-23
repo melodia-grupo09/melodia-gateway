@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ArtistsController } from './artists.controller';
 import { ArtistsService } from './artists.service';
-import { CreateArtistDto } from './dto/create-artist.dto';
 import { CreateReleaseDto } from './dto/create-release.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { UpdateReleaseDto } from './dto/update-release.dto';
@@ -10,7 +9,6 @@ describe('ArtistsController', () => {
   let controller: ArtistsController;
 
   const mockArtistsService = {
-    createArtist: jest.fn(),
     getArtist: jest.fn(),
     updateArtist: jest.fn(),
     deleteArtist: jest.fn(),
@@ -43,62 +41,6 @@ describe('ArtistsController', () => {
 
     // Clear all mocks before each test
     jest.clearAllMocks();
-  });
-
-  describe('createArtist', () => {
-    it('should create an artist successfully', async () => {
-      const createArtistDto: CreateArtistDto = {
-        name: 'Test Artist',
-      };
-
-      const mockResult = {
-        id: '123',
-        name: 'Test Artist',
-        createdAt: '2024-01-01T00:00:00Z',
-      };
-
-      mockArtistsService.createArtist.mockResolvedValue(mockResult);
-
-      const result = (await controller.createArtist(createArtistDto)) as {
-        id: string;
-        name: string;
-        createdAt: string;
-      };
-
-      expect(mockArtistsService.createArtist).toHaveBeenCalled();
-      expect(result).toEqual(mockResult);
-    });
-
-    it('should create an artist with image', async () => {
-      const createArtistDto: CreateArtistDto = {
-        name: 'Test Artist',
-      };
-
-      const mockImage = {
-        buffer: Buffer.from('test'),
-        originalname: 'test.jpg',
-      };
-
-      const mockResult = {
-        id: '123',
-        name: 'Test Artist',
-        imageUrl: 'http://example.com/image.jpg',
-      };
-
-      mockArtistsService.createArtist.mockResolvedValue(mockResult);
-
-      const result = (await controller.createArtist(
-        createArtistDto,
-        mockImage,
-      )) as {
-        id: string;
-        name: string;
-        imageUrl: string;
-      };
-
-      expect(mockArtistsService.createArtist).toHaveBeenCalled();
-      expect(result).toEqual(mockResult);
-    });
   });
 
   describe('getArtist', () => {

@@ -24,7 +24,6 @@ import {
 } from '@nestjs/swagger';
 import { HttpErrorInterceptor } from '../users/interceptors/http-error.interceptor';
 import { ArtistsService } from './artists.service';
-import { CreateArtistDto } from './dto/create-artist.dto';
 import { CreateReleaseDto } from './dto/create-release.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { UpdateReleaseDto } from './dto/update-release.dto';
@@ -34,62 +33,6 @@ import { UpdateReleaseDto } from './dto/update-release.dto';
 @Controller('artists')
 export class ArtistsController {
   constructor(private readonly artistsService: ArtistsService) {}
-
-  @Post()
-  @UseInterceptors(FileInterceptor('image'))
-  @ApiOperation({ summary: 'Create a new artist' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    description: 'Artist data with optional image',
-    schema: {
-      type: 'object',
-      properties: {
-        name: {
-          type: 'string',
-          description: 'The name of the artist',
-          example: 'J Balvin',
-        },
-        image: {
-          type: 'string',
-          format: 'binary',
-          description: 'Artist profile image',
-        },
-      },
-      required: ['name'],
-    },
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Artist created successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Artist name already exists',
-  })
-  async createArtist(
-    @Body() createArtistDto: CreateArtistDto,
-    @UploadedFile() image?: any,
-  ): Promise<any> {
-    const formData = new FormData();
-    formData.append('name', createArtistDto.name);
-
-    if (
-      image &&
-      typeof image === 'object' &&
-      'buffer' in image &&
-      'originalname' in image
-    ) {
-      const imageFile = image as { buffer: Buffer; originalname: string };
-      const blob = new Blob([new Uint8Array(imageFile.buffer)]);
-      formData.append('image', blob, imageFile.originalname);
-    }
-
-    return this.artistsService.createArtist(formData);
-  }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get artist by ID' })
