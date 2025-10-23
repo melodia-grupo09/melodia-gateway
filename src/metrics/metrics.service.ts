@@ -124,7 +124,7 @@ export class MetricsService {
     }
 
     const response = await firstValueFrom(
-      this.httpService.get('/metrics/albums/top', { params }),
+      this.httpService.get('/metrics/albums', { params }),
     );
     return response.data;
   }

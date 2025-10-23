@@ -311,7 +311,7 @@ describe('MetricsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getTopAlbums();
 
-      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/albums/top', {
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/albums', {
         params: {},
       });
       expect(result).toEqual(mockData);
@@ -332,7 +332,7 @@ describe('MetricsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getTopAlbums(limit);
 
-      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/albums/top', {
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/albums', {
         params: { limit },
       });
       expect(result).toEqual(mockData);
