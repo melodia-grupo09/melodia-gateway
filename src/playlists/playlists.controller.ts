@@ -118,6 +118,27 @@ export class PlaylistsController {
     return this.playlistsService.reorderLikedSongs(userId, songPositions);
   }
 
+  @Get('liked-songs/is-liked')
+  @ApiOperation({
+    summary: 'Check if song is liked',
+    description: "Check if a song is in the user's liked songs collection",
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns true if the song is liked, false otherwise',
+    schema: {
+      type: 'boolean',
+    },
+  })
+  @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
+  @ApiHeader({ name: 'song-id', description: 'Song ID', required: true })
+  async isLikedSong(
+    @Headers('user-id') userId: string,
+    @Headers('song-id') songId: string,
+  ) {
+    return this.playlistsService.isLikedSong(userId, songId);
+  }
+
   // History endpoints (must be before dynamic routes)
   @Get('history')
   @ApiOperation({ summary: 'Get playback history' })

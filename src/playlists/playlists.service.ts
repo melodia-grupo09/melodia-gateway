@@ -111,6 +111,15 @@ export class PlaylistsService {
     return response.data;
   }
 
+  async isLikedSong(userId: string, songId: string) {
+    const response = await firstValueFrom(
+      this.httpService.get('/liked-songs/is-liked', {
+        headers: { 'user-id': userId, 'song-id': songId },
+      }),
+    );
+    return response.data;
+  }
+
   // History endpoints
   async getHistory(userId: string) {
     const response = await firstValueFrom(

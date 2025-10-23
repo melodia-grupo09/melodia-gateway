@@ -359,6 +359,50 @@ describe('PlaylistsService', () => {
     });
   });
 
+  describe('isLikedSong', () => {
+    it('should check if song is liked successfully', async () => {
+      const userId = 'user-123';
+      const songId = 'song-123';
+
+      const mockResponse = {
+        data: true,
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.isLikedSong(userId, songId);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        '/liked-songs/is-liked',
+        {
+          headers: { 'user-id': userId, 'song-id': songId },
+        },
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should return false when song is not liked', async () => {
+      const userId = 'user-123';
+      const songId = 'song-456';
+
+      const mockResponse = {
+        data: false,
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.isLikedSong(userId, songId);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        '/liked-songs/is-liked',
+        {
+          headers: { 'user-id': userId, 'song-id': songId },
+        },
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('getHistory', () => {
     it('should get playback history successfully', async () => {
       const userId = 'user-123';

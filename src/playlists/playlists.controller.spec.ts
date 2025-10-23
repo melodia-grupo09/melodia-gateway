@@ -34,6 +34,7 @@ describe('PlaylistsController', () => {
     addLikedSong: jest.fn(),
     removeLikedSong: jest.fn(),
     reorderLikedSongs: jest.fn(),
+    isLikedSong: jest.fn(),
     // History methods
     getHistory: jest.fn(),
     addToHistory: jest.fn(),
@@ -358,6 +359,40 @@ describe('PlaylistsController', () => {
       expect(mockPlaylistsService.reorderLikedSongs).toHaveBeenCalledWith(
         userId,
         songPositions,
+      );
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('isLikedSong', () => {
+    it('should check if song is liked successfully', async () => {
+      const userId = 'user-123';
+      const songId = 'song-123';
+      const expectedResult = true;
+
+      mockPlaylistsService.isLikedSong.mockResolvedValue(expectedResult);
+
+      const result = await controller.isLikedSong(userId, songId);
+
+      expect(mockPlaylistsService.isLikedSong).toHaveBeenCalledWith(
+        userId,
+        songId,
+      );
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should return false when song is not liked', async () => {
+      const userId = 'user-123';
+      const songId = 'song-456';
+      const expectedResult = false;
+
+      mockPlaylistsService.isLikedSong.mockResolvedValue(expectedResult);
+
+      const result = await controller.isLikedSong(userId, songId);
+
+      expect(mockPlaylistsService.isLikedSong).toHaveBeenCalledWith(
+        userId,
+        songId,
       );
       expect(result).toEqual(expectedResult);
     });
