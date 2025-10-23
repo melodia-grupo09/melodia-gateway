@@ -3,10 +3,19 @@ import { Injectable } from '@nestjs/common';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
 import { Readable } from 'stream';
+import { MetricsService } from '../metrics/metrics.service';
+
+interface UploadResponse {
+  id?: string;
+  [key: string]: unknown;
+}
 
 @Injectable()
 export class SongsService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly metricsService: MetricsService,
+  ) {}
 
   async getSongById(songId: string): Promise<any> {
     const response = await firstValueFrom(
@@ -53,6 +62,10 @@ export class SongsService {
       headers,
       responseType: 'stream',
     };
+
+    // Record song play metrics
+    await this.metricsService.recordSongPlay(songId);
+
     return firstValueFrom(
       this.httpService.get<Readable>(`/songs/player/play/${songId}`, config),
     );
@@ -60,12 +73,18 @@ export class SongsService {
 
   async uploadSong(formData: FormData): Promise<any> {
     const response = await firstValueFrom(
-      this.httpService.post('/songs/upload', formData, {
+      this.httpService.post<UploadResponse>('/songs/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       }),
     );
+
+    // Record song upload metrics if we have a song ID in the response
+    if (response.data?.id) {
+      await this.metricsService.recordSongUpload(response.data.id);
+    }
+
     return response.data;
   }
 }

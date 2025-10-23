@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AxiosResponse } from 'axios';
 import { of, throwError } from 'rxjs';
 import { Readable } from 'stream';
+import { MetricsService } from '../metrics/metrics.service';
 import { SongsService } from './songs.service';
 
 describe('SongsService', () => {
@@ -10,6 +11,12 @@ describe('SongsService', () => {
 
   const mockHttpService = {
     get: jest.fn(),
+    post: jest.fn(),
+  };
+
+  const mockMetricsService = {
+    recordSongPlay: jest.fn(),
+    recordSongUpload: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -19,6 +26,10 @@ describe('SongsService', () => {
         {
           provide: HttpService,
           useValue: mockHttpService,
+        },
+        {
+          provide: MetricsService,
+          useValue: mockMetricsService,
         },
       ],
     }).compile();
@@ -47,10 +58,12 @@ describe('SongsService', () => {
       } as unknown as AxiosResponse<Readable>;
 
       mockHttpService.get.mockReturnValue(of(mockResponse));
+      mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
 
       const result = await service.streamSong(songId, undefined);
 
       expect(result).toEqual(mockResponse);
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(songId);
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/song123',
         {
@@ -77,10 +90,12 @@ describe('SongsService', () => {
       } as unknown as AxiosResponse<Readable>;
 
       mockHttpService.get.mockReturnValue(of(mockResponse));
+      mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
 
       const result = await service.streamSong(songId, range);
 
       expect(result).toEqual(mockResponse);
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(songId);
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/song456',
         {
@@ -104,10 +119,12 @@ describe('SongsService', () => {
       } as unknown as AxiosResponse<Readable>;
 
       mockHttpService.get.mockReturnValue(of(mockResponse));
+      mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
 
       const result = await service.streamSong(songId, rangeArray);
 
       expect(result).toEqual(mockResponse);
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(songId);
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/song789',
         {
@@ -121,11 +138,13 @@ describe('SongsService', () => {
       const songId = 'nonexistent-song';
       const error = new Error('Song not found');
 
+      mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
       mockHttpService.get.mockReturnValue(throwError(() => error));
 
       await expect(service.streamSong(songId, undefined)).rejects.toThrow(
         'Song not found',
       );
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(songId);
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/nonexistent-song',
         {
@@ -146,9 +165,11 @@ describe('SongsService', () => {
       } as unknown as AxiosResponse<Readable>;
 
       mockHttpService.get.mockReturnValue(of(mockResponse));
+      mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
 
       await service.streamSong(songId, undefined);
 
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(songId);
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/different-song-id-12345',
         {
@@ -156,6 +177,82 @@ describe('SongsService', () => {
           responseType: 'stream',
         },
       );
+    });
+  });
+
+  describe('uploadSong', () => {
+    it('should successfully upload a song and record metrics', async () => {
+      const mockFormData = new FormData();
+      const mockResponse = {
+        data: {
+          id: 'new-song-123',
+          title: 'Test Song',
+          message: 'Song uploaded successfully',
+        },
+        status: 201,
+        statusText: 'Created',
+        headers: {},
+      } as unknown as AxiosResponse;
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+      mockMetricsService.recordSongUpload.mockResolvedValue(undefined);
+
+      const result = await service.uploadSong(mockFormData);
+
+      expect(result).toEqual(mockResponse.data);
+      expect(mockMetricsService.recordSongUpload).toHaveBeenCalledWith(
+        'new-song-123',
+      );
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        '/songs/upload',
+        mockFormData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+    });
+
+    it('should upload song without recording metrics when no id in response', async () => {
+      const mockFormData = new FormData();
+      const mockResponse = {
+        data: {
+          message: 'Song uploaded successfully',
+          // No id in response
+        },
+        status: 201,
+        statusText: 'Created',
+        headers: {},
+      } as unknown as AxiosResponse;
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = await service.uploadSong(mockFormData);
+
+      expect(result).toEqual(mockResponse.data);
+      expect(mockMetricsService.recordSongUpload).not.toHaveBeenCalled();
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        '/songs/upload',
+        mockFormData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+    });
+
+    it('should handle upload errors', async () => {
+      const mockFormData = new FormData();
+      const error = new Error('Upload failed');
+
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(service.uploadSong(mockFormData)).rejects.toThrow(
+        'Upload failed',
+      );
+      expect(mockMetricsService.recordSongUpload).not.toHaveBeenCalled();
     });
   });
 });

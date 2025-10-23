@@ -2,6 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import type { Request, Response } from 'express';
 import { Readable } from 'stream';
+import { MetricsService } from '../metrics/metrics.service';
 import { UploadSongDTO } from './dto/upload-song.dto';
 import { SongsController } from './songs.controller';
 import { SongsService } from './songs.service';
@@ -28,6 +29,11 @@ describe('SongsController', () => {
     uploadSong: jest.fn(),
   };
 
+  const mockMetricsService = {
+    recordSongPlay: jest.fn(),
+    recordSongUpload: jest.fn(),
+  };
+
   beforeEach(async () => {
     mockWriteHead = jest.fn();
     mockStatus = jest.fn().mockReturnThis();
@@ -52,6 +58,10 @@ describe('SongsController', () => {
         {
           provide: SongsService,
           useValue: mockSongsService,
+        },
+        {
+          provide: MetricsService,
+          useValue: mockMetricsService,
         },
       ],
     }).compile();

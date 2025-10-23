@@ -15,9 +15,9 @@ export class MetricsService {
       );
       this.logger.log(`User registration recorded for userId: ${userId}`);
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        `Failed to record user registration for userId: ${userId}: ${error?.message || error}`,
+        `Failed to record user registration for userId: ${userId}: ${message}`,
       );
       // Don't throw error to avoid breaking the main flow
     }
@@ -30,9 +30,9 @@ export class MetricsService {
       );
       this.logger.log(`User login recorded for userId: ${userId}`);
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        `Failed to record user login for userId: ${userId}: ${error?.message || error}`,
+        `Failed to record user login for userId: ${userId}: ${message}`,
       );
       // Don't throw error to avoid breaking the main flow
     }
@@ -45,9 +45,9 @@ export class MetricsService {
       );
       this.logger.log(`User activity recorded for userId: ${userId}`);
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        `Failed to record user activity for userId: ${userId}: ${error?.message || error}`,
+        `Failed to record user activity for userId: ${userId}: ${message}`,
       );
       // Don't throw error to avoid breaking the main flow
     }
@@ -61,9 +61,9 @@ export class MetricsService {
         `User activity tracked for userId: ${userId}${action ? ` (${action})` : ''}`,
       );
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        `Failed to track user activity for userId: ${userId}${action ? ` (${action})` : ''}: ${error?.message || error}`,
+        `Failed to track user activity for userId: ${userId}${action ? ` (${action})` : ''}: ${message}`,
       );
     }
   }
@@ -127,5 +127,33 @@ export class MetricsService {
       this.httpService.get('/metrics/albums/top', { params }),
     );
     return response.data;
+  }
+
+  async recordSongUpload(songId: string): Promise<void> {
+    try {
+      await firstValueFrom(this.httpService.post(`/metrics/songs/${songId}`));
+      this.logger.log(`Song upload recorded for songId: ${songId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to record song upload for songId: ${songId}: ${message}`,
+      );
+      // Don't throw error to avoid breaking the main flow
+    }
+  }
+
+  async recordSongPlay(songId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.httpService.post(`/metrics/songs/${songId}/plays`),
+      );
+      this.logger.log(`Song play recorded for songId: ${songId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to record song play for songId: ${songId}: ${message}`,
+      );
+      // Don't throw error to avoid breaking the main flow
+    }
   }
 }
