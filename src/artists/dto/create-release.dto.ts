@@ -6,7 +6,6 @@ import {
   IsOptional,
   IsString,
   IsUrl,
-  IsUUID,
 } from 'class-validator';
 
 export class CreateReleaseDto {
@@ -45,11 +44,11 @@ export class CreateReleaseDto {
   coverUrl?: string;
 
   @ApiProperty({
-    description: 'Artist ID who owns this release',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'Artist ID who owns this release (Firebase UID or UUID)',
+    example: 'BkmRgBIizfWC7MaFVhyNHRTRa4A2',
   })
   @IsNotEmpty()
-  @IsUUID()
+  @IsString()
   artistId: string;
 
   @ApiProperty({
