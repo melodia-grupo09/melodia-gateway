@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { MetricsService } from '../metrics/metrics.service';
 import { ArtistsController } from './artists.controller';
 import { ArtistsService } from './artists.service';
 import { CreateReleaseDto } from './dto/create-release.dto';
@@ -19,11 +20,17 @@ describe('ArtistsController', () => {
     getArtistReleases: jest.fn(),
     createRelease: jest.fn(),
     getArtistRelease: jest.fn(),
+    getReleaseById: jest.fn(),
     updateRelease: jest.fn(),
     deleteRelease: jest.fn(),
     updateReleaseCover: jest.fn(),
     addSongsToRelease: jest.fn(),
     removeSongsFromRelease: jest.fn(),
+  };
+
+  const mockMetricsService = {
+    recordAlbumLike: jest.fn(),
+    recordAlbumShare: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -33,6 +40,10 @@ describe('ArtistsController', () => {
         {
           provide: ArtistsService,
           useValue: mockArtistsService,
+        },
+        {
+          provide: MetricsService,
+          useValue: mockMetricsService,
         },
       ],
     }).compile();
@@ -407,6 +418,44 @@ describe('ArtistsController', () => {
         songData,
       );
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('likeAlbum', () => {
+    it('should like an album', async () => {
+      const artistId = '123';
+      const releaseId = 'release-123';
+
+      const mockReleaseData = { id: releaseId, title: 'Test Album' };
+      mockArtistsService.getReleaseById.mockResolvedValue(mockReleaseData);
+      mockMetricsService.recordAlbumLike.mockResolvedValue(undefined);
+
+      const result = await controller.likeAlbum(artistId, releaseId);
+
+      expect(mockArtistsService.getReleaseById).toHaveBeenCalledWith(releaseId);
+      expect(mockMetricsService.recordAlbumLike).toHaveBeenCalledWith(
+        releaseId,
+      );
+      expect(result).toEqual({ message: 'Album like recorded successfully' });
+    });
+  });
+
+  describe('shareAlbum', () => {
+    it('should share an album', async () => {
+      const artistId = '123';
+      const releaseId = 'release-123';
+
+      const mockReleaseData = { id: releaseId, title: 'Test Album' };
+      mockArtistsService.getReleaseById.mockResolvedValue(mockReleaseData);
+      mockMetricsService.recordAlbumShare.mockResolvedValue(undefined);
+
+      const result = await controller.shareAlbum(artistId, releaseId);
+
+      expect(mockArtistsService.getReleaseById).toHaveBeenCalledWith(releaseId);
+      expect(mockMetricsService.recordAlbumShare).toHaveBeenCalledWith(
+        releaseId,
+      );
+      expect(result).toEqual({ message: 'Album share recorded successfully' });
     });
   });
 });

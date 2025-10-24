@@ -7,8 +7,9 @@ import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
-import { UsersModule } from '../users/users.module';
+import { MetricsModule } from '../metrics/metrics.module';
 import { RegisterUserDto } from './dto/register-user.dto';
+import { UsersModule } from './users.module';
 import { UsersService } from './users.service';
 
 interface ErrorResponse {
@@ -97,6 +98,7 @@ describe('Users Registration', () => {
           isGlobal: true,
           envFilePath: '.env.test',
         }),
+        MetricsModule,
         UsersModule,
       ],
     })

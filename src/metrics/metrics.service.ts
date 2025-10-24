@@ -262,4 +262,34 @@ export class MetricsService {
       // Don't throw error to avoid breaking the main flow
     }
   }
+
+  async recordAlbumLike(albumId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.httpService.post(`/metrics/albums/${albumId}/likes`),
+      );
+      this.logger.log(`Album like recorded for albumId: ${albumId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to record album like for albumId: ${albumId}: ${message}`,
+      );
+      // Don't throw error to avoid breaking the main flow
+    }
+  }
+
+  async recordAlbumShare(albumId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.httpService.post(`/metrics/albums/${albumId}/shares`),
+      );
+      this.logger.log(`Album share recorded for albumId: ${albumId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to record album share for albumId: ${albumId}: ${message}`,
+      );
+      // Don't throw error to avoid breaking the main flow
+    }
+  }
 }

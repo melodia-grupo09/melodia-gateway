@@ -23,6 +23,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { MetricsService } from '../metrics/metrics.service';
 import { HttpErrorInterceptor } from '../users/interceptors/http-error.interceptor';
 import { ArtistsService } from './artists.service';
 import { CreateReleaseDto } from './dto/create-release.dto';
@@ -33,7 +34,10 @@ import { UpdateReleaseDto } from './dto/update-release.dto';
 @UseInterceptors(HttpErrorInterceptor)
 @Controller('artists')
 export class ArtistsController {
-  constructor(private readonly artistsService: ArtistsService) {}
+  constructor(
+    private readonly artistsService: ArtistsService,
+    private readonly metricsService: MetricsService,
+  ) {}
 
   @Get(':id')
   @ApiOperation({ summary: 'Get artist by ID' })
@@ -607,6 +611,71 @@ export class ArtistsController {
       releaseId,
       songData,
     );
+  }
+
+  @Post(':artistId/releases/:releaseId/like')
+  @ApiOperation({ summary: 'Like an album/release' })
+  @ApiParam({
+    name: 'artistId',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiParam({
+    name: 'releaseId',
+    description: 'Release/Album UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Album like recorded successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist or release not found',
+  })
+  async likeAlbum(
+    @Param('artistId') artistId: string,
+    @Param('releaseId') releaseId: string,
+  ): Promise<{ message: string }> {
+    // Verify the release exists for the artist
+    await this.artistsService.getReleaseById(releaseId);
+
+    await this.metricsService.recordAlbumLike(releaseId);
+
+    return { message: 'Album like recorded successfully' };
+  }
+
+  @Post(':artistId/releases/:releaseId/share')
+  @ApiOperation({ summary: 'Share an album/release' })
+  @ApiParam({
+    name: 'artistId',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiParam({
+    name: 'releaseId',
+    description: 'Release/Album UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Album share recorded successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist or release not found',
+  })
+  async shareAlbum(
+    @Param('artistId') artistId: string,
+    @Param('releaseId') releaseId: string,
+  ): Promise<{ message: string }> {
+    // Verify the release exists for the artist
+    await this.artistsService.getReleaseById(releaseId);
+
+    // Record the share in metrics service
+    await this.metricsService.recordAlbumShare(releaseId);
+
+    return { message: 'Album share recorded successfully' };
   }
 
   @Patch(':id/follow')
