@@ -144,4 +144,11 @@ export class ArtistsService {
     );
     return response.data;
   }
+
+  async getReleaseById(releaseId: string): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.get(`/releases/${releaseId}`),
+    );
+    return response.data;
+  }
 }

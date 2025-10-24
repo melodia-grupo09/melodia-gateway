@@ -2,6 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { of, throwError } from 'rxjs';
+import { ArtistsService } from '../artists/artists.service';
 import { MetricsService } from './metrics.service';
 
 describe('MetricsService', () => {
@@ -10,6 +11,10 @@ describe('MetricsService', () => {
   const mockHttpService = {
     post: jest.fn(),
     get: jest.fn(),
+  };
+
+  const mockArtistsService = {
+    getReleaseById: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -22,6 +27,10 @@ describe('MetricsService', () => {
         {
           provide: HttpService,
           useValue: mockHttpService,
+        },
+        {
+          provide: ArtistsService,
+          useValue: mockArtistsService,
         },
       ],
     }).compile();
@@ -298,44 +307,82 @@ describe('MetricsService', () => {
   });
 
   describe('getTopAlbums', () => {
-    it('should return top albums without limit', async () => {
-      const mockData = {
-        albums: [
-          { id: 'album1', title: 'Album 1', totalPlays: 1800 },
-          { id: 'album2', title: 'Album 2', totalPlays: 1000 },
-        ],
+    it('should return enhanced top albums without limit', async () => {
+      const mockAlbumsData = [
+        { albumId: 'album1', likes: 10, shares: 5 },
+        { albumId: 'album2', likes: 8, shares: 3 },
+      ];
+
+      const mockReleaseInfo1 = {
+        id: 'album1',
+        title: 'Album 1',
+        artist: { name: 'Artist 1' },
+        coverUrl: 'cover1.jpg',
       };
 
-      mockHttpService.get.mockReturnValue(of({ data: mockData }));
+      const mockReleaseInfo2 = {
+        id: 'album2',
+        title: 'Album 2',
+        artist: { name: 'Artist 2' },
+        coverUrl: 'cover2.jpg',
+      };
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      mockHttpService.get.mockReturnValue(of({ data: mockAlbumsData }));
+      mockArtistsService.getReleaseById
+        .mockResolvedValueOnce(mockReleaseInfo1)
+        .mockResolvedValueOnce(mockReleaseInfo2);
+
       const result = await service.getTopAlbums();
 
       expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/albums', {
         params: {},
       });
-      expect(result).toEqual(mockData);
+      expect(mockArtistsService.getReleaseById).toHaveBeenCalledWith('album1');
+      expect(mockArtistsService.getReleaseById).toHaveBeenCalledWith('album2');
+      expect(result).toEqual([
+        { ...mockAlbumsData[0], ...mockReleaseInfo1 },
+        { ...mockAlbumsData[1], ...mockReleaseInfo2 },
+      ]);
     });
 
-    it('should return top albums with limit', async () => {
-      const limit = 3;
-      const mockData = {
-        albums: [
-          { id: 'album1', title: 'Album 1', totalPlays: 1800 },
-          { id: 'album2', title: 'Album 2', totalPlays: 1000 },
-          { id: 'album3', title: 'Album 3', totalPlays: 800 },
-        ],
+    it('should return enhanced top albums with limit', async () => {
+      const limit = 1;
+      const mockAlbumsData = [{ albumId: 'album1', likes: 10, shares: 5 }];
+
+      const mockReleaseInfo = {
+        id: 'album1',
+        title: 'Album 1',
+        artist: { name: 'Artist 1' },
+        coverUrl: 'cover1.jpg',
       };
 
-      mockHttpService.get.mockReturnValue(of({ data: mockData }));
+      mockHttpService.get.mockReturnValue(of({ data: mockAlbumsData }));
+      mockArtistsService.getReleaseById.mockResolvedValue(mockReleaseInfo);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getTopAlbums(limit);
 
       expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/albums', {
         params: { limit },
       });
-      expect(result).toEqual(mockData);
+      expect(mockArtistsService.getReleaseById).toHaveBeenCalledWith('album1');
+      expect(result).toEqual([{ ...mockAlbumsData[0], ...mockReleaseInfo }]);
+    });
+
+    it('should handle errors when getting release info and return original album data', async () => {
+      const mockAlbumsData = [{ albumId: 'album1', likes: 10, shares: 5 }];
+
+      mockHttpService.get.mockReturnValue(of({ data: mockAlbumsData }));
+      mockArtistsService.getReleaseById.mockRejectedValue(
+        new Error('Release not found'),
+      );
+
+      const result = await service.getTopAlbums();
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/albums', {
+        params: {},
+      });
+      expect(mockArtistsService.getReleaseById).toHaveBeenCalledWith('album1');
+      expect(result).toEqual(mockAlbumsData);
     });
 
     it('should handle errors when getting top albums', async () => {

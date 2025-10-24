@@ -1,12 +1,16 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { ArtistsService } from '../artists/artists.service';
 
 @Injectable()
 export class MetricsService {
   private readonly logger = new Logger(MetricsService.name);
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly artistsService: ArtistsService,
+  ) {}
 
   async recordUserRegistration(userId: string): Promise<void> {
     try {
@@ -117,7 +121,7 @@ export class MetricsService {
     return response.data;
   }
 
-  async getTopAlbums(limit?: number): Promise<any> {
+  async getTopAlbums(limit?: number): Promise<unknown[]> {
     const params: Record<string, number> = {};
     if (limit !== undefined) {
       params.limit = limit;
@@ -126,7 +130,70 @@ export class MetricsService {
     const response = await firstValueFrom(
       this.httpService.get('/metrics/albums', { params }),
     );
-    return response.data;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const topAlbums: unknown[] = response.data;
+
+    // Ensure topAlbums is an array
+    if (!Array.isArray(topAlbums)) {
+      this.logger.warn(
+        'Expected topAlbums to be an array, received:',
+        typeof topAlbums,
+      );
+      return [];
+    }
+
+    // Enhance each album with additional release information
+    const enhancedAlbums = await Promise.allSettled(
+      topAlbums.map(async (album: unknown) => {
+        try {
+          // Type guard to ensure album has albumId property
+          if (!album || typeof album !== 'object' || !('albumId' in album)) {
+            this.logger.warn('Invalid album object, missing albumId');
+            return album;
+          }
+
+          const albumWithId = album as { albumId: string };
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          const releaseInfo = await this.artistsService.getReleaseById(
+            albumWithId.albumId,
+          );
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return {
+            ...album,
+            ...releaseInfo,
+          };
+        } catch (error) {
+          // Type guard for album to access albumId safely
+          const albumId =
+            album && typeof album === 'object' && 'albumId' in album
+              ? (album as { albumId: string }).albumId
+              : 'unknown';
+
+          this.logger.warn(
+            `Failed to fetch release info for album ${albumId}: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
+          // Return original album data if release info fetch fails
+          return album;
+        }
+      }),
+    );
+
+    // Extract fulfilled values and handle any rejections
+    return enhancedAlbums
+      .map((result) => {
+        if (result.status === 'fulfilled') {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return result.value;
+        } else {
+          this.logger.error(`Promise rejected: ${String(result.reason)}`);
+          return null;
+        }
+      })
+      .filter((item): item is NonNullable<unknown> => item !== null);
   }
 
   async recordSongUpload(songId: string): Promise<void> {
