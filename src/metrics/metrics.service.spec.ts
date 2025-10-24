@@ -391,6 +391,63 @@ describe('MetricsService', () => {
 
       await expect(service.getTopAlbums()).rejects.toThrow('HTTP error');
     });
+
+    it('should handle non-array response from metrics service', async () => {
+      const mockNonArrayData = { message: 'No albums found' };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockNonArrayData }));
+
+      const result = await service.getTopAlbums();
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/albums', {
+        params: {},
+      });
+      expect(result).toEqual([]);
+    });
+
+    it('should handle invalid album objects missing albumId', async () => {
+      const mockAlbumsData = [
+        { likes: 10, shares: 5 }, // Missing albumId
+        { albumId: 'album2', likes: 8, shares: 3 },
+      ];
+
+      const mockReleaseInfo = {
+        id: 'album2',
+        title: 'Album 2',
+        artist: { name: 'Artist 2' },
+      };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockAlbumsData }));
+      mockArtistsService.getReleaseById.mockResolvedValue(mockReleaseInfo);
+
+      const result = await service.getTopAlbums();
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/albums', {
+        params: {},
+      });
+      expect(mockArtistsService.getReleaseById).toHaveBeenCalledWith('album2');
+      expect(result).toEqual([
+        { likes: 10, shares: 5 }, // Original invalid object returned as-is
+        { ...mockAlbumsData[1], ...mockReleaseInfo },
+      ]);
+    });
+
+    it('should handle Promise.allSettled rejections', async () => {
+      const mockAlbumsData = [{ albumId: 'album1', likes: 10, shares: 5 }];
+
+      mockHttpService.get.mockReturnValue(of({ data: mockAlbumsData }));
+      // Force Promise.allSettled to have a rejection by making getReleaseById throw synchronously
+      mockArtistsService.getReleaseById.mockImplementation(() => {
+        throw new Error('Synchronous error');
+      });
+
+      const result = await service.getTopAlbums();
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/albums', {
+        params: {},
+      });
+      expect(result).toEqual(mockAlbumsData); // Should return original data when release fetch fails
+    });
   });
 
   describe('recordSongUpload', () => {
