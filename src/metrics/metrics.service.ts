@@ -169,6 +169,18 @@ export class MetricsService {
     }
   }
 
+  async getTopArtists(limit?: number): Promise<any> {
+    const params: Record<string, number> = {};
+    if (limit !== undefined) {
+      params.limit = limit;
+    }
+
+    const response = await firstValueFrom(
+      this.httpService.get('/metrics/artists/top', { params }),
+    );
+    return response.data;
+  }
+
   async recordArtistCreation(artistId: string): Promise<void> {
     try {
       await firstValueFrom(

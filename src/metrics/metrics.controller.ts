@@ -159,6 +159,26 @@ export class MetricsController {
     return this.metricsService.getTopAlbums(limit);
   }
 
+  @Get('artists/top')
+  @ApiOperation({
+    summary: 'Get top artists by monthly listeners',
+    description: 'Retrieve the top artists based on monthly listeners',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 10,
+    description: 'Number of top artists to return (default: 10)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Top artists retrieved successfully',
+  })
+  async getTopArtists(@Query('limit') limit?: number): Promise<unknown> {
+    return this.metricsService.getTopArtists(limit);
+  }
+
   @Post('artists')
   @ApiOperation({
     summary: 'Create a new artist',
