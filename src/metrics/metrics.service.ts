@@ -263,6 +263,19 @@ export class MetricsService {
     }
   }
 
+  async recordAlbumCreation(albumId: string): Promise<void> {
+    try {
+      await firstValueFrom(this.httpService.post(`/metrics/albums/${albumId}`));
+      this.logger.log(`Album creation recorded for albumId: ${albumId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to record album creation for albumId: ${albumId}: ${message}`,
+      );
+      // Don't throw error to avoid breaking the main flow
+    }
+  }
+
   async recordAlbumLike(albumId: string): Promise<void> {
     try {
       await firstValueFrom(

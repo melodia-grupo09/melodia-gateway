@@ -275,7 +275,24 @@ export class ArtistsController {
     @Param('artistId') artistId: string,
     @Body() createReleaseDto: CreateReleaseDto,
   ): Promise<any> {
-    return this.artistsService.createRelease(artistId, createReleaseDto);
+    const release = await this.artistsService.createRelease(
+      artistId,
+      createReleaseDto,
+    );
+
+    try {
+      if (release && typeof release === 'object' && 'id' in release) {
+        const releaseWithId = release as { id: string };
+        if (releaseWithId.id && typeof releaseWithId.id === 'string') {
+          await this.metricsService.recordAlbumCreation(releaseWithId.id);
+        }
+      }
+    } catch (error) {
+      // Log error but don't break the main flow
+      console.error('Failed to record album creation in metrics:', error);
+    }
+
+    return release;
   }
 
   @Get(':artistId/releases/:releaseId')
