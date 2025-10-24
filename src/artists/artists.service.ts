@@ -151,4 +151,21 @@ export class ArtistsService {
     );
     return response.data;
   }
+
+  async searchArtists(
+    query: string,
+    page: number = 1,
+    limit: number = 20,
+  ): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.get(`/artists/search`, {
+        params: {
+          query,
+          page,
+          limit,
+        },
+      }),
+    );
+    return response.data;
+  }
 }

@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UploadedFiles,
   UseInterceptors,
@@ -38,6 +39,24 @@ export class ArtistsController {
     private readonly artistsService: ArtistsService,
     private readonly metricsService: MetricsService,
   ) {}
+
+  @Get('search')
+  @ApiOperation({ summary: 'Search artists by name or bio' })
+  @ApiResponse({
+    status: 200,
+    description: 'Artists found matching the search query',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - invalid parameters',
+  })
+  async searchArtists(
+    @Query('query') query: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
+  ): Promise<any> {
+    return this.artistsService.searchArtists(query, page, limit);
+  }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get artist by ID' })
