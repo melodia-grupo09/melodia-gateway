@@ -6,6 +6,7 @@ interface HealthCheckResponse {
   status: string;
   topSongs?: unknown;
   topAlbums?: unknown;
+  topArtists?: unknown;
   metricsError?: string;
 }
 
@@ -18,7 +19,7 @@ export class AppController {
   @ApiOperation({ summary: 'Health check endpoint with top content' })
   @ApiResponse({
     status: 200,
-    description: 'APIs healthcheck with top 10 songs and albums',
+    description: 'APIs healthcheck with top 10 songs, albums, and artists',
   })
   async healthCheck(): Promise<HealthCheckResponse> {
     try {
@@ -28,10 +29,14 @@ export class AppController {
       // Get top 10 albums
       const topAlbums: unknown = await this.metricsService.getTopAlbums(10);
 
+      // Get top 10 artists
+      const topArtists: unknown = await this.metricsService.getTopArtists(10);
+
       return {
         status: 'ok',
         topSongs,
         topAlbums,
+        topArtists,
       };
     } catch (error) {
       // If metrics service fails, still return healthy status but without metrics
@@ -42,6 +47,7 @@ export class AppController {
         status: 'ok',
         topSongs: null,
         topAlbums: null,
+        topArtists: null,
         metricsError: errorMessage,
       };
     }

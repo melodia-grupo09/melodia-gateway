@@ -8,6 +8,7 @@ describe('AppController', () => {
   const mockMetricsService = {
     getTopSongs: jest.fn(),
     getTopAlbums: jest.fn(),
+    getTopArtists: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -29,7 +30,7 @@ describe('AppController', () => {
   });
 
   describe('healthCheck', () => {
-    it('should return status ok with top songs and albums', async () => {
+    it('should return status ok with top songs, albums, and artists', async () => {
       const mockTopSongs = {
         songs: [
           { id: 'song1', title: 'Song 1', plays: 1000 },
@@ -42,18 +43,27 @@ describe('AppController', () => {
           { id: 'album2', title: 'Album 2', totalPlays: 1000 },
         ],
       };
+      const mockTopArtists = {
+        artists: [
+          { id: 'artist1', name: 'Artist 1', monthlyListeners: 1000000 },
+          { id: 'artist2', name: 'Artist 2', monthlyListeners: 800000 },
+        ],
+      };
 
       mockMetricsService.getTopSongs.mockResolvedValue(mockTopSongs);
       mockMetricsService.getTopAlbums.mockResolvedValue(mockTopAlbums);
+      mockMetricsService.getTopArtists.mockResolvedValue(mockTopArtists);
 
       const result = await appController.healthCheck();
 
       expect(mockMetricsService.getTopSongs).toHaveBeenCalledWith(10);
       expect(mockMetricsService.getTopAlbums).toHaveBeenCalledWith(10);
+      expect(mockMetricsService.getTopArtists).toHaveBeenCalledWith(10);
       expect(result).toEqual({
         status: 'ok',
         topSongs: mockTopSongs,
         topAlbums: mockTopAlbums,
+        topArtists: mockTopArtists,
       });
     });
 
@@ -62,6 +72,7 @@ describe('AppController', () => {
 
       mockMetricsService.getTopSongs.mockRejectedValue(error);
       mockMetricsService.getTopAlbums.mockRejectedValue(error);
+      mockMetricsService.getTopArtists.mockRejectedValue(error);
 
       const result = await appController.healthCheck();
 
@@ -69,6 +80,7 @@ describe('AppController', () => {
         status: 'ok',
         topSongs: null,
         topAlbums: null,
+        topArtists: null,
         metricsError: 'Metrics service error',
       });
     });
@@ -82,6 +94,7 @@ describe('AppController', () => {
         status: 'ok',
         topSongs: null,
         topAlbums: null,
+        topArtists: null,
         metricsError: 'Failed to fetch metrics',
       });
     });

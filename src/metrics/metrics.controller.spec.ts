@@ -12,7 +12,6 @@ describe('MetricsController', () => {
     getTopSongs: jest.fn(),
     getTopAlbums: jest.fn(),
     getTopArtists: jest.fn(),
-    recordArtistCreation: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -286,32 +285,6 @@ describe('MetricsController', () => {
       mockMetricsService.getTopArtists.mockRejectedValue(error);
 
       await expect(controller.getTopArtists()).rejects.toThrow('Service error');
-    });
-  });
-
-  describe('createArtist', () => {
-    it('should successfully create artist metric', async () => {
-      const createArtistDto = { artistId: 'artist-123' };
-
-      mockMetricsService.recordArtistCreation.mockResolvedValue(undefined);
-
-      const result = await controller.createArtist(createArtistDto);
-
-      expect(mockMetricsService.recordArtistCreation).toHaveBeenCalledWith(
-        'artist-123',
-      );
-      expect(result).toBeUndefined();
-    });
-
-    it('should handle errors when creating artist metric', async () => {
-      const createArtistDto = { artistId: 'artist-123' };
-      const error = new Error('Service error');
-
-      mockMetricsService.recordArtistCreation.mockRejectedValue(error);
-
-      await expect(controller.createArtist(createArtistDto)).rejects.toThrow(
-        'Service error',
-      );
     });
   });
 });

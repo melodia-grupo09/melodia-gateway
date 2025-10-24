@@ -1,13 +1,6 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
-import {
-  ApiBody,
-  ApiOperation,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
-import { CreateArtistMetricDto } from './dto/create-artist-metric.dto';
 import { MetricsService } from './metrics.service';
 
 @ApiTags('metrics')
@@ -177,38 +170,5 @@ export class MetricsController {
   })
   async getTopArtists(@Query('limit') limit?: number): Promise<unknown> {
     return this.metricsService.getTopArtists(limit);
-  }
-
-  @Post('artists')
-  @ApiOperation({
-    summary: 'Create a new artist',
-    description: 'Record the creation of a new artist in the metrics system',
-  })
-  @ApiBody({
-    type: CreateArtistMetricDto,
-    description: 'Artist creation data',
-    examples: {
-      createArtist: {
-        summary: 'Create artist example',
-        value: {
-          artistId: 'artist-123',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Artist created successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid input data',
-  })
-  async createArtist(
-    @Body() createArtistMetricDto: CreateArtistMetricDto,
-  ): Promise<void> {
-    await this.metricsService.recordArtistCreation(
-      createArtistMetricDto.artistId,
-    );
   }
 }
