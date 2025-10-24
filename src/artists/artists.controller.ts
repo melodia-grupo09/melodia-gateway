@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
   Param,
   Patch,
   Post,
@@ -462,7 +463,87 @@ export class ArtistsController {
     @Param('releaseId') releaseId: string,
     @Body() songData: { songIds: string[] },
   ): Promise<any> {
-    return this.artistsService.addSongsToRelease(artistId, releaseId, songData);
+    // Validate input
+    if (!songData || !songData.songIds) {
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'songIds array is required',
+          code: 'validation_error',
+        },
+        400,
+      );
+    }
+
+    if (!Array.isArray(songData.songIds)) {
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'songIds must be an array of strings',
+          code: 'validation_error',
+          received: typeof songData.songIds,
+          expected: 'array',
+        },
+        400,
+      );
+    }
+
+    if (songData.songIds.length === 0) {
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'songIds array cannot be empty',
+          code: 'validation_error',
+        },
+        400,
+      );
+    }
+
+    // Validate each songId is a string
+    const invalidSongIds = songData.songIds.filter(
+      (id) => typeof id !== 'string' || id.trim() === '',
+    );
+    if (invalidSongIds.length > 0) {
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'All songIds must be non-empty strings',
+          code: 'validation_error',
+          invalidIds: invalidSongIds,
+        },
+        400,
+      );
+    }
+
+    try {
+      return await this.artistsService.addSongsToRelease(
+        artistId,
+        releaseId,
+        songData,
+      );
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      // Enhanced error logging for debugging
+      console.error('Error adding songs to release:', {
+        artistId,
+        releaseId,
+        songData,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to add songs to release',
+          code: 'add_songs_error',
+          details: error instanceof Error ? error.message : 'Unknown error',
+        },
+        500,
+      );
+    }
   }
 
   @Patch(':artistId/releases/:releaseId/songs/remove')
