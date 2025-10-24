@@ -168,4 +168,19 @@ export class MetricsService {
       // Don't throw error to avoid breaking the main flow
     }
   }
+
+  async recordArtistCreation(artistId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.httpService.post('/metrics/artists', { artistId }),
+      );
+      this.logger.log(`Artist creation recorded for artistId: ${artistId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to record artist creation for artistId: ${artistId}: ${message}`,
+      );
+      // Don't throw error to avoid breaking the main flow
+    }
+  }
 }

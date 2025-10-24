@@ -98,18 +98,31 @@ export class UsersService {
     }
 
     // If user is an artist, create artist profile
-    if (registerUserDto.isArtist === true && response.data?.user?.uid) {
+    const userData = response.data;
+    if (
+      registerUserDto.isArtist === true &&
+      userData?.user?.uid &&
+      typeof userData.user.uid === 'string'
+    ) {
+      const userId = userData.user.uid as string;
       try {
         const formData = new FormData();
-        formData.append('id', response.data.user.uid);
+        formData.append('id', userId);
         formData.append('name', registerUserDto.username);
 
         const artistResponse = await this.artistsService.createArtist(formData);
         console.log('Artist profile created:', artistResponse);
 
+        // Record artist creation in metrics
+        try {
+          await this.metricsService.recordArtistCreation(userId);
+        } catch (error) {
+          console.error('Failed to track artist creation:', error);
+        }
+
         // Add artist info to the response
         return {
-          ...response.data,
+          ...userData,
           message: 'User registered successfully',
           artist: artistResponse,
         };
@@ -122,7 +135,7 @@ export class UsersService {
 
     // Return response with English message
     return {
-      ...response.data,
+      ...userData,
       message: 'User registered successfully',
     };
   }
