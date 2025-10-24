@@ -640,4 +640,52 @@ describe('MetricsService', () => {
       await expect(service.recordAlbumShare(albumId)).resolves.toBeUndefined();
     });
   });
+
+  describe('recordSongLike', () => {
+    it('should successfully record song like', async () => {
+      const songId = 'song-123';
+      const mockResponse = { data: { success: true } };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      await service.recordSongLike(songId);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/metrics/songs/${songId}/likes`,
+      );
+    });
+
+    it('should handle errors gracefully and not throw', async () => {
+      const songId = 'song-123';
+      const error = new Error('Network error');
+
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(service.recordSongLike(songId)).resolves.toBeUndefined();
+    });
+  });
+
+  describe('recordSongShare', () => {
+    it('should successfully record song share', async () => {
+      const songId = 'song-123';
+      const mockResponse = { data: { success: true } };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      await service.recordSongShare(songId);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/metrics/songs/${songId}/shares`,
+      );
+    });
+
+    it('should handle errors gracefully and not throw', async () => {
+      const songId = 'song-123';
+      const error = new Error('Network error');
+
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(service.recordSongShare(songId)).resolves.toBeUndefined();
+    });
+  });
 });

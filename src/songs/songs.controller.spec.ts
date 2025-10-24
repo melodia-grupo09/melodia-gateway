@@ -27,11 +27,14 @@ describe('SongsController', () => {
   const mockSongsService = {
     streamSong: jest.fn(),
     uploadSong: jest.fn(),
+    getSongById: jest.fn(),
   };
 
   const mockMetricsService = {
     recordSongPlay: jest.fn(),
     recordSongUpload: jest.fn(),
+    recordSongLike: jest.fn(),
+    recordSongShare: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -383,6 +386,38 @@ describe('SongsController', () => {
       const result: unknown = await controller.uploadSong(uploadDto, mockFile);
 
       expect(result).toEqual(mockResponse);
+    });
+  });
+
+  describe('likeSong', () => {
+    it('should like a song', async () => {
+      const songId = 'song-123';
+
+      const mockSongData = { id: songId, title: 'Test Song' };
+      mockSongsService.getSongById.mockResolvedValue(mockSongData);
+      mockMetricsService.recordSongLike.mockResolvedValue(undefined);
+
+      const result = await controller.likeSong(songId);
+
+      expect(mockSongsService.getSongById).toHaveBeenCalledWith(songId);
+      expect(mockMetricsService.recordSongLike).toHaveBeenCalledWith(songId);
+      expect(result).toEqual({ message: 'Song like recorded successfully' });
+    });
+  });
+
+  describe('shareSong', () => {
+    it('should share a song', async () => {
+      const songId = 'song-123';
+
+      const mockSongData = { id: songId, title: 'Test Song' };
+      mockSongsService.getSongById.mockResolvedValue(mockSongData);
+      mockMetricsService.recordSongShare.mockResolvedValue(undefined);
+
+      const result = await controller.shareSong(songId);
+
+      expect(mockSongsService.getSongById).toHaveBeenCalledWith(songId);
+      expect(mockMetricsService.recordSongShare).toHaveBeenCalledWith(songId);
+      expect(result).toEqual({ message: 'Song share recorded successfully' });
     });
   });
 });

@@ -29,6 +29,7 @@ import { AxiosResponse } from 'axios';
 import type { Request, Response } from 'express';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
+import { MetricsService } from '../metrics/metrics.service';
 import { UploadSongDTO } from './dto/upload-song.dto';
 import { SongsService } from './songs.service';
 
@@ -48,7 +49,10 @@ interface UploadedFileData {
 @ApiTags('songs')
 @Controller('songs')
 export class SongsController {
-  constructor(private readonly songsService: SongsService) {}
+  constructor(
+    private readonly songsService: SongsService,
+    private readonly metricsService: MetricsService,
+  ) {}
 
   @Get('id/:id')
   @HttpCode(HttpStatus.OK)
@@ -268,5 +272,57 @@ export class SongsController {
     formData.append('file', blob, file.originalname || 'song.mp3');
 
     return this.songsService.uploadSong(formData);
+  }
+
+  @Post(':songId/like')
+  @ApiOperation({ summary: 'Like a song' })
+  @ApiParam({
+    name: 'songId',
+    description: 'Song UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Song like recorded successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Song not found',
+  })
+  async likeSong(
+    @Param('songId') songId: string,
+  ): Promise<{ message: string }> {
+    // Verify the song exists
+    await this.songsService.getSongById(songId);
+
+    await this.metricsService.recordSongLike(songId);
+
+    return { message: 'Song like recorded successfully' };
+  }
+
+  @Post(':songId/share')
+  @ApiOperation({ summary: 'Share a song' })
+  @ApiParam({
+    name: 'songId',
+    description: 'Song UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Song share recorded successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Song not found',
+  })
+  async shareSong(
+    @Param('songId') songId: string,
+  ): Promise<{ message: string }> {
+    // Verify the song exists
+    await this.songsService.getSongById(songId);
+
+    await this.metricsService.recordSongShare(songId);
+
+    return { message: 'Song share recorded successfully' };
   }
 }

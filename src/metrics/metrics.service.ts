@@ -292,4 +292,34 @@ export class MetricsService {
       // Don't throw error to avoid breaking the main flow
     }
   }
+
+  async recordSongLike(songId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.httpService.post(`/metrics/songs/${songId}/likes`),
+      );
+      this.logger.log(`Song like recorded for songId: ${songId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to record song like for songId: ${songId}: ${message}`,
+      );
+      // Don't throw error to avoid breaking the main flow
+    }
+  }
+
+  async recordSongShare(songId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.httpService.post(`/metrics/songs/${songId}/shares`),
+      );
+      this.logger.log(`Song share recorded for songId: ${songId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to record song share for songId: ${songId}: ${message}`,
+      );
+      // Don't throw error to avoid breaking the main flow
+    }
+  }
 }
