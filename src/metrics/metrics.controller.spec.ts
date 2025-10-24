@@ -11,6 +11,8 @@ describe('MetricsController', () => {
     getUserRetention: jest.fn(),
     getTopSongs: jest.fn(),
     getTopAlbums: jest.fn(),
+    getTopArtists: jest.fn(),
+    recordArtistCreation: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -238,6 +240,78 @@ describe('MetricsController', () => {
       mockMetricsService.getTopAlbums.mockRejectedValue(error);
 
       await expect(controller.getTopAlbums()).rejects.toThrow('Service error');
+    });
+  });
+
+  describe('getTopArtists', () => {
+    it('should return top artists with default limit', async () => {
+      const expectedResult = {
+        artists: [
+          { id: 'artist1', name: 'Artist 1', monthlyListeners: 1000000 },
+          { id: 'artist2', name: 'Artist 2', monthlyListeners: 800000 },
+        ],
+      };
+
+      mockMetricsService.getTopArtists.mockResolvedValue(expectedResult);
+
+      const result = await controller.getTopArtists();
+
+      expect(mockMetricsService.getTopArtists).toHaveBeenCalledWith(undefined);
+      expect(result).toBe(expectedResult);
+    });
+
+    it('should return top artists with custom limit', async () => {
+      const limit = 5;
+      const expectedResult = {
+        artists: [
+          { id: 'artist1', name: 'Artist 1', monthlyListeners: 1000000 },
+          { id: 'artist2', name: 'Artist 2', monthlyListeners: 800000 },
+          { id: 'artist3', name: 'Artist 3', monthlyListeners: 600000 },
+          { id: 'artist4', name: 'Artist 4', monthlyListeners: 400000 },
+          { id: 'artist5', name: 'Artist 5', monthlyListeners: 200000 },
+        ],
+      };
+
+      mockMetricsService.getTopArtists.mockResolvedValue(expectedResult);
+
+      const result = await controller.getTopArtists(limit);
+
+      expect(mockMetricsService.getTopArtists).toHaveBeenCalledWith(limit);
+      expect(result).toBe(expectedResult);
+    });
+
+    it('should handle errors when getting top artists', async () => {
+      const error = new Error('Service error');
+
+      mockMetricsService.getTopArtists.mockRejectedValue(error);
+
+      await expect(controller.getTopArtists()).rejects.toThrow('Service error');
+    });
+  });
+
+  describe('createArtist', () => {
+    it('should successfully create artist metric', async () => {
+      const createArtistDto = { artistId: 'artist-123' };
+
+      mockMetricsService.recordArtistCreation.mockResolvedValue(undefined);
+
+      const result = await controller.createArtist(createArtistDto);
+
+      expect(mockMetricsService.recordArtistCreation).toHaveBeenCalledWith(
+        'artist-123',
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle errors when creating artist metric', async () => {
+      const createArtistDto = { artistId: 'artist-123' };
+      const error = new Error('Service error');
+
+      mockMetricsService.recordArtistCreation.mockRejectedValue(error);
+
+      await expect(controller.createArtist(createArtistDto)).rejects.toThrow(
+        'Service error',
+      );
     });
   });
 });

@@ -413,4 +413,79 @@ describe('MetricsService', () => {
       );
     });
   });
+
+  describe('getTopArtists', () => {
+    it('should return top artists without limit', async () => {
+      const mockData = {
+        artists: [
+          { id: 'artist1', name: 'Artist 1', monthlyListeners: 1000000 },
+          { id: 'artist2', name: 'Artist 2', monthlyListeners: 800000 },
+        ],
+      };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockData }));
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = await service.getTopArtists();
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/artists/top', {
+        params: {},
+      });
+      expect(result).toEqual(mockData);
+    });
+
+    it('should return top artists with limit', async () => {
+      const limit = 3;
+      const mockData = {
+        artists: [
+          { id: 'artist1', name: 'Artist 1', monthlyListeners: 1000000 },
+          { id: 'artist2', name: 'Artist 2', monthlyListeners: 800000 },
+          { id: 'artist3', name: 'Artist 3', monthlyListeners: 600000 },
+        ],
+      };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockData }));
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result = await service.getTopArtists(limit);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/artists/top', {
+        params: { limit },
+      });
+      expect(result).toEqual(mockData);
+    });
+
+    it('should handle errors when getting top artists', async () => {
+      const error = new Error('HTTP error');
+      mockHttpService.get.mockReturnValue(throwError(() => error));
+
+      await expect(service.getTopArtists()).rejects.toThrow('HTTP error');
+    });
+  });
+
+  describe('recordArtistCreation', () => {
+    it('should successfully record artist creation', async () => {
+      const artistId = 'artist-123';
+      const mockResponse = { data: { success: true } };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      await service.recordArtistCreation(artistId);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith('/metrics/artists', {
+        artistId,
+      });
+    });
+
+    it('should handle errors gracefully and not throw', async () => {
+      const artistId = 'artist-123';
+      const error = new Error('Network error');
+
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(
+        service.recordArtistCreation(artistId),
+      ).resolves.toBeUndefined();
+    });
+  });
 });
