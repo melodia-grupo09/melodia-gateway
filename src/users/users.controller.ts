@@ -27,7 +27,7 @@ export class UsersController {
       'Login successful - Returns both access token and refresh token',
     schema: {
       example: {
-        message: 'Login exitoso',
+        message: 'Succesful Login',
         token: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...',
         refresh_token: 'AMf-vBywFmjorV2yrPzYrB6DkOq6mV7N870sOkhiVQ...',
         user: {
