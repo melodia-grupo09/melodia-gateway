@@ -593,6 +593,32 @@ describe('MetricsService', () => {
     });
   });
 
+  describe('recordAlbumCreation', () => {
+    it('should successfully record album creation', async () => {
+      const albumId = 'album-123';
+      const mockResponse = { data: { success: true } };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      await service.recordAlbumCreation(albumId);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/metrics/albums/${albumId}`,
+      );
+    });
+
+    it('should handle errors gracefully and not throw', async () => {
+      const albumId = 'album-123';
+      const error = new Error('Network error');
+
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(
+        service.recordAlbumCreation(albumId),
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe('recordAlbumLike', () => {
     it('should successfully record album like', async () => {
       const albumId = 'album-123';

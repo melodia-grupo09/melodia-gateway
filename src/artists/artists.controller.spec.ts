@@ -31,6 +31,7 @@ describe('ArtistsController', () => {
   const mockMetricsService = {
     recordAlbumLike: jest.fn(),
     recordAlbumShare: jest.fn(),
+    recordAlbumCreation: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -212,7 +213,7 @@ describe('ArtistsController', () => {
   });
 
   describe('createRelease', () => {
-    it('should create a release', async () => {
+    it('should create a release and record album creation in metrics', async () => {
       const artistId = '123';
       const createReleaseDto: CreateReleaseDto = {
         title: 'New Album',
@@ -229,6 +230,7 @@ describe('ArtistsController', () => {
       };
 
       mockArtistsService.createRelease.mockResolvedValue(mockResult);
+      mockMetricsService.recordAlbumCreation.mockResolvedValue(undefined);
 
       const result = (await controller.createRelease(
         artistId,
@@ -247,6 +249,90 @@ describe('ArtistsController', () => {
         artistId,
         createReleaseDto,
       );
+      expect(mockMetricsService.recordAlbumCreation).toHaveBeenCalledWith(
+        'release-123',
+      );
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should create a release and handle metrics recording failure gracefully', async () => {
+      const artistId = '123';
+      const createReleaseDto: CreateReleaseDto = {
+        title: 'New Album',
+        type: 'album',
+        releaseDate: '2024-01-01',
+        coverUrl: 'https://example.com/cover.jpg',
+        artistId: '123',
+        songIds: ['song-1', 'song-2'],
+      };
+
+      const mockResult = {
+        id: 'release-123',
+        ...createReleaseDto,
+      };
+
+      mockArtistsService.createRelease.mockResolvedValue(mockResult);
+      mockMetricsService.recordAlbumCreation.mockRejectedValue(
+        new Error('Metrics service error'),
+      );
+
+      // Mock console.error to verify it's called
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const result = (await controller.createRelease(
+        artistId,
+        createReleaseDto,
+      )) as {
+        id: string;
+        title: string;
+        type: string;
+        releaseDate: string;
+        coverUrl: string;
+        artistId: string;
+        songIds: string[];
+      };
+
+      expect(mockArtistsService.createRelease).toHaveBeenCalledWith(
+        artistId,
+        createReleaseDto,
+      );
+      expect(mockMetricsService.recordAlbumCreation).toHaveBeenCalledWith(
+        'release-123',
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to record album creation in metrics:',
+        expect.any(Error),
+      );
+      expect(result).toEqual(mockResult);
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should create a release and not call metrics if release has no id', async () => {
+      const artistId = '123';
+      const createReleaseDto: CreateReleaseDto = {
+        title: 'New Album',
+        type: 'album',
+        releaseDate: '2024-01-01',
+        coverUrl: 'https://example.com/cover.jpg',
+        artistId: '123',
+        songIds: ['song-1', 'song-2'],
+      };
+
+      const mockResult = {
+        // No id property
+        ...createReleaseDto,
+      };
+
+      mockArtistsService.createRelease.mockResolvedValue(mockResult);
+
+      const result = await controller.createRelease(artistId, createReleaseDto);
+
+      expect(mockArtistsService.createRelease).toHaveBeenCalledWith(
+        artistId,
+        createReleaseDto,
+      );
+      expect(mockMetricsService.recordAlbumCreation).not.toHaveBeenCalled();
       expect(result).toEqual(mockResult);
     });
   });
