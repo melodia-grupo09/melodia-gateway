@@ -102,6 +102,83 @@ describe('ArtistsService', () => {
     });
   });
 
+  describe('searchArtists', () => {
+    it('should search artists with default parameters', async () => {
+      const query = 'test artist';
+      const mockResponse = {
+        data: {
+          artists: [
+            {
+              id: '123',
+              name: 'Test Artist',
+              bio: 'Test bio',
+            },
+          ],
+          total: 1,
+          page: 1,
+          limit: 20,
+        },
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.searchArtists(query);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/artists/search', {
+        params: {
+          query,
+          page: 1,
+          limit: 20,
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should search artists with custom parameters', async () => {
+      const query = 'test artist';
+      const page = 2;
+      const limit = 10;
+      const mockResponse = {
+        data: {
+          artists: [
+            {
+              id: '456',
+              name: 'Another Artist',
+              bio: 'Another bio',
+            },
+          ],
+          total: 1,
+          page: 2,
+          limit: 10,
+        },
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.searchArtists(query, page, limit);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/artists/search', {
+        params: {
+          query,
+          page,
+          limit,
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw error when search fails', async () => {
+      const query = 'test artist';
+      const error = new Error('Search failed');
+
+      mockHttpService.get.mockReturnValue(throwError(() => error));
+
+      await expect(service.searchArtists(query)).rejects.toThrow(
+        'Search failed',
+      );
+    });
+  });
+
   describe('updateArtist', () => {
     it('should update an artist successfully', async () => {
       const artistId = '123';

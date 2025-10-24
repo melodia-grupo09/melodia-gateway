@@ -16,6 +16,7 @@ describe('ArtistsController', () => {
     updateArtistMedia: jest.fn(),
     followArtist: jest.fn(),
     unfollowArtist: jest.fn(),
+    searchArtists: jest.fn(),
     // Release methods
     getArtistReleases: jest.fn(),
     createRelease: jest.fn(),
@@ -73,6 +74,64 @@ describe('ArtistsController', () => {
       };
 
       expect(mockArtistsService.getArtist).toHaveBeenCalledWith(artistId);
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('searchArtists', () => {
+    it('should search artists with default parameters', async () => {
+      const query = 'test artist';
+      const mockResult = {
+        artists: [
+          {
+            id: '123',
+            name: 'Test Artist',
+            bio: 'Test bio',
+          },
+        ],
+        total: 1,
+        page: 1,
+        limit: 20,
+      };
+
+      mockArtistsService.searchArtists.mockResolvedValue(mockResult);
+
+      const result = await controller.searchArtists(query);
+
+      expect(mockArtistsService.searchArtists).toHaveBeenCalledWith(
+        query,
+        1,
+        20,
+      );
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should search artists with custom parameters', async () => {
+      const query = 'test artist';
+      const page = 2;
+      const limit = 10;
+      const mockResult = {
+        artists: [
+          {
+            id: '456',
+            name: 'Another Artist',
+            bio: 'Another bio',
+          },
+        ],
+        total: 1,
+        page: 2,
+        limit: 10,
+      };
+
+      mockArtistsService.searchArtists.mockResolvedValue(mockResult);
+
+      const result = await controller.searchArtists(query, page, limit);
+
+      expect(mockArtistsService.searchArtists).toHaveBeenCalledWith(
+        query,
+        page,
+        limit,
+      );
       expect(result).toEqual(mockResult);
     });
   });
