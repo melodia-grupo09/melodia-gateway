@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { ArtistsModule } from './artists/artists.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { PlaylistsModule } from './playlists/playlists.module';
+import { ReleasesModule } from './releases/releases.module';
 import { SongsModule } from './songs/songs.module';
 import { UsersModule } from './users/users.module';
 
@@ -17,6 +18,7 @@ import { UsersModule } from './users/users.module';
     ArtistsModule,
     MetricsModule,
     PlaylistsModule,
+    ReleasesModule,
     SongsModule,
     UsersModule,
   ],
