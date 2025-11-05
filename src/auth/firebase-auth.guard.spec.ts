@@ -3,6 +3,20 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Request } from 'express';
 import { FirebaseAuthGuard } from './firebase-auth.guard';
 
+// Mock firebase-admin module
+const mockVerifyIdToken = jest.fn();
+jest.mock('firebase-admin', () => ({
+  auth: jest.fn(() => ({
+    verifyIdToken: mockVerifyIdToken,
+  })),
+  credential: {
+    applicationDefault: jest.fn(),
+    cert: jest.fn(),
+  },
+  initializeApp: jest.fn(),
+  apps: [],
+}));
+
 describe('FirebaseAuthGuard', () => {
   let guard: FirebaseAuthGuard;
   let mockExecutionContext: jest.Mocked<ExecutionContext>;
@@ -89,6 +103,54 @@ describe('FirebaseAuthGuard', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const request = mockExecutionContext.switchToHttp().getRequest();
       expect(request).toBe(mockRequest);
+    });
+
+    it('should throw UnauthorizedException when token is empty', async () => {
+      mockRequest.headers = {
+        authorization: 'Bearer ',
+      };
+
+      await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
+        new UnauthorizedException('Token is empty'),
+      );
+    });
+
+    it('should return true when token is valid', async () => {
+      const mockDecodedToken = { uid: 'user123', email: 'test@example.com' };
+      mockVerifyIdToken.mockResolvedValue(mockDecodedToken);
+
+      mockRequest.headers = {
+        authorization: 'Bearer valid-token',
+      };
+
+      const result = await guard.canActivate(mockExecutionContext);
+
+      expect(result).toBe(true);
+      expect(mockRequest.user).toBe(mockDecodedToken);
+      expect(mockVerifyIdToken).toHaveBeenCalledWith('valid-token');
+    });
+
+    it('should throw UnauthorizedException when token verification fails', async () => {
+      mockVerifyIdToken.mockRejectedValue(new Error('Invalid token'));
+
+      mockRequest.headers = {
+        authorization: 'Bearer invalid-token',
+      };
+
+      // Mock console.error to avoid output during tests
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
+        new UnauthorizedException('Invalid or expired token'),
+      );
+
+      expect(mockVerifyIdToken).toHaveBeenCalledWith('invalid-token');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Token verification failed:',
+        'Invalid token',
+      );
+
+      consoleSpy.mockRestore();
     });
   });
 });

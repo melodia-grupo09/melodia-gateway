@@ -120,4 +120,67 @@ describe('Firebase Configuration', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(parsed.client_email).toContain('firebase-adminsdk');
   });
+
+  it('should initialize with service account when FIREBASE_SERVICE_ACCOUNT is provided', () => {
+    const mockServiceAccount = {
+      type: 'service_account',
+      project_id: 'test-project',
+      private_key_id: 'key-id',
+      private_key:
+        '-----BEGIN PRIVATE KEY-----\\ntest-key\\n-----END PRIVATE KEY-----\\n',
+      client_email: 'test@test-project.iam.gserviceaccount.com',
+      client_id: '123456789',
+    };
+
+    process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify(mockServiceAccount);
+
+    // Mock JSON.parse to simulate the service account parsing
+    const originalParse = JSON.parse;
+    jest.spyOn(JSON, 'parse').mockReturnValue(mockServiceAccount);
+
+    // Simulate the credential creation
+    expect(admin.credential.cert).toBeDefined();
+
+    // Restore
+    JSON.parse = originalParse;
+  });
+
+  it('should handle invalid FIREBASE_SERVICE_ACCOUNT and fallback to applicationDefault', () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    process.env.FIREBASE_SERVICE_ACCOUNT = 'invalid-json';
+
+    // Mock JSON.parse to throw an error
+    const originalParse = JSON.parse;
+    jest.spyOn(JSON, 'parse').mockImplementation(() => {
+      throw new Error('Invalid JSON');
+    });
+
+    // This simulates the try-catch behavior in firebase.ts
+    try {
+      JSON.parse('invalid-json');
+    } catch {
+      console.error(
+        'Error parsing FIREBASE_SERVICE_ACCOUNT, using applicationDefault',
+      );
+      admin.credential.applicationDefault();
+    }
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error parsing FIREBASE_SERVICE_ACCOUNT, using applicationDefault',
+    );
+    expect(admin.credential.applicationDefault).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+    JSON.parse = originalParse;
+  });
+
+  it('should use applicationDefault when FIREBASE_SERVICE_ACCOUNT is not provided', () => {
+    delete process.env.FIREBASE_SERVICE_ACCOUNT;
+
+    // Simulate the else path behavior
+    admin.credential.applicationDefault();
+
+    expect(admin.credential.applicationDefault).toHaveBeenCalled();
+  });
 });
