@@ -335,4 +335,61 @@ export class MetricsService {
       // Don't throw error to avoid breaking the main flow
     }
   }
+
+  // New endpoints for user analytics and export
+
+  async getUserContentAnalytics(
+    userId: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<any> {
+    const params: Record<string, string> = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+
+    const response = await firstValueFrom(
+      this.httpService.get(`/metrics/users/${userId}/analytics/content`, {
+        params,
+      }),
+    );
+    return response.data;
+  }
+
+  async getUserActivityPatterns(userId: string): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.get(`/metrics/users/${userId}/analytics/patterns`),
+    );
+    return response.data;
+  }
+
+  async exportUserMetrics(
+    startDate: string,
+    endDate: string,
+    format?: 'csv' | 'json',
+  ): Promise<any> {
+    const params: Record<string, string> = {
+      startDate,
+      endDate,
+    };
+    if (format) params.format = format;
+
+    const response = await firstValueFrom(
+      this.httpService.get('/metrics/users/export', { params }),
+    );
+    return response.data;
+  }
+
+  // Internal method to delete user metrics (called by users service)
+  async deleteUserMetrics(userId: string): Promise<void> {
+    try {
+      await firstValueFrom(this.httpService.delete(`/metrics/users/${userId}`));
+      this.logger.log(`User metrics deleted for userId: ${userId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to delete user metrics for userId: ${userId}: ${message}`,
+      );
+      // Don't throw error to avoid breaking the main flow
+    }
+  }
 }
