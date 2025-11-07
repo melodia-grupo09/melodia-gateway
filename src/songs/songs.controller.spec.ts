@@ -35,6 +35,7 @@ describe('SongsController', () => {
     recordSongUpload: jest.fn(),
     recordSongLike: jest.fn(),
     recordSongShare: jest.fn(),
+    trackUserActivity: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -82,7 +83,7 @@ describe('SongsController', () => {
   describe('streamSong', () => {
     it('should stream a song successfully without range headers', async () => {
       const songId = 'song123';
-      const userId = 'user123';
+      const mockUser = { uid: 'user123', email: 'test@example.com' };
       const artistId = 'artist123';
       const mockStream = new Readable();
       const mockServiceResponse = {
@@ -96,11 +97,12 @@ describe('SongsController', () => {
       };
 
       mockSongsService.streamSong.mockResolvedValue(mockServiceResponse);
+      mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
       mockPipeline.mockResolvedValue(undefined);
 
       await controller.streamSong(
         songId,
-        userId,
+        mockUser,
         mockResponse,
         mockRequest,
         artistId,
@@ -109,8 +111,12 @@ describe('SongsController', () => {
       expect(mockSongsService.streamSong).toHaveBeenCalledWith(
         songId,
         undefined,
-        userId,
+        'user123',
         artistId,
+      );
+      expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
+        'user123',
+        'song_play',
       );
       expect(mockWriteHead).toHaveBeenCalledWith(200, {
         'Content-Type': 'audio/mpeg',
@@ -122,7 +128,7 @@ describe('SongsController', () => {
 
     it('should stream a song successfully with range headers', async () => {
       const songId = 'song456';
-      const userId = 'user456';
+      const mockUser = { uid: 'user456', email: 'test@example.com' };
       const artistId = 'artist456';
       const rangeHeader = 'bytes=0-1023';
       const mockStream = new Readable();
@@ -142,11 +148,12 @@ describe('SongsController', () => {
       } as Request;
 
       mockSongsService.streamSong.mockResolvedValue(mockServiceResponse);
+      mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
       mockPipeline.mockResolvedValue(undefined);
 
       await controller.streamSong(
         songId,
-        userId,
+        mockUser,
         mockResponse,
         requestWithRange,
         artistId,
@@ -155,8 +162,12 @@ describe('SongsController', () => {
       expect(mockSongsService.streamSong).toHaveBeenCalledWith(
         songId,
         rangeHeader,
-        userId,
+        'user456',
         artistId,
+      );
+      expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
+        'user456',
+        'song_play',
       );
       expect(mockWriteHead).toHaveBeenCalledWith(206, {
         'Content-Type': 'audio/mpeg',
@@ -169,7 +180,7 @@ describe('SongsController', () => {
 
     it('should filter out null headers', async () => {
       const songId = 'song789';
-      const userId = 'user789';
+      const mockUser = { uid: 'user789', email: 'test@example.com' };
       const artistId = 'artist789';
       const mockStream = new Readable();
       const mockServiceResponse = {
@@ -184,16 +195,27 @@ describe('SongsController', () => {
       };
 
       mockSongsService.streamSong.mockResolvedValue(mockServiceResponse);
+      mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
       mockPipeline.mockResolvedValue(undefined);
 
       await controller.streamSong(
         songId,
-        userId,
+        mockUser,
         mockResponse,
         mockRequest,
         artistId,
       );
 
+      expect(mockSongsService.streamSong).toHaveBeenCalledWith(
+        songId,
+        undefined,
+        'user789',
+        artistId,
+      );
+      expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
+        'user789',
+        'song_play',
+      );
       expect(mockWriteHead).toHaveBeenCalledWith(200, {
         'Content-Type': 'audio/mpeg',
         'Accept-Ranges': 'bytes',
@@ -202,7 +224,7 @@ describe('SongsController', () => {
 
     it('should handle service error with response object', async () => {
       const songId = 'song404';
-      const userId = 'user404';
+      const mockUser = { uid: 'user404', email: 'test@example.com' };
       const artistId = 'artist404';
       const error = {
         response: {
@@ -215,7 +237,7 @@ describe('SongsController', () => {
 
       await controller.streamSong(
         songId,
-        userId,
+        mockUser,
         mockResponse,
         mockRequest,
         artistId,
@@ -227,7 +249,7 @@ describe('SongsController', () => {
 
     it('should handle generic error without response object', async () => {
       const songId = 'song500';
-      const userId = 'user500';
+      const mockUser = { uid: 'user500', email: 'test@example.com' };
       const artistId = 'artist500';
       const error = new Error('Generic error');
 
@@ -235,7 +257,7 @@ describe('SongsController', () => {
 
       await controller.streamSong(
         songId,
-        userId,
+        mockUser,
         mockResponse,
         mockRequest,
         artistId,
@@ -249,7 +271,7 @@ describe('SongsController', () => {
 
     it('should destroy response if headers already sent on error', async () => {
       const songId = 'song500';
-      const userId = 'user500b';
+      const mockUser = { uid: 'user500b', email: 'test@example.com' };
       const artistId = 'artist500b';
       const error = new Error('Pipeline error');
 
@@ -265,7 +287,7 @@ describe('SongsController', () => {
 
       await controller.streamSong(
         songId,
-        userId,
+        mockUser,
         mockResponse,
         mockRequest,
         artistId,
@@ -276,7 +298,7 @@ describe('SongsController', () => {
 
     it('should handle pipeline errors when headers not sent', async () => {
       const songId = 'song500';
-      const userId = 'user500c';
+      const mockUser = { uid: 'user500c', email: 'test@example.com' };
       const artistId = 'artist500c';
       const mockStream = new Readable();
       const mockServiceResponse = {
@@ -290,7 +312,7 @@ describe('SongsController', () => {
 
       await controller.streamSong(
         songId,
-        userId,
+        mockUser,
         mockResponse,
         mockRequest,
         artistId,
@@ -408,15 +430,21 @@ describe('SongsController', () => {
   describe('shareSong', () => {
     it('should share a song', async () => {
       const songId = 'song-123';
+      const mockUser = { uid: 'user-123', email: 'test@example.com' };
 
       const mockSongData = { id: songId, title: 'Test Song' };
       mockSongsService.getSongById.mockResolvedValue(mockSongData);
       mockMetricsService.recordSongShare.mockResolvedValue(undefined);
+      mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
 
-      const result = await controller.shareSong(songId);
+      const result = await controller.shareSong(songId, mockUser);
 
       expect(mockSongsService.getSongById).toHaveBeenCalledWith(songId);
       expect(mockMetricsService.recordSongShare).toHaveBeenCalledWith(songId);
+      expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
+        'user-123',
+        'song_share',
+      );
       expect(result).toEqual({ message: 'Song share recorded successfully' });
     });
   });

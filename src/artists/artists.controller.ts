@@ -10,6 +10,7 @@ import {
   Query,
   UploadedFile,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -24,6 +25,9 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import type { FirebaseUser } from '../auth/user.decorator';
+import { User } from '../auth/user.decorator';
 import { MetricsService } from '../metrics/metrics.service';
 import { HttpErrorInterceptor } from '../users/interceptors/http-error.interceptor';
 import { ArtistsService } from './artists.service';
@@ -682,6 +686,7 @@ export class ArtistsController {
   }
 
   @Post(':artistId/releases/:releaseId/share')
+  @UseGuards(FirebaseAuthGuard)
   @ApiOperation({ summary: 'Share an album/release' })
   @ApiParam({
     name: 'artistId',
@@ -704,17 +709,22 @@ export class ArtistsController {
   async shareAlbum(
     @Param('artistId') artistId: string,
     @Param('releaseId') releaseId: string,
+    @User() user: FirebaseUser,
   ): Promise<{ message: string }> {
     // Verify the release exists for the artist
     await this.artistsService.getReleaseById(releaseId);
 
-    // Record the share in metrics service
-    await this.metricsService.recordAlbumShare(releaseId);
+    // Record the share in metrics service and track user activity
+    await Promise.all([
+      this.metricsService.recordAlbumShare(releaseId),
+      this.metricsService.trackUserActivity(user.uid, 'album_share'),
+    ]);
 
     return { message: 'Album share recorded successfully' };
   }
 
   @Patch(':id/follow')
+  @UseGuards(FirebaseAuthGuard)
   @ApiOperation({ summary: 'Follow artist (increment followers count)' })
   @ApiParam({
     name: 'id',
@@ -729,11 +739,24 @@ export class ArtistsController {
     status: 404,
     description: 'Artist not found',
   })
-  async followArtist(@Param('id') id: string): Promise<any> {
-    return this.artistsService.followArtist(id);
+  async followArtist(
+    @Param('id') id: string,
+    @User() user: FirebaseUser,
+  ): Promise<any> {
+    const result = await this.artistsService.followArtist(id);
+
+    // Track user activity for following artist
+    try {
+      await this.metricsService.trackUserActivity(user.uid, 'artist_follow');
+    } catch (error) {
+      console.error('Failed to track artist follow activity:', error);
+    }
+
+    return result;
   }
 
   @Patch(':id/unfollow')
+  @UseGuards(FirebaseAuthGuard)
   @ApiOperation({ summary: 'Unfollow artist (decrement followers count)' })
   @ApiParam({
     name: 'id',
@@ -748,7 +771,19 @@ export class ArtistsController {
     status: 404,
     description: 'Artist not found',
   })
-  async unfollowArtist(@Param('id') id: string): Promise<any> {
-    return this.artistsService.unfollowArtist(id);
+  async unfollowArtist(
+    @Param('id') id: string,
+    @User() user: FirebaseUser,
+  ): Promise<any> {
+    const result = await this.artistsService.unfollowArtist(id);
+
+    // Track user activity for unfollowing artist
+    try {
+      await this.metricsService.trackUserActivity(user.uid, 'artist_unfollow');
+    } catch (error) {
+      console.error('Failed to track artist unfollow activity:', error);
+    }
+
+    return result;
   }
 }

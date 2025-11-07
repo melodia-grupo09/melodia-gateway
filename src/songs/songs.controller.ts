@@ -13,6 +13,7 @@ import {
   Req,
   Res,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -29,6 +30,9 @@ import { AxiosResponse } from 'axios';
 import type { Request, Response } from 'express';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import type { FirebaseUser } from '../auth/user.decorator';
+import { User } from '../auth/user.decorator';
 import { MetricsService } from '../metrics/metrics.service';
 import { UploadSongDTO } from './dto/upload-song.dto';
 import { SongsService } from './songs.service';
@@ -141,16 +145,11 @@ export class SongsController {
   }
 
   @Get('player/play/:songId')
+  @UseGuards(FirebaseAuthGuard)
   @ApiOperation({ summary: 'Stream a song' })
   @ApiParam({
     name: 'songId',
     description: 'ID of the song to stream',
-    type: String,
-  })
-  @ApiQuery({
-    name: 'userId',
-    description: 'ID of the user playing the song (for metrics)',
-    required: true,
     type: String,
   })
   @ApiQuery({
@@ -164,7 +163,7 @@ export class SongsController {
   @ApiResponse({ status: 404, description: 'Song not found' })
   async streamSong(
     @Param('songId') songId: string,
-    @Query('userId') userId: string,
+    @User() user: FirebaseUser,
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request,
     @Query('artistId') artistId?: string,
@@ -172,7 +171,14 @@ export class SongsController {
     try {
       const range = req.headers['range'] as string | string[] | undefined;
       const responseFromService: AxiosResponse<Readable> =
-        await this.songsService.streamSong(songId, range, userId, artistId);
+        await this.songsService.streamSong(songId, range, user.uid, artistId);
+
+      // Track user activity for song play in parallel (don't block streaming)
+      try {
+        await this.metricsService.trackUserActivity(user.uid, 'song_play');
+      } catch (error) {
+        console.error('Failed to track song play activity:', error);
+      }
 
       const headers = {
         'Content-Type': responseFromService.headers['content-type'] as string,
@@ -301,6 +307,7 @@ export class SongsController {
   }
 
   @Post(':songId/share')
+  @UseGuards(FirebaseAuthGuard)
   @ApiOperation({ summary: 'Share a song' })
   @ApiParam({
     name: 'songId',
@@ -317,11 +324,16 @@ export class SongsController {
   })
   async shareSong(
     @Param('songId') songId: string,
+    @User() user: FirebaseUser,
   ): Promise<{ message: string }> {
     // Verify the song exists
     await this.songsService.getSongById(songId);
 
-    await this.metricsService.recordSongShare(songId);
+    // Record the share in metrics service and track user activity
+    await Promise.all([
+      this.metricsService.recordSongShare(songId),
+      this.metricsService.trackUserActivity(user.uid, 'song_share'),
+    ]);
 
     return { message: 'Song share recorded successfully' };
   }

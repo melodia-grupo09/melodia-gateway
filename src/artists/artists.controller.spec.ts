@@ -33,6 +33,7 @@ describe('ArtistsController', () => {
     recordAlbumLike: jest.fn(),
     recordAlbumShare: jest.fn(),
     recordAlbumCreation: jest.fn(),
+    trackUserActivity: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -222,13 +223,19 @@ describe('ArtistsController', () => {
   describe('followArtist', () => {
     it('should follow an artist', async () => {
       const artistId = '123';
+      const mockUser = { uid: 'user-123', email: 'test@example.com' };
       const mockResult = { followersCount: 1 };
 
       mockArtistsService.followArtist.mockResolvedValue(mockResult);
+      mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
 
-      const result = await controller.followArtist(artistId);
+      const result = await controller.followArtist(artistId, mockUser);
 
       expect(mockArtistsService.followArtist).toHaveBeenCalledWith(artistId);
+      expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
+        'user-123',
+        'artist_follow',
+      );
       expect(result).toEqual(mockResult);
     });
   });
@@ -236,13 +243,19 @@ describe('ArtistsController', () => {
   describe('unfollowArtist', () => {
     it('should unfollow an artist', async () => {
       const artistId = '123';
+      const mockUser = { uid: 'user-123', email: 'test@example.com' };
       const mockResult = { followersCount: 0 };
 
       mockArtistsService.unfollowArtist.mockResolvedValue(mockResult);
+      mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
 
-      const result = await controller.unfollowArtist(artistId);
+      const result = await controller.unfollowArtist(artistId, mockUser);
 
       expect(mockArtistsService.unfollowArtist).toHaveBeenCalledWith(artistId);
+      expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
+        'user-123',
+        'artist_unfollow',
+      );
       expect(result).toEqual(mockResult);
     });
   });
@@ -589,16 +602,22 @@ describe('ArtistsController', () => {
     it('should share an album', async () => {
       const artistId = '123';
       const releaseId = 'release-123';
+      const mockUser = { uid: 'user-123', email: 'test@example.com' };
 
       const mockReleaseData = { id: releaseId, title: 'Test Album' };
       mockArtistsService.getReleaseById.mockResolvedValue(mockReleaseData);
       mockMetricsService.recordAlbumShare.mockResolvedValue(undefined);
+      mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
 
-      const result = await controller.shareAlbum(artistId, releaseId);
+      const result = await controller.shareAlbum(artistId, releaseId, mockUser);
 
       expect(mockArtistsService.getReleaseById).toHaveBeenCalledWith(releaseId);
       expect(mockMetricsService.recordAlbumShare).toHaveBeenCalledWith(
         releaseId,
+      );
+      expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
+        'user-123',
+        'album_share',
       );
       expect(result).toEqual({ message: 'Album share recorded successfully' });
     });

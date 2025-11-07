@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { MetricsService } from '../metrics/metrics.service';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
 import { CreateLikedSongDto } from './dto/create-liked-song.dto';
@@ -10,7 +11,11 @@ import { ReorderSongDto } from './dto/reorder-song.dto';
 
 @Injectable()
 export class PlaylistsService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    @Inject(forwardRef(() => MetricsService))
+    private readonly metricsService: MetricsService,
+  ) {}
 
   // Playlist endpoints
   async createPlaylist(userId: string, createPlaylistDto: CreatePlaylistDto) {
@@ -19,6 +24,14 @@ export class PlaylistsService {
         params: { user_id: userId },
       }),
     );
+
+    // Track user activity for playlist creation
+    try {
+      await this.metricsService.trackUserActivity(userId, 'playlist_creation');
+    } catch (error) {
+      console.error('Failed to track playlist creation activity:', error);
+    }
+
     return response.data;
   }
 
@@ -91,6 +104,17 @@ export class PlaylistsService {
         headers: { 'user-id': userId },
       }),
     );
+
+    // Track user activity and song like metrics
+    try {
+      await Promise.all([
+        this.metricsService.trackUserActivity(userId, 'song_like'),
+        this.metricsService.recordSongLike(createLikedSongDto.song_id),
+      ]);
+    } catch (error) {
+      console.error('Failed to track song like activity:', error);
+    }
+
     return response.data;
   }
 
