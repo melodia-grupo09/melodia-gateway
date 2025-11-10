@@ -314,6 +314,58 @@ describe('ArtistsService', () => {
     });
   });
 
+  describe('getUpcomingReleases', () => {
+    it('should get upcoming releases successfully', async () => {
+      const artistId = '123';
+      const mockResponse = {
+        data: [
+          {
+            id: 'release-1',
+            title: 'Upcoming Album',
+            type: 'album',
+            releaseDate: '2024-12-01',
+            status: 'SCHEDULED',
+          },
+        ],
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = (await service.getUpcomingReleases(artistId)) as any[];
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases/upcoming`,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('getPublishedReleases', () => {
+    it('should get published releases successfully', async () => {
+      const artistId = '123';
+      const mockResponse = {
+        data: [
+          {
+            id: 'release-1',
+            title: 'Published Album',
+            type: 'album',
+            releaseDate: '2024-01-01',
+            status: 'PUBLISHED',
+          },
+        ],
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = (await service.getPublishedReleases(artistId)) as any[];
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases/published`,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('createRelease', () => {
     it('should create a release successfully', async () => {
       const artistId = '123';

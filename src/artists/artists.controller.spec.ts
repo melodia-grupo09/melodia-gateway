@@ -19,6 +19,8 @@ describe('ArtistsController', () => {
     searchArtists: jest.fn(),
     // Release methods
     getArtistReleases: jest.fn(),
+    getUpcomingReleases: jest.fn(),
+    getPublishedReleases: jest.fn(),
     createRelease: jest.fn(),
     getArtistRelease: jest.fn(),
     getReleaseById: jest.fn(),
@@ -278,6 +280,54 @@ describe('ArtistsController', () => {
       const result = (await controller.getArtistReleases(artistId)) as any[];
 
       expect(mockArtistsService.getArtistReleases).toHaveBeenCalledWith(
+        artistId,
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getUpcomingReleases', () => {
+    it('should get upcoming releases for an artist', async () => {
+      const artistId = '123';
+      const mockResult = [
+        {
+          id: 'release-1',
+          title: 'Upcoming Album',
+          type: 'album',
+          releaseDate: '2024-12-01',
+          status: 'SCHEDULED',
+        },
+      ];
+
+      mockArtistsService.getUpcomingReleases.mockResolvedValue(mockResult);
+
+      const result = (await controller.getUpcomingReleases(artistId)) as any[];
+
+      expect(mockArtistsService.getUpcomingReleases).toHaveBeenCalledWith(
+        artistId,
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getPublishedReleases', () => {
+    it('should get published releases for an artist', async () => {
+      const artistId = '123';
+      const mockResult = [
+        {
+          id: 'release-1',
+          title: 'Published Album',
+          type: 'album',
+          releaseDate: '2024-01-01',
+          status: 'PUBLISHED',
+        },
+      ];
+
+      mockArtistsService.getPublishedReleases.mockResolvedValue(mockResult);
+
+      const result = (await controller.getPublishedReleases(artistId)) as any[];
+
+      expect(mockArtistsService.getPublishedReleases).toHaveBeenCalledWith(
         artistId,
       );
       expect(result).toEqual(mockResult);

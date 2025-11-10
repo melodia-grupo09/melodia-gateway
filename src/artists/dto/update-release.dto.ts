@@ -54,4 +54,24 @@ export class UpdateReleaseDto {
   @IsArray()
   @IsString({ each: true })
   songIds?: string[];
+
+  @ApiProperty({
+    description:
+      'Scheduled publication date in ISO format (for smart publication logic)',
+    example: '2024-06-15T10:00:00Z',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString()
+  scheduledPublishAt?: string;
+
+  @ApiProperty({
+    description: 'Array of genre strings (optional for legacy compatibility)',
+    example: ['reggaeton', 'latin pop'],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  genres?: string[];
 }

@@ -168,4 +168,18 @@ export class ArtistsService {
     );
     return response.data;
   }
+
+  async getUpcomingReleases(artistId: string): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.get(`/artists/${artistId}/releases/upcoming`),
+    );
+    return response.data;
+  }
+
+  async getPublishedReleases(artistId: string): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.get(`/artists/${artistId}/releases/published`),
+    );
+    return response.data;
+  }
 }

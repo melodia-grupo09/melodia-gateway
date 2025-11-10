@@ -259,7 +259,47 @@ export class ArtistsController {
     return this.artistsService.updateArtistMedia(id, formData);
   }
 
-  // Release endpoints
+  // Release endpoints - Specific routes MUST come before general routes
+  @Get(':artistId/releases/upcoming')
+  @ApiOperation({ summary: 'Get upcoming/scheduled releases for an artist' })
+  @ApiParam({
+    name: 'artistId',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Upcoming releases retrieved successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist not found',
+  })
+  async getUpcomingReleases(@Param('artistId') artistId: string): Promise<any> {
+    return this.artistsService.getUpcomingReleases(artistId);
+  }
+
+  @Get(':artistId/releases/published')
+  @ApiOperation({ summary: 'Get published releases for an artist' })
+  @ApiParam({
+    name: 'artistId',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Published releases retrieved successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist not found',
+  })
+  async getPublishedReleases(
+    @Param('artistId') artistId: string,
+  ): Promise<any> {
+    return this.artistsService.getPublishedReleases(artistId);
+  }
+
   @Get(':artistId/releases')
   @ApiOperation({ summary: 'Get all releases for an artist' })
   @ApiParam({
