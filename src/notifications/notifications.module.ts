@@ -1,6 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 
 @Module({
@@ -17,7 +18,7 @@ import { NotificationsService } from './notifications.service';
       inject: [ConfigService],
     }),
   ],
-  controllers: [],
+  controllers: [NotificationsController],
   providers: [NotificationsService],
   exports: [],
 })
