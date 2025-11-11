@@ -20,6 +20,5 @@ import { PlaylistsService } from './playlists.service';
   ],
   controllers: [PlaylistsController],
   providers: [PlaylistsService],
-  exports: [PlaylistsService],
 })
 export class PlaylistsModule {}

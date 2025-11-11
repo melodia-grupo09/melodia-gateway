@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { FirebaseAuthGuard } from 'src/auth/firebase-auth.guard';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { AddDevicePayloadDTO } from './dtos/add-device.dto';
 import { SendNotificationToUserPayloadDTO } from './dtos/send-notification.dto';
 import { NotificationsService } from './notifications.service';
