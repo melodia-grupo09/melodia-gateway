@@ -11,26 +11,28 @@ export class NotificationsService {
 
   async addDevice(addDeviceDto: AddDevicePayloadDTO) {
     const response = await firstValueFrom(
-      this.httpService.post('/device/', addDeviceDto),
+      this.httpService.post('/notifications/device/', addDeviceDto),
     );
     return response.data;
   }
 
   async deleteDevice(deviceToken: string) {
     const response = await firstValueFrom(
-      this.httpService.delete(`/device/${deviceToken}`),
+      this.httpService.delete(`/notifications/device/${deviceToken}`),
     );
     return response.data;
   }
 
   async sendNotificationToUserDevices(dto: SendNotificationToUserPayloadDTO) {
-    const response = await firstValueFrom(this.httpService.post('/send', dto));
+    const response = await firstValueFrom(
+      this.httpService.post('/notifications/send', dto),
+    );
     return response.data;
   }
 
   async sendTestNotification(deviceToken: string) {
     const response = await firstValueFrom(
-      this.httpService.post(`/test/${deviceToken}`),
+      this.httpService.post(`/notifications/test/${deviceToken}`),
     );
     return response.data;
   }
