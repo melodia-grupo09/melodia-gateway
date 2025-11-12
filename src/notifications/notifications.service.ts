@@ -54,7 +54,7 @@ export class NotificationsService {
 
   async deleteNotification(notificationId: UUID) {
     const response = await firstValueFrom(
-      this.httpService.delete(`/notifications/${notificationId}`),
+      this.httpService.delete(`/notifications/delete/${notificationId}`),
     );
     return response.data;
   }
