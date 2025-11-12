@@ -3,7 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { of, throwError } from 'rxjs';
 import { ArtistsService } from '../artists/artists.service';
 import { MetricsService } from '../metrics/metrics.service';
+import { AdminLoginDto } from './dto/admin-login.dto';
+import { AdminRegisterDto } from './dto/admin-register.dto';
+import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ListUsersDto } from './dto/list-users.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UsersService } from './users.service';
@@ -13,6 +17,8 @@ describe('UsersService', () => {
 
   const mockHttpService = {
     post: jest.fn(),
+    get: jest.fn(),
+    delete: jest.fn(),
   };
 
   const mockMetricsService = {
@@ -516,6 +522,359 @@ describe('UsersService', () => {
 
       await expect(service.refreshToken(refreshTokenDto)).rejects.toThrow(
         'Unable to refresh token - please try again',
+      );
+    });
+  });
+
+  describe('adminRegister', () => {
+    it('should successfully register admin', async () => {
+      const adminRegisterDto: AdminRegisterDto = {
+        email: 'admin@melodia.com',
+        password: 'adminpassword123',
+        nombre: 'Admin User',
+      };
+
+      const mockResponse = {
+        data: { admin: { id: 'admin-id', email: 'admin@melodia.com' } },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = await service.adminRegister(adminRegisterDto);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        '/admin/admin/register',
+        {
+          email: adminRegisterDto.email,
+          password: adminRegisterDto.password,
+          nombre: adminRegisterDto.nombre,
+        },
+      );
+
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw HttpException on admin registration error', async () => {
+      const adminRegisterDto: AdminRegisterDto = {
+        email: 'admin@melodia.com',
+        password: 'adminpassword123',
+        nombre: 'Admin User',
+      };
+
+      mockHttpService.post.mockReturnValue(
+        throwError(() => new Error('Registration failed')),
+      );
+
+      await expect(service.adminRegister(adminRegisterDto)).rejects.toThrow(
+        'Admin registration failed',
+      );
+    });
+  });
+
+  describe('adminLogin', () => {
+    it('should successfully login admin', async () => {
+      const adminLoginDto: AdminLoginDto = {
+        email: 'admin@melodia.com',
+        password: 'adminpassword123',
+      };
+
+      const mockResponse = {
+        data: { token: 'admin-jwt-token', admin: { id: 'admin-id' } },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = await service.adminLogin(adminLoginDto);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith('/admin/admin/login', {
+        email: adminLoginDto.email,
+        password: adminLoginDto.password,
+      });
+
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw HttpException on admin login error', async () => {
+      const adminLoginDto: AdminLoginDto = {
+        email: 'admin@melodia.com',
+        password: 'wrongpassword',
+      };
+
+      mockHttpService.post.mockReturnValue(
+        throwError(() => new Error('Login failed')),
+      );
+
+      await expect(service.adminLogin(adminLoginDto)).rejects.toThrow(
+        'Admin login failed',
+      );
+    });
+  });
+
+  describe('adminResetPassword', () => {
+    it('should successfully reset admin password', async () => {
+      const adminResetPasswordDto: AdminResetPasswordDto = {
+        email: 'admin@melodia.com',
+      };
+
+      const mockResponse = {
+        data: { message: 'Password reset email sent' },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = await service.adminResetPassword(adminResetPasswordDto);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        '/admin/admin/reset-password',
+        {
+          email: adminResetPasswordDto.email,
+        },
+      );
+
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw HttpException on admin reset password error', async () => {
+      const adminResetPasswordDto: AdminResetPasswordDto = {
+        email: 'nonexistent@melodia.com',
+      };
+
+      mockHttpService.post.mockReturnValue(
+        throwError(() => new Error('Reset failed')),
+      );
+
+      await expect(
+        service.adminResetPassword(adminResetPasswordDto),
+      ).rejects.toThrow('Admin password reset failed');
+    });
+  });
+
+  describe('listUsers', () => {
+    it('should successfully list users with pagination', async () => {
+      const listUsersDto: ListUsersDto = {
+        page: 1,
+        limit: 10,
+      };
+
+      const mockResponse = {
+        data: {
+          users: [
+            { id: 'user1', email: 'user1@example.com' },
+            { id: 'user2', email: 'user2@example.com' },
+          ],
+          total: 2,
+          page: 1,
+          limit: 10,
+        },
+      };
+
+      const mockHttpService = {
+        get: jest.fn().mockReturnValue(of(mockResponse)),
+        post: jest.fn(),
+      };
+
+      // Create new service instance with mock that includes get method
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          UsersService,
+          {
+            provide: HttpService,
+            useValue: mockHttpService,
+          },
+          {
+            provide: MetricsService,
+            useValue: mockMetricsService,
+          },
+          {
+            provide: ArtistsService,
+            useValue: mockArtistsService,
+          },
+        ],
+      }).compile();
+
+      const testService = module.get<UsersService>(UsersService);
+      const result = await testService.listUsers(listUsersDto);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/admin/admin/users', {
+        params: {
+          page: listUsersDto.page,
+          limit: listUsersDto.limit,
+        },
+      });
+
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw HttpException on list users error', async () => {
+      const listUsersDto: ListUsersDto = {
+        page: 1,
+        limit: 10,
+      };
+
+      const mockHttpServiceWithError = {
+        get: jest
+          .fn()
+          .mockReturnValue(throwError(() => new Error('List failed'))),
+        post: jest.fn(),
+      };
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          UsersService,
+          {
+            provide: HttpService,
+            useValue: mockHttpServiceWithError,
+          },
+          {
+            provide: MetricsService,
+            useValue: mockMetricsService,
+          },
+          {
+            provide: ArtistsService,
+            useValue: mockArtistsService,
+          },
+        ],
+      }).compile();
+
+      const testService = module.get<UsersService>(UsersService);
+
+      await expect(testService.listUsers(listUsersDto)).rejects.toThrow(
+        'Failed to list users',
+      );
+    });
+  });
+
+  describe('blockUser', () => {
+    it('should successfully block user', async () => {
+      const userId = 'user123';
+      const mockResponse = {
+        data: { message: 'User blocked successfully' },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = await service.blockUser(userId);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/admin/admin/users/${userId}/block`,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw HttpException on block user error', async () => {
+      const userId = 'user123';
+
+      mockHttpService.post.mockReturnValue(
+        throwError(() => new Error('Block failed')),
+      );
+
+      await expect(service.blockUser(userId)).rejects.toThrow(
+        'Failed to block user',
+      );
+    });
+  });
+
+  describe('unblockUser', () => {
+    it('should successfully unblock user', async () => {
+      const userId = 'user123';
+      const mockResponse = {
+        data: { message: 'User unblocked successfully' },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = await service.unblockUser(userId);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/admin/admin/users/${userId}/unblock`,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw HttpException on unblock user error', async () => {
+      const userId = 'user123';
+
+      mockHttpService.post.mockReturnValue(
+        throwError(() => new Error('Unblock failed')),
+      );
+
+      await expect(service.unblockUser(userId)).rejects.toThrow(
+        'Failed to unblock user',
+      );
+    });
+  });
+
+  describe('deleteUser', () => {
+    it('should successfully delete user', async () => {
+      const userId = 'user123';
+      const mockResponse = {
+        data: { message: 'User deleted successfully' },
+      };
+
+      const mockHttpServiceWithDelete = {
+        delete: jest.fn().mockReturnValue(of(mockResponse)),
+        post: jest.fn(),
+      };
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          UsersService,
+          {
+            provide: HttpService,
+            useValue: mockHttpServiceWithDelete,
+          },
+          {
+            provide: MetricsService,
+            useValue: mockMetricsService,
+          },
+          {
+            provide: ArtistsService,
+            useValue: mockArtistsService,
+          },
+        ],
+      }).compile();
+
+      const testService = module.get<UsersService>(UsersService);
+      const result = await testService.deleteUser(userId);
+
+      expect(mockHttpServiceWithDelete.delete).toHaveBeenCalledWith(
+        `/admin/admin/users/${userId}`,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw HttpException on delete user error', async () => {
+      const userId = 'user123';
+
+      const mockHttpServiceWithError = {
+        delete: jest
+          .fn()
+          .mockReturnValue(throwError(() => new Error('Delete failed'))),
+        post: jest.fn(),
+      };
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          UsersService,
+          {
+            provide: HttpService,
+            useValue: mockHttpServiceWithError,
+          },
+          {
+            provide: MetricsService,
+            useValue: mockMetricsService,
+          },
+          {
+            provide: ArtistsService,
+            useValue: mockArtistsService,
+          },
+        ],
+      }).compile();
+
+      const testService = module.get<UsersService>(UsersService);
+
+      await expect(testService.deleteUser(userId)).rejects.toThrow(
+        'Failed to delete user',
       );
     });
   });
