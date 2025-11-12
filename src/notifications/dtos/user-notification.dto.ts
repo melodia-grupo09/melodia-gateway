@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsString } from 'class-validator';
+import { IsDate, IsObject, IsString } from 'class-validator';
 import type { UUID } from 'crypto';
 
 export class UserNotificationDTO {
@@ -17,6 +17,13 @@ export class UserNotificationDTO {
   })
   @IsString()
   message: string;
+
+  @ApiProperty({
+    description: 'Data payload associated with the notification',
+    type: Object,
+  })
+  @IsObject()
+  data: Record<string, any>;
 
   @ApiProperty({
     description: 'ID of the user to whom the notification is sent',
