@@ -420,9 +420,46 @@ describe('PlaylistsController', () => {
 
       mockPlaylistsService.getHistory.mockResolvedValue(expectedResult);
 
-      const result = await controller.getHistory(userId);
+      const result = await controller.getHistory(userId, {});
 
-      expect(mockPlaylistsService.getHistory).toHaveBeenCalledWith(userId);
+      expect(mockPlaylistsService.getHistory).toHaveBeenCalledWith(userId, {});
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should get playback history with query parameters', async () => {
+      const userId = 'user-123';
+      const queryParams = {
+        page: 1,
+        limit: 5,
+        search: 'hello',
+        artist: 'Adele',
+      };
+      const expectedResult = {
+        history: [
+          {
+            id: 'history-123',
+            song_id: 'song-123',
+            user_id: userId,
+            position: 1,
+            played_at: '2025-10-18T00:00:00Z',
+          },
+        ],
+        pagination: {
+          page: 1,
+          limit: 5,
+          total: 10,
+          total_pages: 2,
+        },
+      };
+
+      mockPlaylistsService.getHistory.mockResolvedValue(expectedResult);
+
+      const result = await controller.getHistory(userId, queryParams);
+
+      expect(mockPlaylistsService.getHistory).toHaveBeenCalledWith(
+        userId,
+        queryParams,
+      );
       expect(result).toEqual(expectedResult);
     });
   });

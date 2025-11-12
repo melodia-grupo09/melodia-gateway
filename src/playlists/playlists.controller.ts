@@ -27,6 +27,7 @@ import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
 import { CreateLikedSongDto } from './dto/create-liked-song.dto';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
+import { GetHistoryQueryDto } from './dto/get-history-query.dto';
 import { ReorderSongDto } from './dto/reorder-song.dto';
 import { PlaylistsService } from './playlists.service';
 
@@ -141,11 +142,42 @@ export class PlaylistsController {
 
   // History endpoints (must be before dynamic routes)
   @Get('history')
-  @ApiOperation({ summary: 'Get playback history' })
+  @ApiOperation({
+    summary: 'Get playback history with pagination and filters',
+    description:
+      'Retrieve user playback history with optional pagination, search by song name, and filter by artist',
+  })
   @ApiResponse({ status: 200, description: 'History retrieved successfully' })
   @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
-  async getHistory(@Headers('user-id') userId: string) {
-    return this.playlistsService.getHistory(userId);
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Entries per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Search by song name',
+    example: 'Bohemian Rhapsody',
+  })
+  @ApiQuery({
+    name: 'artist',
+    required: false,
+    description: 'Filter by artist',
+    example: 'Queen',
+  })
+  async getHistory(
+    @Headers('user-id') userId: string,
+    @Query() queryParams: GetHistoryQueryDto,
+  ) {
+    return this.playlistsService.getHistory(userId, queryParams);
   }
 
   @Post('history')

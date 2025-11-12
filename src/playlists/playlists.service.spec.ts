@@ -434,6 +434,52 @@ describe('PlaylistsService', () => {
 
       expect(mockHttpService.get).toHaveBeenCalledWith('/history/', {
         headers: { 'user-id': userId },
+        params: {},
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should get playback history with query parameters', async () => {
+      const userId = 'user-123';
+      const queryParams = {
+        page: 2,
+        limit: 5,
+        search: 'rock',
+        artist: 'Queen',
+      };
+
+      const mockResponse = {
+        data: {
+          history: [
+            {
+              id: 'history-123',
+              song_id: 'song-123',
+              user_id: userId,
+              position: 1,
+              played_at: '2025-10-18T00:00:00Z',
+            },
+          ],
+          pagination: {
+            page: 2,
+            limit: 5,
+            total: 50,
+            total_pages: 10,
+          },
+        },
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.getHistory(userId, queryParams);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/history/', {
+        headers: { 'user-id': userId },
+        params: {
+          page: 2,
+          limit: 5,
+          search: 'rock',
+          artist: 'Queen',
+        },
       });
       expect(result).toEqual(mockResponse.data);
     });

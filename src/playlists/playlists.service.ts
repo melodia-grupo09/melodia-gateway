@@ -7,6 +7,7 @@ import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
 import { CreateLikedSongDto } from './dto/create-liked-song.dto';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
+import { GetHistoryQueryDto } from './dto/get-history-query.dto';
 import { ReorderSongDto } from './dto/reorder-song.dto';
 
 @Injectable()
@@ -145,10 +146,26 @@ export class PlaylistsService {
   }
 
   // History endpoints
-  async getHistory(userId: string) {
+  async getHistory(userId: string, queryParams?: GetHistoryQueryDto) {
+    const params: Record<string, string | number> = {};
+
+    if (queryParams?.page) {
+      params.page = queryParams.page;
+    }
+    if (queryParams?.limit) {
+      params.limit = queryParams.limit;
+    }
+    if (queryParams?.search) {
+      params.search = queryParams.search;
+    }
+    if (queryParams?.artist) {
+      params.artist = queryParams.artist;
+    }
+
     const response = await firstValueFrom(
       this.httpService.get('/history/', {
         headers: { 'user-id': userId },
+        params: params,
       }),
     );
     return response.data;
