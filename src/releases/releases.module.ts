@@ -16,6 +16,5 @@ import { ReleasesService } from './releases.service';
   ],
   controllers: [ReleasesController],
   providers: [ReleasesService],
-  exports: [ReleasesService],
 })
 export class ReleasesModule {}

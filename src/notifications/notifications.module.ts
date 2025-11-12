@@ -1,15 +1,15 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PlaylistsController } from './playlists.controller';
-import { PlaylistsService } from './playlists.service';
+import { NotificationsController } from './notifications.controller';
+import { NotificationsService } from './notifications.service';
 
 @Module({
   imports: [
     HttpModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        baseURL: configService.get<string>('PLAYLISTS_SERVICE_URL') ?? '',
+        baseURL: configService.get<string>('NOTIFICATIONS_SERVICE_URL') ?? '',
         timeout: 5000,
         headers: {
           'Content-Type': 'application/json',
@@ -18,7 +18,7 @@ import { PlaylistsService } from './playlists.service';
       inject: [ConfigService],
     }),
   ],
-  controllers: [PlaylistsController],
-  providers: [PlaylistsService],
+  controllers: [NotificationsController],
+  providers: [NotificationsService],
 })
-export class PlaylistsModule {}
+export class NotificationsModule {}
