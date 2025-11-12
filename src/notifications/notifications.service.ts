@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { UUID } from 'crypto';
 import { firstValueFrom } from 'rxjs';
 import { AddDevicePayloadDTO } from './dtos/add-device.dto';
 import { SendNotificationToUserPayloadDTO } from './dtos/send-notification.dto';
@@ -47,6 +48,20 @@ export class NotificationsService {
   async sendTestNotification(deviceToken: string) {
     const response = await firstValueFrom(
       this.httpService.post(`/notifications/test/${deviceToken}`),
+    );
+    return response.data;
+  }
+
+  async deleteNotification(notificationId: UUID) {
+    const response = await firstValueFrom(
+      this.httpService.delete(`/notifications/${notificationId}`),
+    );
+    return response.data;
+  }
+
+  async clearNotitications(userId: string) {
+    const response = await firstValueFrom(
+      this.httpService.delete(`/notifications/clear/${userId}`),
     );
     return response.data;
   }

@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -21,6 +22,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import type { UUID } from 'crypto';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { AddDevicePayloadDTO } from './dtos/add-device.dto';
 import { SendNotificationToUserPayloadDTO } from './dtos/send-notification.dto';
@@ -98,5 +100,29 @@ export class NotificationsController {
   })
   async sendTestNotification(@Param('deviceToken') deviceToken: string) {
     return this.notificationsService.sendTestNotification(deviceToken);
+  }
+
+  @Delete('delete/:notificationId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiParam({
+    name: 'notificationId',
+    type: 'string',
+    description: 'The ID of the notification to be deleted',
+  })
+  async deleteNotification(
+    @Param('notificationId', ParseUUIDPipe) notificationId: UUID,
+  ) {
+    return this.notificationsService.deleteNotification(notificationId);
+  }
+
+  @Delete('clear/:userId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiParam({
+    name: 'userId',
+    type: 'string',
+    description: 'The ID of the user whose notifications are to be cleared',
+  })
+  async clearNotifications(@Param('userId') userId: string) {
+    return this.notificationsService.clearNotitications(userId);
   }
 }
