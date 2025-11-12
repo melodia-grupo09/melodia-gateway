@@ -10,7 +10,11 @@ import { firstValueFrom } from 'rxjs';
 import { ArtistsService } from '../artists/artists.service';
 
 import { MetricsService } from '../metrics/metrics.service';
+import { AdminLoginDto } from './dto/admin-login.dto';
+import { AdminRegisterDto } from './dto/admin-register.dto';
+import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ListUsersDto } from './dto/list-users.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -300,6 +304,156 @@ export class UsersService {
         message: 'Unable to refresh token - please try again',
         code: 'refresh_failed',
       });
+    }
+  }
+
+  // Admin methods
+  async adminRegister(adminRegisterDto: AdminRegisterDto): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post('/admin/admin/register', {
+          email: adminRegisterDto.email,
+          password: adminRegisterDto.password,
+          nombre: adminRegisterDto.nombre,
+        }),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error registering admin:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Admin registration failed',
+          code: 'admin_registration_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async adminLogin(adminLoginDto: AdminLoginDto): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post('/admin/admin/login', {
+          email: adminLoginDto.email,
+          password: adminLoginDto.password,
+        }),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error admin login:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Admin login failed',
+          code: 'admin_login_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async adminResetPassword(
+    adminResetPasswordDto: AdminResetPasswordDto,
+  ): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post('/admin/admin/reset-password', {
+          email: adminResetPasswordDto.email,
+        }),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error admin reset password:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Admin password reset failed',
+          code: 'admin_reset_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async listUsers(listUsersDto: ListUsersDto): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get('/admin/admin/users', {
+          params: {
+            page: listUsersDto.page,
+            limit: listUsersDto.limit,
+          },
+        }),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error listing users:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to list users',
+          code: 'list_users_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async blockUser(userId: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(`/admin/admin/users/${userId}/block`),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error blocking user:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to block user',
+          code: 'block_user_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async unblockUser(userId: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(`/admin/admin/users/${userId}/unblock`),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error unblocking user:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to unblock user',
+          code: 'unblock_user_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async deleteUser(userId: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.delete(`/admin/admin/users/${userId}`),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error deleting user:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to delete user',
+          code: 'delete_user_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }

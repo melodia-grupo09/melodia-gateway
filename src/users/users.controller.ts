@@ -1,13 +1,21 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
+  Query,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AdminLoginDto } from './dto/admin-login.dto';
+import { AdminRegisterDto } from './dto/admin-register.dto';
+import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ListUsersDto } from './dto/list-users.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -159,5 +167,116 @@ export class UsersController {
   })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto): Promise<any> {
     return this.usersService.refreshToken(refreshTokenDto);
+  }
+
+  // Admin endpoints
+  @Post('admin/register')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Register a new admin user',
+    description: 'Register a new administrator account',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Admin registered successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input data or email already registered',
+  })
+  async adminRegister(
+    @Body() adminRegisterDto: AdminRegisterDto,
+  ): Promise<any> {
+    return this.usersService.adminRegister(adminRegisterDto);
+  }
+
+  @Post('admin/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Admin login',
+    description: 'Login with admin credentials',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Admin login successful',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid credentials',
+  })
+  async adminLogin(@Body() adminLoginDto: AdminLoginDto): Promise<any> {
+    return this.usersService.adminLogin(adminLoginDto);
+  }
+
+  @Post('admin/reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Admin password reset',
+    description: 'Request password reset for admin account',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset email sent',
+  })
+  async adminResetPassword(
+    @Body() adminResetPasswordDto: AdminResetPasswordDto,
+  ): Promise<any> {
+    return this.usersService.adminResetPassword(adminResetPasswordDto);
+  }
+
+  @Get('admin/users')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'List all users',
+    description: 'Get paginated list of all users (admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Users retrieved successfully',
+  })
+  async listUsers(@Query() listUsersDto: ListUsersDto): Promise<any> {
+    return this.usersService.listUsers(listUsersDto);
+  }
+
+  @Post('admin/users/:userId/block')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Block a user',
+    description: 'Block a user account (admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User blocked successfully',
+  })
+  async blockUser(@Param('userId') userId: string): Promise<any> {
+    return this.usersService.blockUser(userId);
+  }
+
+  @Post('admin/users/:userId/unblock')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Unblock a user',
+    description: 'Unblock a user account (admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User unblocked successfully',
+  })
+  async unblockUser(@Param('userId') userId: string): Promise<any> {
+    return this.usersService.unblockUser(userId);
+  }
+
+  @Delete('admin/users/:userId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Delete a user',
+    description: 'Delete a user account (admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User deleted successfully',
+  })
+  async deleteUser(@Param('userId') userId: string): Promise<any> {
+    return this.usersService.deleteUser(userId);
   }
 }
