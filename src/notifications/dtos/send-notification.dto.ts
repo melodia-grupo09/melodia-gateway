@@ -22,6 +22,13 @@ export class SendNotificationToUserPayloadDTO {
   })
   @IsString()
   body: string;
+
+  @ApiProperty({
+    type: Object,
+    description: 'Additional data to include with the notification',
+    required: false,
+  })
+  data?: Record<string, any>;
 }
 
 export class SendNotificationToTopicPayloadDTO {
@@ -45,4 +52,11 @@ export class SendNotificationToTopicPayloadDTO {
   })
   @IsString()
   body: string;
+
+  @ApiProperty({
+    type: Object,
+    description: 'Additional data to include with the notification',
+    required: false,
+  })
+  data?: Record<string, any>;
 }
