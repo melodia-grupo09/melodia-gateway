@@ -3,18 +3,28 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { AddDevicePayloadDTO } from './dtos/add-device.dto';
 import { SendNotificationToUserPayloadDTO } from './dtos/send-notification.dto';
+import { UserNotificationDTO } from './dtos/user-notification.dto';
 import { NotificationsService } from './notifications.service';
 
 @ApiTags('notifications')
@@ -22,6 +32,37 @@ import { NotificationsService } from './notifications.service';
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
+
+  @Get(':userId')
+  @ApiParam({
+    name: 'userId',
+    type: 'string',
+    description: 'The ID of the user to retrieve devices for',
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: 'number',
+    required: false,
+    description: 'Number of notifications to retrieve (default is 20)',
+  })
+  @ApiQuery({
+    name: 'page',
+    type: 'number',
+    required: false,
+    description: 'Page number for pagination (default is 1)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of user notifications',
+    type: [UserNotificationDTO],
+  })
+  async getUserNotifications(
+    @Param('userId') userId: string,
+    @Query('limit', new DefaultValuePipe(20)) limit: number,
+    @Query('page', new DefaultValuePipe(1)) page: number,
+  ) {
+    return this.notificationsService.getUserNotifications(userId, limit, page);
+  }
 
   @Post('device')
   @ApiOperation({

@@ -4,10 +4,24 @@ import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { AddDevicePayloadDTO } from './dtos/add-device.dto';
 import { SendNotificationToUserPayloadDTO } from './dtos/send-notification.dto';
+import { UserNotificationDTO } from './dtos/user-notification.dto';
 
 @Injectable()
 export class NotificationsService {
   constructor(private readonly httpService: HttpService) {}
+
+  async getUserNotifications(
+    userId: string,
+    limit: number,
+    page: number,
+  ): Promise<UserNotificationDTO[]> {
+    const response = await firstValueFrom(
+      this.httpService.get('/notifications/' + userId, {
+        params: { limit, page },
+      }),
+    );
+    return response.data;
+  }
 
   async addDevice(addDeviceDto: AddDevicePayloadDTO) {
     const response = await firstValueFrom(
