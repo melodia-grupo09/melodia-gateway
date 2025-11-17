@@ -6,21 +6,28 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   UseInterceptors,
+  UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { AdminRegisterDto } from './dto/admin-register.dto';
 import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
+import { ChangeRoleDto } from './dto/change-role.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
+import { SearchUsersDto } from './dto/search-users.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { HttpErrorInterceptor } from './interceptors/http-error.interceptor';
 import { UsersService } from './users.service';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 
 @ApiTags('users')
 @UseInterceptors(HttpErrorInterceptor)
@@ -278,5 +285,176 @@ export class UsersController {
   })
   async deleteUser(@Param('userId') userId: string): Promise<any> {
     return this.usersService.deleteUser(userId);
+  }
+
+  // New admin endpoints
+  @Patch('admin/users/:userId/role')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Change user role',
+    description: 'Change if a user is an artist or not (admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User role changed successfully',
+  })
+  async changeUserRole(
+    @Param('userId') userId: string,
+    @Body() changeRoleDto: ChangeRoleDto,
+  ): Promise<any> {
+    return this.usersService.changeUserRole(userId, changeRoleDto);
+  }
+
+  @Get('admin/users/profile/:userId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get user details',
+    description: 'Get complete details of a specific user (admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User details retrieved successfully',
+  })
+  async getUserDetails(@Param('userId') userId: string): Promise<any> {
+    return this.usersService.getUserDetails(userId);
+  }
+
+  // Profile endpoints
+  @Get('profile/search')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({
+    summary: 'Search users',
+    description: 'Search users by name with pagination',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Users found successfully',
+  })
+  async searchUsers(@Query() searchUsersDto: SearchUsersDto): Promise<any> {
+    return this.usersService.searchUsers(searchUsersDto);
+  }
+
+  @Get('profile/:userId')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({
+    summary: 'Get own profile',
+    description: 'Get user own profile information',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile retrieved successfully',
+  })
+  async getProfile(@Param('userId') userId: string): Promise<any> {
+    return this.usersService.getProfile(userId);
+  }
+
+  @Patch('profile/:userId')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({
+    summary: 'Update profile',
+    description: 'Update user own profile information',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile updated successfully',
+  })
+  async updateProfile(
+    @Param('userId') userId: string,
+    @Body() updateProfileDto: UpdateProfileDto,
+  ): Promise<any> {
+    return this.usersService.updateProfile(userId, updateProfileDto);
+  }
+
+  @Get('profile/public/:userId')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({
+    summary: 'Get public profile',
+    description: 'Get public profile of another user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Public profile retrieved successfully',
+  })
+  async getPublicProfile(@Param('userId') userId: string): Promise<any> {
+    return this.usersService.getPublicProfile(userId);
+  }
+
+  @Post('profile/:userId/follow')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({
+    summary: 'Follow user',
+    description: 'Follow another user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User followed successfully',
+  })
+  async followUser(
+    @Param('userId') userId: string,
+    @Query('follower_user_id') followerUserId: string,
+  ): Promise<any> {
+    return this.usersService.followUser(userId, followerUserId);
+  }
+
+  @Post('profile/:userId/unfollow')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({
+    summary: 'Unfollow user',
+    description: 'Unfollow a user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User unfollowed successfully',
+  })
+  async unfollowUser(
+    @Param('userId') userId: string,
+    @Query('follower_user_id') followerUserId: string,
+  ): Promise<any> {
+    return this.usersService.unfollowUser(userId, followerUserId);
+  }
+
+  @Get('profile/:userId/is-following')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({
+    summary: 'Check if following',
+    description: 'Check if current user is following another user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Following status retrieved successfully',
+  })
+  async isFollowing(
+    @Param('userId') userId: string,
+    @Query('follower_user_id') followerUserId: string,
+  ): Promise<any> {
+    return this.usersService.isFollowing(userId, followerUserId);
+  }
+
+  @Get('profile/:userId/followers-count')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({
+    summary: 'Get followers count',
+    description: 'Get the number of followers for a user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Followers count retrieved successfully',
+  })
+  async getFollowersCount(@Param('userId') userId: string): Promise<any> {
+    return this.usersService.getFollowersCount(userId);
+  }
+
+  @Get('profile/:userId/following-count')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({
+    summary: 'Get following count',
+    description: 'Get the number of users being followed',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Following count retrieved successfully',
+  })
+  async getFollowingCount(@Param('userId') userId: string): Promise<any> {
+    return this.usersService.getFollowingCount(userId);
   }
 }

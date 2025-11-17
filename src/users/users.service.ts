@@ -13,11 +13,14 @@ import { MetricsService } from '../metrics/metrics.service';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { AdminRegisterDto } from './dto/admin-register.dto';
 import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
+import { ChangeRoleDto } from './dto/change-role.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
+import { SearchUsersDto } from './dto/search-users.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -451,6 +454,229 @@ export class UsersService {
           status: 'error',
           message: 'Failed to delete user',
           code: 'delete_user_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  // New admin methods
+  async changeUserRole(userId: string, changeRoleDto: ChangeRoleDto): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.patch(`/admin/users/${userId}/role`, changeRoleDto),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error changing user role:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to change user role',
+          code: 'change_role_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getUserDetails(userId: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`/admin/users/profile/${userId}`),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error getting user details:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to get user details',
+          code: 'get_user_details_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  // Profile methods
+  async searchUsers(searchUsersDto: SearchUsersDto): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get('/profile/search', {
+          params: {
+            query: searchUsersDto.query,
+            page: searchUsersDto.page,
+            limit: searchUsersDto.limit,
+          },
+        }),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error searching users:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to search users',
+          code: 'search_users_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getProfile(userId: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`/profile/${userId}`),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error getting profile:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to get profile',
+          code: 'get_profile_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.patch(`/profile/${userId}`, updateProfileDto),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error updating profile:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to update profile',
+          code: 'update_profile_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getPublicProfile(userId: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`/profile/public/${userId}`),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error getting public profile:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to get public profile',
+          code: 'get_public_profile_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async followUser(userId: string, followerUserId: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(`/profile/${userId}/follow`, null, {
+          params: { follower_user_id: followerUserId },
+        }),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error following user:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to follow user',
+          code: 'follow_user_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async unfollowUser(userId: string, followerUserId: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(`/profile/${userId}/unfollow`, null, {
+          params: { follower_user_id: followerUserId },
+        }),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error unfollowing user:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to unfollow user',
+          code: 'unfollow_user_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async isFollowing(userId: string, followerUserId: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`/profile/${userId}/is-following`, {
+          params: { follower_user_id: followerUserId },
+        }),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error checking follow status:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to check follow status',
+          code: 'check_follow_status_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getFollowersCount(userId: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`/profile/${userId}/followers-count`),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error getting followers count:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to get followers count',
+          code: 'get_followers_count_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getFollowingCount(userId: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`/profile/${userId}/following-count`),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error getting following count:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to get following count',
+          code: 'get_following_count_failed',
         },
         HttpStatus.BAD_REQUEST,
       );
