@@ -1,13 +1,13 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
-  IsString,
   IsInt,
   IsOptional,
-  Min,
+  IsString,
   Max,
+  Min,
   MinLength,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class SearchUsersDto {
   @ApiProperty({

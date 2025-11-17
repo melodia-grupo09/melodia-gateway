@@ -9,11 +9,11 @@ import {
   Patch,
   Post,
   Query,
-  UseInterceptors,
   UseGuards,
-  Headers,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { AdminRegisterDto } from './dto/admin-register.dto';
 import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
@@ -27,7 +27,6 @@ import { SearchUsersDto } from './dto/search-users.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { HttpErrorInterceptor } from './interceptors/http-error.interceptor';
 import { UsersService } from './users.service';
-import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 
 @ApiTags('users')
 @UseInterceptors(HttpErrorInterceptor)

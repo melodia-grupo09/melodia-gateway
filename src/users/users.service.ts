@@ -314,7 +314,7 @@ export class UsersService {
   async adminRegister(adminRegisterDto: AdminRegisterDto): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.post('/admin/admin/register', {
+        this.httpService.post('/admin/register', {
           email: adminRegisterDto.email,
           password: adminRegisterDto.password,
           nombre: adminRegisterDto.nombre,
@@ -337,7 +337,7 @@ export class UsersService {
   async adminLogin(adminLoginDto: AdminLoginDto): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.post('/admin/admin/login', {
+        this.httpService.post('/admin/login', {
           email: adminLoginDto.email,
           password: adminLoginDto.password,
         }),
@@ -361,7 +361,7 @@ export class UsersService {
   ): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.post('/admin/admin/reset-password', {
+        this.httpService.post('/admin/reset-password', {
           email: adminResetPasswordDto.email,
         }),
       );
@@ -382,7 +382,7 @@ export class UsersService {
   async listUsers(listUsersDto: ListUsersDto): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get('/admin/admin/users', {
+        this.httpService.get('/admin/users', {
           params: {
             page: listUsersDto.page,
             limit: listUsersDto.limit,
@@ -406,7 +406,7 @@ export class UsersService {
   async blockUser(userId: string): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.post(`/admin/admin/users/${userId}/block`),
+        this.httpService.post(`/admin/users/${userId}/block`),
       );
       return response.data;
     } catch (error: unknown) {
@@ -425,7 +425,7 @@ export class UsersService {
   async unblockUser(userId: string): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.post(`/admin/admin/users/${userId}/unblock`),
+        this.httpService.post(`/admin/users/${userId}/unblock`),
       );
       return response.data;
     } catch (error: unknown) {
@@ -444,7 +444,7 @@ export class UsersService {
   async deleteUser(userId: string): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.delete(`/admin/admin/users/${userId}`),
+        this.httpService.delete(`/admin/users/${userId}`),
       );
       return response.data;
     } catch (error: unknown) {
@@ -461,7 +461,10 @@ export class UsersService {
   }
 
   // New admin methods
-  async changeUserRole(userId: string, changeRoleDto: ChangeRoleDto): Promise<any> {
+  async changeUserRole(
+    userId: string,
+    changeRoleDto: ChangeRoleDto,
+  ): Promise<any> {
     try {
       const response = await firstValueFrom(
         this.httpService.patch(`/admin/users/${userId}/role`, changeRoleDto),
@@ -544,7 +547,10 @@ export class UsersService {
     }
   }
 
-  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto): Promise<any> {
+  async updateProfile(
+    userId: string,
+    updateProfileDto: UpdateProfileDto,
+  ): Promise<any> {
     try {
       const response = await firstValueFrom(
         this.httpService.patch(`/profile/${userId}`, updateProfileDto),

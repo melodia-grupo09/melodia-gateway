@@ -542,14 +542,11 @@ describe('UsersService', () => {
 
       const result = await service.adminRegister(adminRegisterDto);
 
-      expect(mockHttpService.post).toHaveBeenCalledWith(
-        '/admin/admin/register',
-        {
-          email: adminRegisterDto.email,
-          password: adminRegisterDto.password,
-          nombre: adminRegisterDto.nombre,
-        },
-      );
+      expect(mockHttpService.post).toHaveBeenCalledWith('/admin/register', {
+        email: adminRegisterDto.email,
+        password: adminRegisterDto.password,
+        nombre: adminRegisterDto.nombre,
+      });
 
       expect(result).toEqual(mockResponse.data);
     });
@@ -586,7 +583,7 @@ describe('UsersService', () => {
 
       const result = await service.adminLogin(adminLoginDto);
 
-      expect(mockHttpService.post).toHaveBeenCalledWith('/admin/admin/login', {
+      expect(mockHttpService.post).toHaveBeenCalledWith('/admin/login', {
         email: adminLoginDto.email,
         password: adminLoginDto.password,
       });
@@ -625,7 +622,7 @@ describe('UsersService', () => {
       const result = await service.adminResetPassword(adminResetPasswordDto);
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
-        '/admin/admin/reset-password',
+        '/admin/reset-password',
         {
           email: adminResetPasswordDto.email,
         },
@@ -695,7 +692,7 @@ describe('UsersService', () => {
       const testService = module.get<UsersService>(UsersService);
       const result = await testService.listUsers(listUsersDto);
 
-      expect(mockHttpService.get).toHaveBeenCalledWith('/admin/admin/users', {
+      expect(mockHttpService.get).toHaveBeenCalledWith('/admin/users', {
         params: {
           page: listUsersDto.page,
           limit: listUsersDto.limit,
@@ -756,7 +753,7 @@ describe('UsersService', () => {
       const result = await service.blockUser(userId);
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
-        `/admin/admin/users/${userId}/block`,
+        `/admin/users/${userId}/block`,
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -786,7 +783,7 @@ describe('UsersService', () => {
       const result = await service.unblockUser(userId);
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
-        `/admin/admin/users/${userId}/unblock`,
+        `/admin/users/${userId}/unblock`,
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -838,7 +835,7 @@ describe('UsersService', () => {
       const result = await testService.deleteUser(userId);
 
       expect(mockHttpServiceWithDelete.delete).toHaveBeenCalledWith(
-        `/admin/admin/users/${userId}`,
+        `/admin/users/${userId}`,
       );
       expect(result).toEqual(mockResponse.data);
     });
