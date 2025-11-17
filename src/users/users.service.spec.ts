@@ -19,6 +19,7 @@ describe('UsersService', () => {
     post: jest.fn(),
     get: jest.fn(),
     delete: jest.fn(),
+    patch: jest.fn(),
   };
 
   const mockMetricsService = {
@@ -872,6 +873,350 @@ describe('UsersService', () => {
 
       await expect(testService.deleteUser(userId)).rejects.toThrow(
         'Failed to delete user',
+      );
+    });
+  });
+
+  // Tests for new methods
+  describe('changeUserRole', () => {
+    it('should change user role successfully', async () => {
+      const userId = 'user123';
+      const changeRoleDto = { esArtista: true };
+      const mockResponse = { message: 'Usuario actualizado a artista' };
+
+      mockHttpService.patch.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.changeUserRole(userId, changeRoleDto);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.patch).toHaveBeenCalledWith(
+        `/admin/users/${userId}/role`,
+        changeRoleDto,
+      );
+    });
+
+    it('should throw error when change user role fails', async () => {
+      const userId = 'user123';
+      const changeRoleDto = { esArtista: true };
+
+      mockHttpService.patch.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(
+        service.changeUserRole(userId, changeRoleDto),
+      ).rejects.toThrow('Failed to change user role');
+    });
+  });
+
+  describe('getUserDetails', () => {
+    it('should get user details successfully', async () => {
+      const userId = 'user123';
+      const mockResponse = {
+        uid: userId,
+        email: 'user@example.com',
+        nombre: 'Test User',
+      };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.getUserDetails(userId);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/admin/users/profile/${userId}`,
+      );
+    });
+
+    it('should throw error when get user details fails', async () => {
+      const userId = 'user123';
+
+      mockHttpService.get.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(service.getUserDetails(userId)).rejects.toThrow(
+        'Failed to get user details',
+      );
+    });
+  });
+
+  describe('searchUsers', () => {
+    it('should search users successfully', async () => {
+      const searchUsersDto = { query: 'test', page: 1, limit: 10 };
+      const mockResponse = {
+        query: 'test',
+        results: [{ uid: 'user1', nombre: 'testuser' }],
+        pagination: { page: 1, limit: 10, total: 1, total_pages: 1 },
+      };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.searchUsers(searchUsersDto);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.get).toHaveBeenCalledWith('/profile/search', {
+        params: {
+          query: searchUsersDto.query,
+          page: searchUsersDto.page,
+          limit: searchUsersDto.limit,
+        },
+      });
+    });
+
+    it('should throw error when search users fails', async () => {
+      const searchUsersDto = { query: 'test', page: 1, limit: 10 };
+
+      mockHttpService.get.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(service.searchUsers(searchUsersDto)).rejects.toThrow(
+        'Failed to search users',
+      );
+    });
+  });
+
+  describe('getProfile', () => {
+    it('should get profile successfully', async () => {
+      const userId = 'user123';
+      const mockResponse = {
+        uid: userId,
+        email: 'user@example.com',
+        nombre: 'Test User',
+      };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.getProfile(userId);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.get).toHaveBeenCalledWith(`/profile/${userId}`);
+    });
+
+    it('should throw error when get profile fails', async () => {
+      const userId = 'user123';
+
+      mockHttpService.get.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(service.getProfile(userId)).rejects.toThrow(
+        'Failed to get profile',
+      );
+    });
+  });
+
+  describe('updateProfile', () => {
+    it('should update profile successfully', async () => {
+      const userId = 'user123';
+      const updateProfileDto = { nombre: 'Updated Name' };
+      const mockResponse = { message: 'Profile updated successfully' };
+
+      mockHttpService.patch.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.updateProfile(userId, updateProfileDto);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.patch).toHaveBeenCalledWith(
+        `/profile/${userId}`,
+        updateProfileDto,
+      );
+    });
+
+    it('should throw error when update profile fails', async () => {
+      const userId = 'user123';
+      const updateProfileDto = { nombre: 'Updated Name' };
+
+      mockHttpService.patch.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(
+        service.updateProfile(userId, updateProfileDto),
+      ).rejects.toThrow('Failed to update profile');
+    });
+  });
+
+  describe('getPublicProfile', () => {
+    it('should get public profile successfully', async () => {
+      const userId = 'user123';
+      const mockResponse = {
+        uid: userId,
+        nombre: 'Test User',
+        foto_perfil_url: null,
+      };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.getPublicProfile(userId);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/profile/public/${userId}`,
+      );
+    });
+
+    it('should throw error when get public profile fails', async () => {
+      const userId = 'user123';
+
+      mockHttpService.get.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(service.getPublicProfile(userId)).rejects.toThrow(
+        'Failed to get public profile',
+      );
+    });
+  });
+
+  describe('followUser', () => {
+    it('should follow user successfully', async () => {
+      const userId = 'user123';
+      const followerUserId = 'follower456';
+      const mockResponse = { message: 'Ahora sigues a este usuario' };
+
+      mockHttpService.post.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.followUser(userId, followerUserId);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/profile/${userId}/follow`,
+        null,
+        { params: { follower_user_id: followerUserId } },
+      );
+    });
+
+    it('should throw error when follow user fails', async () => {
+      const userId = 'user123';
+      const followerUserId = 'follower456';
+
+      mockHttpService.post.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(service.followUser(userId, followerUserId)).rejects.toThrow(
+        'Failed to follow user',
+      );
+    });
+  });
+
+  describe('unfollowUser', () => {
+    it('should unfollow user successfully', async () => {
+      const userId = 'user123';
+      const followerUserId = 'follower456';
+      const mockResponse = { message: 'Has dejado de seguir a este usuario' };
+
+      mockHttpService.post.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.unfollowUser(userId, followerUserId);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/profile/${userId}/unfollow`,
+        null,
+        { params: { follower_user_id: followerUserId } },
+      );
+    });
+
+    it('should throw error when unfollow user fails', async () => {
+      const userId = 'user123';
+      const followerUserId = 'follower456';
+
+      mockHttpService.post.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(
+        service.unfollowUser(userId, followerUserId),
+      ).rejects.toThrow('Failed to unfollow user');
+    });
+  });
+
+  describe('isFollowing', () => {
+    it('should check if following successfully', async () => {
+      const userId = 'user123';
+      const followerUserId = 'follower456';
+      const mockResponse = { isFollowing: true };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.isFollowing(userId, followerUserId);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/profile/${userId}/is-following`,
+        { params: { follower_user_id: followerUserId } },
+      );
+    });
+
+    it('should throw error when check follow status fails', async () => {
+      const userId = 'user123';
+      const followerUserId = 'follower456';
+
+      mockHttpService.get.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(service.isFollowing(userId, followerUserId)).rejects.toThrow(
+        'Failed to check follow status',
+      );
+    });
+  });
+
+  describe('getFollowersCount', () => {
+    it('should get followers count successfully', async () => {
+      const userId = 'user123';
+      const mockResponse = { count: 42 };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.getFollowersCount(userId);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/profile/${userId}/followers-count`,
+      );
+    });
+
+    it('should throw error when get followers count fails', async () => {
+      const userId = 'user123';
+
+      mockHttpService.get.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(service.getFollowersCount(userId)).rejects.toThrow(
+        'Failed to get followers count',
+      );
+    });
+  });
+
+  describe('getFollowingCount', () => {
+    it('should get following count successfully', async () => {
+      const userId = 'user123';
+      const mockResponse = { count: 24 };
+
+      mockHttpService.get.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.getFollowingCount(userId);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/profile/${userId}/following-count`,
+      );
+    });
+
+    it('should throw error when get following count fails', async () => {
+      const userId = 'user123';
+
+      mockHttpService.get.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(service.getFollowingCount(userId)).rejects.toThrow(
+        'Failed to get following count',
       );
     });
   });
