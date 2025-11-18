@@ -21,6 +21,15 @@ export class UpdateProfileDto {
   apellido?: string;
 
   @ApiProperty({
+    description: 'Nombre completo del usuario',
+    example: 'Juan Carlos Pérez',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  nombre_completo?: string;
+
+  @ApiProperty({
     description: 'Email del usuario',
     example: 'juan.perez@email.com',
     required: false,

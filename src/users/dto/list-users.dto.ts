@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class ListUsersDto {
   @ApiProperty({
@@ -30,4 +30,13 @@ export class ListUsersDto {
   @Min(1, { message: 'Limit must be at least 1' })
   @Max(100, { message: 'Limit must be at most 100' })
   limit?: number = 10;
+
+  @ApiProperty({
+    description: 'Search by username',
+    example: 'john',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Search must be a string' })
+  search?: string;
 }

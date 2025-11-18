@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { User, type FirebaseUser } from '../auth/user.decorator';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { AdminRegisterDto } from './dto/admin-register.dto';
 import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
@@ -390,9 +391,9 @@ export class UsersController {
   })
   async followUser(
     @Param('userId') userId: string,
-    @Query('follower_user_id') followerUserId: string,
+    @User() currentUser: FirebaseUser,
   ): Promise<any> {
-    return this.usersService.followUser(userId, followerUserId);
+    return this.usersService.followUser(userId, currentUser.uid);
   }
 
   @Post('profile/:userId/unfollow')
@@ -407,9 +408,9 @@ export class UsersController {
   })
   async unfollowUser(
     @Param('userId') userId: string,
-    @Query('follower_user_id') followerUserId: string,
+    @User() currentUser: FirebaseUser,
   ): Promise<any> {
-    return this.usersService.unfollowUser(userId, followerUserId);
+    return this.usersService.unfollowUser(userId, currentUser.uid);
   }
 
   @Get('profile/:userId/is-following')
@@ -455,5 +456,41 @@ export class UsersController {
   })
   async getFollowingCount(@Param('userId') userId: string): Promise<any> {
     return this.usersService.getFollowingCount(userId);
+  }
+
+  @Get('profile/:userId/followers')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({
+    summary: 'Get followers',
+    description: 'Get list of user followers with pagination',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Followers retrieved successfully',
+  })
+  async getFollowers(
+    @Param('userId') userId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ): Promise<any> {
+    return this.usersService.getFollowers(userId, page, limit);
+  }
+
+  @Get('profile/:userId/following')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiOperation({
+    summary: 'Get following',
+    description: 'Get list of users being followed with pagination',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Following list retrieved successfully',
+  })
+  async getFollowing(
+    @Param('userId') userId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ): Promise<any> {
+    return this.usersService.getFollowing(userId, page, limit);
   }
 }

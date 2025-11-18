@@ -1082,9 +1082,7 @@ describe('UsersService', () => {
 
       expect(result).toEqual(mockResponse);
       expect(mockHttpService.post).toHaveBeenCalledWith(
-        `/profile/${userId}/follow`,
-        null,
-        { params: { follower_user_id: followerUserId } },
+        `/profile/${followerUserId}/follow/${userId}`,
       );
     });
 
@@ -1114,9 +1112,7 @@ describe('UsersService', () => {
 
       expect(result).toEqual(mockResponse);
       expect(mockHttpService.post).toHaveBeenCalledWith(
-        `/profile/${userId}/unfollow`,
-        null,
-        { params: { follower_user_id: followerUserId } },
+        `/profile/${followerUserId}/unfollow/${userId}`,
       );
     });
 
@@ -1146,8 +1142,7 @@ describe('UsersService', () => {
 
       expect(result).toEqual(mockResponse);
       expect(mockHttpService.get).toHaveBeenCalledWith(
-        `/profile/${userId}/is-following`,
-        { params: { follower_user_id: followerUserId } },
+        `/profile/${followerUserId}/is-following/${userId}`,
       );
     });
 

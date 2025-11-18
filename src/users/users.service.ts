@@ -381,13 +381,16 @@ export class UsersService {
 
   async listUsers(listUsersDto: ListUsersDto): Promise<any> {
     try {
+      const params: Record<string, any> = {
+        page: listUsersDto.page,
+        limit: listUsersDto.limit,
+      };
+      if (listUsersDto.search) {
+        params.search = listUsersDto.search;
+      }
+
       const response = await firstValueFrom(
-        this.httpService.get('/admin/users', {
-          params: {
-            page: listUsersDto.page,
-            limit: listUsersDto.limit,
-          },
-        }),
+        this.httpService.get('/admin/users', { params }),
       );
       return response.data;
     } catch (error: unknown) {
@@ -591,9 +594,7 @@ export class UsersService {
   async followUser(userId: string, followerUserId: string): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.post(`/profile/${userId}/follow`, null, {
-          params: { follower_user_id: followerUserId },
-        }),
+        this.httpService.post(`/profile/${followerUserId}/follow/${userId}`),
       );
       return response.data;
     } catch (error: unknown) {
@@ -612,9 +613,7 @@ export class UsersService {
   async unfollowUser(userId: string, followerUserId: string): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.post(`/profile/${userId}/unfollow`, null, {
-          params: { follower_user_id: followerUserId },
-        }),
+        this.httpService.post(`/profile/${followerUserId}/unfollow/${userId}`),
       );
       return response.data;
     } catch (error: unknown) {
@@ -633,9 +632,9 @@ export class UsersService {
   async isFollowing(userId: string, followerUserId: string): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`/profile/${userId}/is-following`, {
-          params: { follower_user_id: followerUserId },
-        }),
+        this.httpService.get(
+          `/profile/${followerUserId}/is-following/${userId}`,
+        ),
       );
       return response.data;
     } catch (error: unknown) {
@@ -683,6 +682,56 @@ export class UsersService {
           status: 'error',
           message: 'Failed to get following count',
           code: 'get_following_count_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getFollowers(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`/profile/${userId}/followers`, {
+          params: { page, limit },
+        }),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error getting followers:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to get followers',
+          code: 'get_followers_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getFollowing(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`/profile/${userId}/following`, {
+          params: { page, limit },
+        }),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error getting following:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to get following',
+          code: 'get_following_failed',
         },
         HttpStatus.BAD_REQUEST,
       );
