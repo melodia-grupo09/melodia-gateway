@@ -740,6 +740,62 @@ describe('UsersService', () => {
         'Failed to list users',
       );
     });
+
+    it('should successfully list users with search parameter', async () => {
+      const listUsersDto: ListUsersDto = {
+        page: 1,
+        limit: 10,
+        search: 'john',
+      };
+
+      const mockResponse = {
+        data: {
+          users: [
+            { id: 'user1', email: 'john@example.com', username: 'john_doe' },
+            { id: 'user2', email: 'johnny@example.com', username: 'johnny' },
+          ],
+          total: 2,
+          page: 1,
+          limit: 10,
+        },
+      };
+
+      const mockHttpService = {
+        get: jest.fn().mockReturnValue(of(mockResponse)),
+        post: jest.fn(),
+      };
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          UsersService,
+          {
+            provide: HttpService,
+            useValue: mockHttpService,
+          },
+          {
+            provide: MetricsService,
+            useValue: mockMetricsService,
+          },
+          {
+            provide: ArtistsService,
+            useValue: mockArtistsService,
+          },
+        ],
+      }).compile();
+
+      const testService = module.get<UsersService>(UsersService);
+      const result = await testService.listUsers(listUsersDto);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/admin/users', {
+        params: {
+          page: listUsersDto.page,
+          limit: listUsersDto.limit,
+          search: listUsersDto.search,
+        },
+      });
+
+      expect(result).toEqual(mockResponse.data);
+    });
   });
 
   describe('blockUser', () => {
@@ -1212,6 +1268,84 @@ describe('UsersService', () => {
 
       await expect(service.getFollowingCount(userId)).rejects.toThrow(
         'Failed to get following count',
+      );
+    });
+  });
+
+  describe('getFollowers', () => {
+    it('should get followers successfully', async () => {
+      const userId = 'user123';
+      const page = 1;
+      const limit = 10;
+      const mockResponse = {
+        data: {
+          followers: [
+            { id: 'follower1', username: 'follower1' },
+            { id: 'follower2', username: 'follower2' },
+          ],
+          pagination: { page: 1, limit: 10, total: 2 },
+        },
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.getFollowers(userId, page, limit);
+
+      expect(result).toEqual(mockResponse.data);
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/profile/${userId}/followers`,
+        { params: { page, limit } },
+      );
+    });
+
+    it('should handle errors when getting followers fails', async () => {
+      const userId = 'user123';
+
+      mockHttpService.get.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(service.getFollowers(userId)).rejects.toThrow(
+        'Failed to get followers',
+      );
+    });
+  });
+
+  describe('getFollowing', () => {
+    it('should get following list successfully', async () => {
+      const userId = 'user123';
+      const page = 1;
+      const limit = 10;
+      const mockResponse = {
+        data: {
+          following: [
+            { id: 'following1', username: 'following1' },
+            { id: 'following2', username: 'following2' },
+          ],
+          pagination: { page: 1, limit: 10, total: 2 },
+        },
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.getFollowing(userId, page, limit);
+
+      expect(result).toEqual(mockResponse.data);
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/profile/${userId}/following`,
+        { params: { page, limit } },
+      );
+    });
+
+    it('should handle errors when getting following fails', async () => {
+      const userId = 'user123';
+
+      mockHttpService.get.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      await expect(service.getFollowing(userId)).rejects.toThrow(
+        'Failed to get following',
       );
     });
   });

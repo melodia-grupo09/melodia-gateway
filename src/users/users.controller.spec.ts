@@ -25,6 +25,15 @@ describe('UsersController', () => {
     blockUser: jest.fn(),
     unblockUser: jest.fn(),
     deleteUser: jest.fn(),
+    followUser: jest.fn(),
+    unfollowUser: jest.fn(),
+    isFollowing: jest.fn(),
+    getFollowersCount: jest.fn(),
+    getFollowingCount: jest.fn(),
+    getFollowers: jest.fn(),
+    getFollowing: jest.fn(),
+    getUserProfile: jest.fn(),
+    updateUserProfile: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -274,6 +283,106 @@ describe('UsersController', () => {
       const result = await controller.deleteUser(userId);
 
       expect(mockUsersService.deleteUser).toHaveBeenCalledWith(userId);
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('followUser', () => {
+    it('should follow user successfully using current user from decorator', async () => {
+      const userId = 'user-to-follow';
+      const currentUser = { uid: 'current-user-id' };
+      const mockResult = {
+        status: 'success',
+        message: 'User followed successfully',
+      };
+
+      mockUsersService.followUser.mockResolvedValue(mockResult);
+
+      const result = await controller.followUser(userId, currentUser);
+
+      expect(mockUsersService.followUser).toHaveBeenCalledWith(
+        userId,
+        currentUser.uid,
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('unfollowUser', () => {
+    it('should unfollow user successfully using current user from decorator', async () => {
+      const userId = 'user-to-unfollow';
+      const currentUser = { uid: 'current-user-id' };
+      const mockResult = {
+        status: 'success',
+        message: 'User unfollowed successfully',
+      };
+
+      mockUsersService.unfollowUser.mockResolvedValue(mockResult);
+
+      const result = await controller.unfollowUser(userId, currentUser);
+
+      expect(mockUsersService.unfollowUser).toHaveBeenCalledWith(
+        userId,
+        currentUser.uid,
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getFollowers', () => {
+    it('should get user followers successfully', async () => {
+      const userId = 'test-user-id';
+      const page = 1;
+      const limit = 10;
+      const mockResult = {
+        status: 'success',
+        data: {
+          followers: [
+            { id: 'follower1', username: 'follower1' },
+            { id: 'follower2', username: 'follower2' },
+          ],
+          pagination: { page: 1, limit: 10, total: 2 },
+        },
+      };
+
+      mockUsersService.getFollowers.mockResolvedValue(mockResult);
+
+      const result = await controller.getFollowers(userId, page, limit);
+
+      expect(mockUsersService.getFollowers).toHaveBeenCalledWith(
+        userId,
+        page,
+        limit,
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getFollowing', () => {
+    it('should get user following list successfully', async () => {
+      const userId = 'test-user-id';
+      const page = 1;
+      const limit = 10;
+      const mockResult = {
+        status: 'success',
+        data: {
+          following: [
+            { id: 'following1', username: 'following1' },
+            { id: 'following2', username: 'following2' },
+          ],
+          pagination: { page: 1, limit: 10, total: 2 },
+        },
+      };
+
+      mockUsersService.getFollowing.mockResolvedValue(mockResult);
+
+      const result = await controller.getFollowing(userId, page, limit);
+
+      expect(mockUsersService.getFollowing).toHaveBeenCalledWith(
+        userId,
+        page,
+        limit,
+      );
       expect(result).toEqual(mockResult);
     });
   });
