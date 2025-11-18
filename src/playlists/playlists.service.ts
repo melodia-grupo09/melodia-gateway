@@ -9,6 +9,7 @@ import { CreateLikedSongDto } from './dto/create-liked-song.dto';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { GetHistoryQueryDto } from './dto/get-history-query.dto';
 import { ReorderSongDto } from './dto/reorder-song.dto';
+import { SearchPlaylistsDto } from './dto/search-playlists.dto';
 
 @Injectable()
 export class PlaylistsService {
@@ -19,6 +20,26 @@ export class PlaylistsService {
   ) {}
 
   // Playlist endpoints
+  async searchPlaylists(searchPlaylistsDto: SearchPlaylistsDto) {
+    const params: Record<string, any> = {
+      page: searchPlaylistsDto.page || 1,
+      limit: searchPlaylistsDto.limit || 10,
+    };
+
+    if (searchPlaylistsDto.search) {
+      params.search = searchPlaylistsDto.search;
+    }
+
+    if (searchPlaylistsDto.user_id) {
+      params.user_id = searchPlaylistsDto.user_id;
+    }
+
+    const response = await firstValueFrom(
+      this.httpService.get('/playlists/search', { params }),
+    );
+    return response.data;
+  }
+
   async createPlaylist(userId: string, createPlaylistDto: CreatePlaylistDto) {
     const response = await firstValueFrom(
       this.httpService.post('/playlists/', createPlaylistDto, {

@@ -29,6 +29,7 @@ describe('PlaylistsController', () => {
     addSongToPlaylist: jest.fn(),
     removeSongFromPlaylist: jest.fn(),
     reorderPlaylistSongs: jest.fn(),
+    searchPlaylists: jest.fn(),
     // Liked songs methods
     getLikedSongs: jest.fn(),
     addLikedSong: jest.fn(),
@@ -57,6 +58,106 @@ describe('PlaylistsController', () => {
 
     // Clear all mocks before each test
     jest.clearAllMocks();
+  });
+
+  describe('searchPlaylists', () => {
+    it('should search playlists successfully', async () => {
+      const searchQuery = {
+        search: 'rock',
+        page: 1,
+        limit: 10,
+      };
+
+      const expectedResult = {
+        playlists: [
+          {
+            id: 'playlist-1',
+            name: 'Rock Classics',
+            cover_url: 'https://example.com/cover1.jpg',
+            is_public: true,
+            owner_id: 'user-1',
+            created_at: '2025-10-18T00:00:00Z',
+          },
+          {
+            id: 'playlist-2',
+            name: 'Modern Rock',
+            cover_url: 'https://example.com/cover2.jpg',
+            is_public: false,
+            owner_id: 'user-2',
+            created_at: '2025-10-18T01:00:00Z',
+          },
+        ],
+        total: 2,
+        page: 1,
+        limit: 10,
+      };
+
+      mockPlaylistsService.searchPlaylists.mockResolvedValue(expectedResult);
+
+      const result = await controller.searchPlaylists(searchQuery);
+
+      expect(mockPlaylistsService.searchPlaylists).toHaveBeenCalledWith(
+        searchQuery,
+      );
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should search playlists without search term', async () => {
+      const searchQuery = {
+        page: 2,
+        limit: 20,
+      };
+
+      const expectedResult = {
+        playlists: [],
+        total: 0,
+        page: 2,
+        limit: 20,
+      };
+
+      mockPlaylistsService.searchPlaylists.mockResolvedValue(expectedResult);
+
+      const result = await controller.searchPlaylists(searchQuery);
+
+      expect(mockPlaylistsService.searchPlaylists).toHaveBeenCalledWith(
+        searchQuery,
+      );
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should search playlists with user_id filter', async () => {
+      const searchQuery = {
+        search: 'jazz',
+        user_id: 'user123',
+        page: 1,
+        limit: 5,
+      };
+
+      const expectedResult = {
+        playlists: [
+          {
+            id: 'playlist-3',
+            name: 'Jazz Collection',
+            cover_url: 'https://example.com/jazz.jpg',
+            is_public: true,
+            owner_id: 'user123',
+            created_at: '2025-10-18T02:00:00Z',
+          },
+        ],
+        total: 1,
+        page: 1,
+        limit: 5,
+      };
+
+      mockPlaylistsService.searchPlaylists.mockResolvedValue(expectedResult);
+
+      const result = await controller.searchPlaylists(searchQuery);
+
+      expect(mockPlaylistsService.searchPlaylists).toHaveBeenCalledWith(
+        searchQuery,
+      );
+      expect(result).toEqual(expectedResult);
+    });
   });
 
   describe('createPlaylist', () => {

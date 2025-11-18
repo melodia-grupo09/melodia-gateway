@@ -29,6 +29,7 @@ import { CreateLikedSongDto } from './dto/create-liked-song.dto';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { GetHistoryQueryDto } from './dto/get-history-query.dto';
 import { ReorderSongDto } from './dto/reorder-song.dto';
+import { SearchPlaylistsDto } from './dto/search-playlists.dto';
 import { PlaylistsService } from './playlists.service';
 
 @ApiTags('playlists')
@@ -220,6 +221,41 @@ export class PlaylistsController {
   }
 
   // Playlist endpoints
+  @Get('search')
+  @ApiOperation({
+    summary: 'Search playlists',
+    description: 'Busca playlists por nombre con paginación',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Playlists found successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        playlists: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              name: { type: 'string' },
+              cover_url: { type: 'string', nullable: true },
+              is_public: { type: 'boolean' },
+              owner_id: { type: 'string' },
+              created_at: { type: 'string', format: 'date-time' },
+            },
+          },
+        },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        limit: { type: 'number' },
+      },
+    },
+  })
+  async searchPlaylists(@Query() searchPlaylistsDto: SearchPlaylistsDto) {
+    return this.playlistsService.searchPlaylists(searchPlaylistsDto);
+  }
+
   @Post()
   @ApiOperation({ summary: 'Create a new playlist' })
   @ApiResponse({ status: 201, description: 'Playlist created successfully' })

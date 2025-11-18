@@ -58,6 +58,154 @@ describe('PlaylistsService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('searchPlaylists', () => {
+    it('should search playlists successfully with all parameters', async () => {
+      const searchPlaylistsDto = {
+        search: 'rock',
+        page: 1,
+        limit: 10,
+        user_id: 'user123',
+      };
+
+      const mockResponse = {
+        data: {
+          playlists: [
+            {
+              id: 'playlist-1',
+              name: 'Rock Classics',
+              cover_url: 'https://example.com/cover1.jpg',
+              is_public: true,
+              owner_id: 'user123',
+              created_at: '2025-10-18T00:00:00Z',
+            },
+          ],
+          total: 1,
+          page: 1,
+          limit: 10,
+        },
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.searchPlaylists(searchPlaylistsDto);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/playlists/search', {
+        params: {
+          page: 1,
+          limit: 10,
+          search: 'rock',
+          user_id: 'user123',
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should search playlists with minimal parameters', async () => {
+      const searchPlaylistsDto = {
+        page: 2,
+        limit: 20,
+      };
+
+      const mockResponse = {
+        data: {
+          playlists: [],
+          total: 0,
+          page: 2,
+          limit: 20,
+        },
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.searchPlaylists(searchPlaylistsDto);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/playlists/search', {
+        params: {
+          page: 2,
+          limit: 20,
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should search playlists with default values when not provided', async () => {
+      const searchPlaylistsDto = {
+        search: 'jazz',
+      };
+
+      const mockResponse = {
+        data: {
+          playlists: [
+            {
+              id: 'playlist-2',
+              name: 'Jazz Collection',
+              cover_url: null,
+              is_public: false,
+              owner_id: 'user456',
+              created_at: '2025-10-18T01:00:00Z',
+            },
+          ],
+          total: 1,
+          page: 1,
+          limit: 10,
+        },
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.searchPlaylists(searchPlaylistsDto);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/playlists/search', {
+        params: {
+          page: 1,
+          limit: 10,
+          search: 'jazz',
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should search playlists with only search parameter', async () => {
+      const searchPlaylistsDto = {
+        search: 'classical',
+        page: undefined,
+        limit: undefined,
+        user_id: undefined,
+      };
+
+      const mockResponse = {
+        data: {
+          playlists: [
+            {
+              id: 'playlist-3',
+              name: 'Classical Masterpieces',
+              cover_url: 'https://example.com/classical.jpg',
+              is_public: true,
+              owner_id: 'user789',
+              created_at: '2025-10-18T02:00:00Z',
+            },
+          ],
+          total: 1,
+          page: 1,
+          limit: 10,
+        },
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.searchPlaylists(searchPlaylistsDto);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/playlists/search', {
+        params: {
+          page: 1,
+          limit: 10,
+          search: 'classical',
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('createPlaylist', () => {
     it('should create a playlist successfully', async () => {
       const userId = 'user-123';
