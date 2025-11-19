@@ -136,7 +136,11 @@ export class ArtistsService {
       }
 
       // Get user's followers
-      const followers = await this.usersService.getFollowers(artist.user_id);
+      const followers = await this.usersService.getFollowers(
+        artist.user_id,
+        1,
+        50,
+      );
 
       if (followers.followers && Array.isArray(followers.followers)) {
         // Send notification to each follower (non-blocking)

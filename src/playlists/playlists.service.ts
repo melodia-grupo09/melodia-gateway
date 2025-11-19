@@ -106,7 +106,7 @@ export class PlaylistsService {
       const followersResponse = await this.usersService.getFollowers(
         userId,
         1,
-        1000,
+        50,
       );
 
       this.logger.log(
