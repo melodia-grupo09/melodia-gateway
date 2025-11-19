@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { SendNotificationToUsersBatchPayloadDTO } from 'src/notifications/dtos/send-notification.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { UsersService } from '../users/users.service';
 import { CreateReleaseDto } from './dto/create-release.dto';
@@ -142,39 +143,32 @@ export class ArtistsService {
         50,
       );
 
-      if (followers.followers && Array.isArray(followers.followers)) {
-        // Send notification to each follower (non-blocking)
-        const notificationPromises = followers.followers.map(
-          async (follower) => {
-            const notificationData = {
-              userId: follower.uid,
-              title: 'Nuevo Release',
-              body: `Un artista que sigues ha lanzado un nuevo release: "${releaseTitle}"`,
-              data: {
-                type: 'release_created',
-                releaseTitle,
-                createdId: releaseId,
-                artistId,
-                userId: artist.user_id,
-              },
-            };
-
-            return this.notificationsService
-              .sendNotificationToUserDevices(notificationData)
-              .catch((error) => {
-                console.error(
-                  `Failed to send notification to user ${follower.uid}:`,
-                  error,
-                );
-              });
-          },
-        );
-
-        // Execute all notifications concurrently but don't wait for them
-        Promise.all(notificationPromises).catch((error) => {
-          console.error('Some notifications failed to send:', error);
-        });
+      if (!followers.followers || !Array.isArray(followers.followers)) {
+        return;
       }
+      // Send notification to each follower (non-blocking)
+      const followerIds = followers.followers.map((follower) => follower.uid);
+      const notificationData: SendNotificationToUsersBatchPayloadDTO = {
+        userIds: followerIds,
+        title: 'Nuevo Release',
+        body: `Un artista que sigues ha lanzado un nuevo release: ${releaseTitle}`,
+        data: {
+          type: 'release_created',
+          releaseTitle,
+          createdId: releaseId,
+          artistId,
+          userId: artist.user_id,
+        },
+      };
+
+      return this.notificationsService
+        .sendNotificationToUsersDevicesBatch(notificationData)
+        .catch((error) => {
+          console.error(
+            `Failed to send notification to user ${followerIds}:`,
+            error,
+          );
+        });
     } catch (error) {
       console.error('Error getting followers for release notification:', error);
     }

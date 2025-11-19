@@ -2,6 +2,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { SendNotificationToUsersBatchPayloadDTO } from 'src/notifications/dtos/send-notification.dto';
 import { MetricsService } from '../metrics/metrics.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { UsersService } from '../users/users.service';
@@ -115,43 +116,34 @@ export class PlaylistsService {
       this.logger.log(`Followers data: ${JSON.stringify(followersResponse)}`);
 
       if (
-        followersResponse.followers &&
-        Array.isArray(followersResponse.followers)
+        !followersResponse.followers ||
+        !Array.isArray(followersResponse.followers)
       ) {
-        const notificationPromises = followersResponse.followers.map(
-          async (follower) => {
-            const notificationData = {
-              userId: follower.uid,
-              title: 'Nueva Playlist Pública',
-              body: `Un usuario que sigues ha creado una nueva playlist: "${playlistName}"`,
-              data: {
-                type: 'playlist_created',
-                playlistName,
-                createdId: playlistId,
-                creatorId: userId,
-              },
-            };
-
-            return this.notificationsService
-              .sendNotificationToUserDevices(notificationData)
-              .catch((error) => {
-                console.error(
-                  `Failed to send notification to user ${follower.uid}:`,
-                  error,
-                );
-              });
-          },
-        );
-
-        this.logger.log(
-          `Prepared ${notificationPromises.length} notification(s) for followers of user ${userId}`,
-        );
-
-        // Execute all notifications concurrently but don't wait for them
-        Promise.all(notificationPromises).catch((error) => {
-          console.error('Some notifications failed to send:', error);
-        });
+        return;
       }
+      const followerIds = followersResponse.followers.map(
+        (follower) => follower.uid,
+      );
+      const notificationData: SendNotificationToUsersBatchPayloadDTO = {
+        userIds: followerIds,
+        title: 'Nueva Playlist Pública',
+        body: `Un usuario que sigues ha creado una nueva playlist: ${playlistName}`,
+        data: {
+          type: 'playlist_created',
+          playlistName,
+          createdId: playlistId,
+          creatorId: userId,
+        },
+      };
+
+      return this.notificationsService
+        .sendNotificationToUsersDevicesBatch(notificationData)
+        .catch((error) => {
+          console.error(
+            `Failed to send notification to users ${followerIds}:`,
+            error,
+          );
+        });
     } catch (error) {
       console.error(
         'Error getting followers for playlist notification:',

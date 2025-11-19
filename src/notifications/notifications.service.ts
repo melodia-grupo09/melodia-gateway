@@ -4,7 +4,10 @@ import { Injectable } from '@nestjs/common';
 import { UUID } from 'crypto';
 import { firstValueFrom } from 'rxjs';
 import { AddDevicePayloadDTO } from './dtos/add-device.dto';
-import { SendNotificationToUserPayloadDTO } from './dtos/send-notification.dto';
+import {
+  SendNotificationToUserPayloadDTO,
+  SendNotificationToUsersBatchPayloadDTO,
+} from './dtos/send-notification.dto';
 import { UserNotificationDTO } from './dtos/user-notification.dto';
 
 @Injectable()
@@ -41,6 +44,15 @@ export class NotificationsService {
   async sendNotificationToUserDevices(dto: SendNotificationToUserPayloadDTO) {
     const response = await firstValueFrom(
       this.httpService.post('/notifications/send', dto),
+    );
+    return response.data;
+  }
+
+  async sendNotificationToUsersDevicesBatch(
+    dto: SendNotificationToUsersBatchPayloadDTO,
+  ) {
+    const response = await firstValueFrom(
+      this.httpService.post('/notifications/sendBatch', dto),
     );
     return response.data;
   }
