@@ -24,6 +24,24 @@ import { RegisterUserDto } from './dto/register-user.dto';
 import { SearchUsersDto } from './dto/search-users.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
+interface User {
+  uid: string;
+  nombre: string;
+  nombre_completo: string;
+  foto_perfil_url: string | null;
+  esArtista: boolean;
+}
+
+interface FollowersResponse {
+  followers: User[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    total_pages: number;
+  };
+}
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -744,7 +762,7 @@ export class UsersService {
     userId: string,
     page: number = 1,
     limit: number = 10,
-  ): Promise<any> {
+  ): Promise<FollowersResponse> {
     try {
       const response = await firstValueFrom(
         this.httpService.get(`/profile/${userId}/followers`, {

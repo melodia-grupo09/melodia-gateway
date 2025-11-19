@@ -13,19 +13,6 @@ import { GetHistoryQueryDto } from './dto/get-history-query.dto';
 import { ReorderSongDto } from './dto/reorder-song.dto';
 import { SearchPlaylistsDto } from './dto/search-playlists.dto';
 
-interface User {
-  id: string;
-  [key: string]: unknown;
-}
-
-interface FollowersResponse {
-  data: {
-    users: User[];
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-}
-
 @Injectable()
 export class PlaylistsService {
   private readonly logger = new Logger(PlaylistsService.name);
@@ -116,18 +103,25 @@ export class PlaylistsService {
   ): Promise<void> {
     try {
       // Get user's followers
-      const followers = await this.usersService.getFollowers(userId);
+      const followersResponse = await this.usersService.getFollowers(
+        userId,
+        1,
+        1000,
+      );
 
       this.logger.log(
         `Notifying followers of user ${userId} about new playlist "${playlistName}" with ID ${playlistId}`,
       );
-      this.logger.log(`Followers data: ${JSON.stringify(followers)}`);
+      this.logger.log(`Followers data: ${JSON.stringify(followersResponse)}`);
 
-      if (followers?.data?.users && Array.isArray(followers.data.users)) {
-        const notificationPromises = followers.data.users.map(
-          async (follower: User) => {
+      if (
+        followersResponse.followers &&
+        Array.isArray(followersResponse.followers)
+      ) {
+        const notificationPromises = followersResponse.followers.map(
+          async (follower) => {
             const notificationData = {
-              userId: follower.id,
+              userId: follower.uid,
               title: 'Nueva Playlist Pública',
               body: `Un usuario que sigues ha creado una nueva playlist: "${playlistName}"`,
               data: {
@@ -142,7 +136,7 @@ export class PlaylistsService {
               .sendNotificationToUserDevices(notificationData)
               .catch((error) => {
                 console.error(
-                  `Failed to send notification to user ${follower.id}:`,
+                  `Failed to send notification to user ${follower.uid}:`,
                   error,
                 );
               });
