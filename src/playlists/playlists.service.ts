@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MetricsService } from '../metrics/metrics.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -28,6 +28,7 @@ interface FollowersResponse {
 
 @Injectable()
 export class PlaylistsService {
+  private readonly logger = new Logger(PlaylistsService.name);
   constructor(
     private readonly httpService: HttpService,
     @Inject(forwardRef(() => MetricsService))
@@ -73,6 +74,9 @@ export class PlaylistsService {
     }
 
     // Send notifications to followers if playlist is public (non-blocking)
+    this.logger.log(
+      `Playlist "${createPlaylistDto.name}" created by user ${userId}. Public: ${createPlaylistDto.is_public}. Response data: ${JSON.stringify(response.data)}`,
+    );
     if (createPlaylistDto.is_public && response.data?.id) {
       this.sendPlaylistNotificationToFollowers(
         userId,
@@ -92,10 +96,9 @@ export class PlaylistsService {
     playlistName: string,
     playlistId: string,
   ): void {
-    // Non-blocking call - no await
     this.notifyFollowersAboutPlaylist(userId, playlistName, playlistId).catch(
       (error) => {
-        console.error(
+        this.logger.error(
           `Failed to notify followers about playlist for user ${userId}:`,
           error,
         );
