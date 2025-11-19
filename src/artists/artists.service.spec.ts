@@ -1,6 +1,8 @@
 import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
 import { of, throwError } from 'rxjs';
+import { NotificationsService } from '../notifications/notifications.service';
+import { UsersService } from '../users/users.service';
 import { ArtistsService } from './artists.service';
 
 describe('ArtistsService', () => {
@@ -13,6 +15,18 @@ describe('ArtistsService', () => {
     delete: jest.fn(),
   };
 
+  const mockUsersService = {
+    getFollowers: jest.fn().mockResolvedValue({
+      data: {
+        users: [{ id: 'follower1' }, { id: 'follower2' }],
+      },
+    }),
+  };
+
+  const mockNotificationsService = {
+    sendNotificationToUserDevices: jest.fn().mockResolvedValue(undefined),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -20,6 +34,14 @@ describe('ArtistsService', () => {
         {
           provide: HttpService,
           useValue: mockHttpService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: NotificationsService,
+          useValue: mockNotificationsService,
         },
       ],
     }).compile();
@@ -374,7 +396,6 @@ describe('ArtistsService', () => {
         type: 'album' as const,
         releaseDate: '2024-01-01',
         coverUrl: 'https://example.com/cover.jpg',
-        artistId: '123',
         songIds: ['song-1', 'song-2'],
       };
       const mockResponse = {
@@ -395,7 +416,6 @@ describe('ArtistsService', () => {
         type: string;
         releaseDate: string;
         coverUrl: string;
-        artistId: string;
         songIds: string[];
       };
 
@@ -404,6 +424,45 @@ describe('ArtistsService', () => {
         createReleaseDto,
       );
       expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should send notifications to followers when creating a release', async () => {
+      const artistId = '123';
+      const createReleaseDto = {
+        title: 'Exciting New Album',
+        type: 'album' as const,
+        releaseDate: '2024-01-01',
+      };
+
+      const mockResponse = {
+        data: {
+          id: 'release-123',
+          ...createReleaseDto,
+        },
+      };
+
+      // Mock the getArtist call to return artist with user_id
+      const mockArtistResponse = {
+        data: {
+          id: artistId,
+          user_id: 'user-456',
+          name: 'Test Artist',
+        },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+      mockHttpService.get.mockReturnValue(of(mockArtistResponse));
+
+      await service.createRelease(artistId, createReleaseDto);
+
+      // Give time for async notification to potentially be called
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/artists/${artistId}/releases`,
+        createReleaseDto,
+      );
+      expect(mockHttpService.get).toHaveBeenCalledWith(`/artists/${artistId}`);
     });
   });
 

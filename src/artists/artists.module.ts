@@ -1,6 +1,9 @@
 import { HttpModule } from '@nestjs/axios';
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { MetricsModule } from '../metrics/metrics.module';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { UsersModule } from '../users/users.module';
 import { ArtistsController } from './artists.controller';
 import { ArtistsService } from './artists.service';
 
@@ -13,6 +16,9 @@ import { ArtistsService } from './artists.service';
       }),
       inject: [ConfigService],
     }),
+    forwardRef(() => UsersModule),
+    forwardRef(() => MetricsModule),
+    NotificationsModule,
   ],
   controllers: [ArtistsController],
   providers: [ArtistsService],

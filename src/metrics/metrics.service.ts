@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ArtistsService } from '../artists/artists.service';
 
@@ -9,6 +9,7 @@ export class MetricsService {
 
   constructor(
     private readonly httpService: HttpService,
+    @Inject(forwardRef(() => ArtistsService))
     private readonly artistsService: ArtistsService,
   ) {}
 

@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { of } from 'rxjs';
 import { MetricsService } from '../metrics/metrics.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { UsersService } from '../users/users.service';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
 import { CreateLikedSongDto } from './dto/create-liked-song.dto';
@@ -30,6 +32,18 @@ describe('PlaylistsService', () => {
     recordSongLike: jest.fn().mockResolvedValue(undefined),
   };
 
+  const mockUsersService = {
+    getFollowers: jest.fn().mockResolvedValue({
+      data: {
+        users: [{ id: 'follower1' }, { id: 'follower2' }],
+      },
+    }),
+  };
+
+  const mockNotificationsService = {
+    sendNotificationToUserDevices: jest.fn().mockResolvedValue(undefined),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -45,6 +59,14 @@ describe('PlaylistsService', () => {
         {
           provide: MetricsService,
           useValue: mockMetricsService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: NotificationsService,
+          useValue: mockNotificationsService,
         },
       ],
     }).compile();
@@ -239,6 +261,68 @@ describe('PlaylistsService', () => {
         },
       );
       expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should send notifications to followers when creating a public playlist', async () => {
+      const userId = 'user-123';
+      const createPlaylistDto: CreatePlaylistDto = {
+        name: 'My Public Playlist',
+        is_public: true,
+      };
+
+      const mockResponse = {
+        data: {
+          id: 'playlist-123',
+          name: 'My Public Playlist',
+          is_public: true,
+          owner_id: userId,
+        },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      await service.createPlaylist(userId, createPlaylistDto);
+
+      // Give time for async notification to potentially be called
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        '/playlists/',
+        createPlaylistDto,
+        {
+          params: { user_id: userId },
+        },
+      );
+    });
+
+    it('should not send notifications when creating a private playlist', async () => {
+      const userId = 'user-123';
+      const createPlaylistDto: CreatePlaylistDto = {
+        name: 'My Private Playlist',
+        is_public: false,
+      };
+
+      const mockResponse = {
+        data: {
+          id: 'playlist-123',
+          name: 'My Private Playlist',
+          is_public: false,
+          owner_id: userId,
+        },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      await service.createPlaylist(userId, createPlaylistDto);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        '/playlists/',
+        createPlaylistDto,
+        {
+          params: { user_id: userId },
+        },
+      );
+      // No notification methods should be called for private playlists
     });
   });
 

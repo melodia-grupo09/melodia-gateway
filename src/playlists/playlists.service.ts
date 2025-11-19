@@ -3,6 +3,8 @@ import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MetricsService } from '../metrics/metrics.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { UsersService } from '../users/users.service';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
 import { CreateLikedSongDto } from './dto/create-liked-song.dto';
@@ -11,12 +13,28 @@ import { GetHistoryQueryDto } from './dto/get-history-query.dto';
 import { ReorderSongDto } from './dto/reorder-song.dto';
 import { SearchPlaylistsDto } from './dto/search-playlists.dto';
 
+interface User {
+  id: string;
+  [key: string]: unknown;
+}
+
+interface FollowersResponse {
+  data: {
+    users: User[];
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
 @Injectable()
 export class PlaylistsService {
   constructor(
     private readonly httpService: HttpService,
     @Inject(forwardRef(() => MetricsService))
     private readonly metricsService: MetricsService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   // Playlist endpoints
@@ -54,7 +72,80 @@ export class PlaylistsService {
       console.error('Failed to track playlist creation activity:', error);
     }
 
+    // Send notifications to followers if playlist is public (non-blocking)
+    if (createPlaylistDto.is_public) {
+      this.sendPlaylistNotificationToFollowers(userId, createPlaylistDto.name);
+    }
+
     return response.data;
+  }
+
+  /**
+   * Send notification to user's followers about new public playlist (non-blocking)
+   */
+  private sendPlaylistNotificationToFollowers(
+    userId: string,
+    playlistName: string,
+  ): void {
+    // Non-blocking call - no await
+    this.notifyFollowersAboutPlaylist(userId, playlistName).catch((error) => {
+      console.error(
+        `Failed to notify followers about playlist for user ${userId}:`,
+        error,
+      );
+    });
+  }
+
+  /**
+   * Internal method to handle the actual notification logic
+   */
+  private async notifyFollowersAboutPlaylist(
+    userId: string,
+    playlistName: string,
+  ): Promise<void> {
+    try {
+      // Get user's followers
+      const followers = (await this.usersService.getFollowers(
+        userId,
+      )) as FollowersResponse;
+
+      if (followers?.data?.users && Array.isArray(followers.data.users)) {
+        // Send notification to each follower (non-blocking)
+        const notificationPromises = followers.data.users.map(
+          (follower: User) => {
+            const notificationData = {
+              userId: follower.id,
+              title: 'Nueva Playlist Pública',
+              body: `Un usuario que sigues ha creado una nueva playlist: "${playlistName}"`,
+              data: {
+                type: 'playlist_created',
+                playlistName,
+                creatorId: userId,
+              },
+            };
+
+            return this.notificationsService
+              .sendNotificationToUserDevices(notificationData)
+              .catch((error) => {
+                console.error(
+                  `Failed to send notification to user ${follower.id}:`,
+                  error,
+                );
+              });
+          },
+        );
+
+        // Execute all notifications concurrently but don't wait for them
+        Promise.all(notificationPromises).catch((error) => {
+          console.error('Some notifications failed to send:', error);
+        });
+      }
+    } catch (error) {
+      console.error(
+        'Error getting followers for playlist notification:',
+        error,
+      );
+    }
   }
 
   async getPlaylists(userId?: string) {

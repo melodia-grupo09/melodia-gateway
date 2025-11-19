@@ -3,8 +3,10 @@ import {
   BadRequestException,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   UnauthorizedException,
+  forwardRef,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ArtistsService } from '../artists/artists.service';
@@ -26,7 +28,9 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 export class UsersService {
   constructor(
     private readonly httpService: HttpService,
+    @Inject(forwardRef(() => MetricsService))
     private readonly metricsService: MetricsService,
+    @Inject(forwardRef(() => ArtistsService))
     private readonly artistsService: ArtistsService,
   ) {}
 

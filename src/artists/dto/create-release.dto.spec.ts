@@ -94,18 +94,6 @@ describe('CreateReleaseDto', () => {
         true,
       );
     });
-
-    it('should fail validation with missing artistId', async () => {
-      const dto = plainToInstance(CreateReleaseDto, {
-        title: 'Test Album',
-        type: 'album',
-        releaseDate: '2024-01-15',
-      });
-
-      const errors = await validate(dto);
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors.some((error) => error.property === 'artistId')).toBe(true);
-    });
   });
 
   describe('field type validation', () => {

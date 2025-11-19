@@ -35,21 +35,13 @@ export class CreateReleaseDto {
   releaseDate: string;
 
   @ApiProperty({
-    description: 'Cover image URL',
-    example: 'https://cloudinary.com/cover.jpg',
+    description: 'Cover image URL (optional, can be updated later)',
+    example: 'https://example.com/album-cover.jpg',
     required: false,
   })
   @IsOptional()
   @IsUrl()
   coverUrl?: string;
-
-  @ApiProperty({
-    description: 'Artist ID who owns this release (Firebase UID or UUID)',
-    example: 'BkmRgBIizfWC7MaFVhyNHRTRa4A2',
-  })
-  @IsNotEmpty()
-  @IsString()
-  artistId: string;
 
   @ApiProperty({
     description: 'Array of song IDs from the songs microservice',
