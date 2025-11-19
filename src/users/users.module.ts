@@ -20,7 +20,7 @@ import { UsersService } from './users.service';
       inject: [ConfigService],
     }),
     forwardRef(() => ArtistsModule),
-    MetricsModule,
+    forwardRef(() => MetricsModule),
   ],
   controllers: [UsersController],
   providers: [UsersService],

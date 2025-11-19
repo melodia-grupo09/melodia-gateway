@@ -162,7 +162,9 @@ describe('UsersService', () => {
       const result = await service.registerUser(registerDto);
 
       expect(mockArtistsService.createArtist).toHaveBeenCalledWith(
-        expect.any(FormData),
+        expect.objectContaining({
+          _boundary: expect.any(String),
+        }),
       );
 
       expect(result).toEqual({
