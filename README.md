@@ -47,6 +47,7 @@ The gateway integrates with the following external services:
 - **Artists Service**: [https://melodia-artists-64869ccb2e15.herokuapp.com](https://melodia-artists-64869ccb2e15.herokuapp.com)
 - **Playlists Service**: [https://backend-playlist-service-4afcaf66ff1a.herokuapp.com](https://backend-playlist-service-4afcaf66ff1a.herokuapp.com)
 - **Metrics Service**: [https://melodia-metrics-e9ca6dea743b.herokuapp.com](https://melodia-metrics-e9ca6dea743b.herokuapp.com)
+- **Notifications Service**: [https://melodia-notification-service-4211bca82b5a.herokuapp.com](https://melodia-notification-service-4211bca82b5a.herokuapp.com)
 
 ## API Documentation
 
