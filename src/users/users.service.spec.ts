@@ -1096,6 +1096,99 @@ describe('UsersService', () => {
     });
   });
 
+  describe('uploadProfilePhoto', () => {
+    it('should upload profile photo successfully', async () => {
+      const userId = 'user123';
+      const mockFile = {
+        buffer: Buffer.from('fake-image-data'),
+        originalname: 'profile.jpg',
+        mimetype: 'image/jpeg',
+      } as Express.Multer.File;
+
+      const mockResponse = {
+        message: 'Profile photo uploaded successfully',
+        foto_perfil_url:
+          'https://res.cloudinary.com/example/image/upload/v123/profile.jpg',
+      };
+
+      mockHttpService.post.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.uploadProfilePhoto(userId, mockFile);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/profile/${userId}/photo`,
+        expect.objectContaining({
+          _boundary: expect.any(String),
+        }),
+        expect.objectContaining({
+          headers: expect.any(Object),
+        }),
+      );
+    });
+
+    it('should throw error when upload profile photo fails', async () => {
+      const userId = 'user123';
+      const mockFile = {
+        buffer: Buffer.from('fake-image-data'),
+        originalname: 'profile.jpg',
+        mimetype: 'image/jpeg',
+      } as Express.Multer.File;
+
+      mockHttpService.post.mockReturnValue(
+        throwError(() => new Error('Upload failed')),
+      );
+
+      await expect(
+        service.uploadProfilePhoto(userId, mockFile),
+      ).rejects.toThrow('Failed to upload profile photo');
+    });
+
+    it('should handle large file uploads', async () => {
+      const userId = 'user123';
+      const largeBuffer = Buffer.alloc(5 * 1024 * 1024); // 5MB
+      const mockFile = {
+        buffer: largeBuffer,
+        originalname: 'large-profile.jpg',
+        mimetype: 'image/jpeg',
+      } as Express.Multer.File;
+
+      const mockResponse = {
+        message: 'Profile photo uploaded successfully',
+        foto_perfil_url:
+          'https://res.cloudinary.com/example/image/upload/v123/large-profile.jpg',
+      };
+
+      mockHttpService.post.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.uploadProfilePhoto(userId, mockFile);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.post).toHaveBeenCalled();
+    });
+
+    it('should handle different image formats', async () => {
+      const userId = 'user123';
+      const mockFile = {
+        buffer: Buffer.from('fake-png-data'),
+        originalname: 'profile.png',
+        mimetype: 'image/png',
+      } as Express.Multer.File;
+
+      const mockResponse = {
+        message: 'Profile photo uploaded successfully',
+        foto_perfil_url:
+          'https://res.cloudinary.com/example/image/upload/v123/profile.png',
+      };
+
+      mockHttpService.post.mockReturnValue(of({ data: mockResponse }));
+
+      const result = await service.uploadProfilePhoto(userId, mockFile);
+
+      expect(result).toEqual(mockResponse);
+    });
+  });
+
   describe('getPublicProfile', () => {
     it('should get public profile successfully', async () => {
       const userId = 'user123';

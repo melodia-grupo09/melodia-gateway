@@ -34,6 +34,9 @@ describe('UsersController', () => {
     getFollowing: jest.fn(),
     getUserProfile: jest.fn(),
     updateUserProfile: jest.fn(),
+    uploadProfilePhoto: jest.fn(),
+    getProfile: jest.fn(),
+    updateProfile: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -384,6 +387,72 @@ describe('UsersController', () => {
         limit,
       );
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('uploadProfilePhoto', () => {
+    it('should upload profile photo successfully', async () => {
+      const userId = 'test-user-id';
+      const mockFile = {
+        buffer: Buffer.from('fake-image-data'),
+        originalname: 'profile.jpg',
+        mimetype: 'image/jpeg',
+        fieldname: 'file',
+        encoding: '7bit',
+        size: 1024,
+      } as Express.Multer.File;
+
+      const mockResult = {
+        message: 'Profile photo uploaded successfully',
+        foto_perfil_url:
+          'https://res.cloudinary.com/example/image/upload/v123/profile.jpg',
+      };
+
+      mockUsersService.uploadProfilePhoto.mockResolvedValue(mockResult);
+
+      const result = await controller.uploadProfilePhoto(userId, mockFile);
+
+      expect(mockUsersService.uploadProfilePhoto).toHaveBeenCalledWith(
+        userId,
+        mockFile,
+      );
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should handle missing file', async () => {
+      const userId = 'test-user-id';
+      const mockFile = undefined as any;
+
+      mockUsersService.uploadProfilePhoto.mockResolvedValue({
+        message: 'No file provided',
+      });
+
+      await controller.uploadProfilePhoto(userId, mockFile);
+
+      expect(mockUsersService.uploadProfilePhoto).toHaveBeenCalledWith(
+        userId,
+        mockFile,
+      );
+    });
+
+    it('should handle upload errors', async () => {
+      const userId = 'test-user-id';
+      const mockFile = {
+        buffer: Buffer.from('fake-image-data'),
+        originalname: 'profile.jpg',
+        mimetype: 'image/jpeg',
+        fieldname: 'file',
+        encoding: '7bit',
+        size: 1024,
+      } as Express.Multer.File;
+
+      mockUsersService.uploadProfilePhoto.mockRejectedValue(
+        new Error('Upload failed'),
+      );
+
+      await expect(
+        controller.uploadProfilePhoto(userId, mockFile),
+      ).rejects.toThrow('Upload failed');
     });
   });
 });
