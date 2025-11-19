@@ -9,10 +9,17 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { User, type FirebaseUser } from '../auth/user.decorator';
 import { AdminLoginDto } from './dto/admin-login.dto';
@@ -363,6 +370,29 @@ export class UsersController {
     @Body() updateProfileDto: UpdateProfileDto,
   ): Promise<any> {
     return this.usersService.updateProfile(userId, updateProfileDto);
+  }
+
+  @Post('profile/:userId/photo')
+  @UseGuards(FirebaseAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload profile photo',
+    description: 'Upload or update user profile photo',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile photo uploaded successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid file format or size',
+  })
+  async uploadProfilePhoto(
+    @Param('userId') userId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<any> {
+    return this.usersService.uploadProfilePhoto(userId, file);
   }
 
   @Get('profile/public/:userId')

@@ -8,9 +8,9 @@ import {
   UnauthorizedException,
   forwardRef,
 } from '@nestjs/common';
+import FormData from 'form-data';
 import { firstValueFrom } from 'rxjs';
 import { ArtistsService } from '../artists/artists.service';
-
 import { MetricsService } from '../metrics/metrics.service';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { AdminRegisterDto } from './dto/admin-register.dto';
@@ -35,7 +35,12 @@ export class UsersService {
   ) {}
 
   async registerUser(registerUserDto: RegisterUserDto): Promise<any> {
-    let response;
+    let response: {
+      data: {
+        user?: { uid?: string; email?: string };
+        [key: string]: unknown;
+      };
+    };
 
     try {
       response = await firstValueFrom(
@@ -109,19 +114,24 @@ export class UsersService {
     }
 
     // If user is an artist, create artist profile
-    const userData = response.data;
+    const userData = response.data as {
+      user?: { uid?: string; email?: string };
+      [key: string]: unknown;
+    };
     if (
       registerUserDto.isArtist === true &&
       userData?.user?.uid &&
       typeof userData.user.uid === 'string'
     ) {
-      const userId = userData.user.uid as string;
+      const userId = userData.user.uid;
       try {
         const formData = new FormData();
         formData.append('id', userId);
         formData.append('name', registerUserDto.username);
 
-        const artistResponse = await this.artistsService.createArtist(formData);
+        const artistResponse: unknown = await this.artistsService.createArtist(
+          formData as unknown as globalThis.FormData,
+        );
         console.log('Artist profile created:', artistResponse);
 
         // Record artist creation in metrics
@@ -570,6 +580,44 @@ export class UsersService {
           status: 'error',
           message: 'Failed to update profile',
           code: 'update_profile_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async uploadProfilePhoto(
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<any> {
+    try {
+      const formData = new FormData();
+
+      // Append the file buffer directly to FormData
+      const multerFile = file as unknown as {
+        buffer: Buffer;
+        originalname: string;
+        mimetype: string;
+      };
+
+      formData.append('file', multerFile.buffer, {
+        filename: multerFile.originalname,
+        contentType: multerFile.mimetype,
+      });
+
+      const response = await firstValueFrom(
+        this.httpService.post(`/profile/${userId}/photo`, formData, {
+          headers: formData.getHeaders() as Record<string, string>,
+        }),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error uploading profile photo:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to upload profile photo',
+          code: 'upload_photo_failed',
         },
         HttpStatus.BAD_REQUEST,
       );
