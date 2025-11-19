@@ -7,19 +7,6 @@ import { UsersService } from '../users/users.service';
 import { CreateReleaseDto } from './dto/create-release.dto';
 import { UpdateReleaseDto } from './dto/update-release.dto';
 
-interface User {
-  id: string;
-  [key: string]: unknown;
-}
-
-interface FollowersResponse {
-  data: {
-    users: User[];
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-}
-
 interface Artist {
   id: string;
   user_id: string;
@@ -87,10 +74,12 @@ export class ArtistsService {
     );
 
     // Send notifications to artist's followers about new release (non-blocking)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (response.data?.id) {
       this.sendReleaseNotificationToFollowers(
         artistId,
         createReleaseDto.title,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
         response.data.id,
       );
     }
@@ -150,8 +139,8 @@ export class ArtistsService {
       const followerIds = followers.followers.map((follower) => follower.uid);
       const notificationData: SendNotificationToUsersBatchPayloadDTO = {
         userIds: followerIds,
-        title: 'Nuevo Release',
-        body: `Un artista que sigues ha lanzado un nuevo release: ${releaseTitle}`,
+        title: 'New Release',
+        body: `An artist you follow has released a new album: ${releaseTitle}`,
         data: {
           type: 'release_created',
           releaseTitle,
@@ -161,11 +150,13 @@ export class ArtistsService {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return this.notificationsService
         .sendNotificationToUsersDevicesBatch(notificationData)
+
         .catch((error) => {
           console.error(
-            `Failed to send notification to user ${followerIds}:`,
+            `Failed to send notification to user ${followerIds.join(', ')}:`,
             error,
           );
         });

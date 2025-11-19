@@ -65,10 +65,12 @@ export class PlaylistsService {
     this.logger.log(
       `Playlist "${createPlaylistDto.name}" created by user ${userId}. Public: ${createPlaylistDto.is_public}. Response data: ${JSON.stringify(response.data)}`,
     );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (createPlaylistDto.is_public && response.data?.id) {
       this.sendPlaylistNotificationToFollowers(
         userId,
         createPlaylistDto.name,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
         response.data.id,
       );
     }
@@ -104,6 +106,7 @@ export class PlaylistsService {
   ): Promise<void> {
     try {
       // Get user's followers
+
       const followersResponse = await this.usersService.getFollowers(
         userId,
         1,
@@ -121,13 +124,15 @@ export class PlaylistsService {
       ) {
         return;
       }
+
       const followerIds = followersResponse.followers.map(
-        (follower) => follower.uid,
-      );
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        (follower: any) => follower.uid,
+      ) as string[];
       const notificationData: SendNotificationToUsersBatchPayloadDTO = {
         userIds: followerIds,
-        title: 'Nueva Playlist Pública',
-        body: `Un usuario que sigues ha creado una nueva playlist: ${playlistName}`,
+        title: 'New Public Playlist',
+        body: `A user you follow has created a new playlist: ${playlistName}`,
         data: {
           type: 'playlist_created',
           playlistName,
@@ -136,11 +141,12 @@ export class PlaylistsService {
         },
       };
 
-      return this.notificationsService
+      await this.notificationsService
         .sendNotificationToUsersDevicesBatch(notificationData)
+
         .catch((error) => {
           console.error(
-            `Failed to send notification to users ${followerIds}:`,
+            `Failed to send notification to users ${followerIds.join(', ')}:`,
             error,
           );
         });
