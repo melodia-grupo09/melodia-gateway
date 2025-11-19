@@ -120,10 +120,14 @@ export class PlaylistsService {
         userId,
       )) as FollowersResponse;
 
+      this.logger.log(
+        `Notifying followers of user ${userId} about new playlist "${playlistName}" with ID ${playlistId}`,
+      );
+      this.logger.log(`Followers data: ${JSON.stringify(followers.data)}`);
+
       if (followers?.data?.users && Array.isArray(followers.data.users)) {
-        // Send notification to each follower (non-blocking)
         const notificationPromises = followers.data.users.map(
-          (follower: User) => {
+          async (follower: User) => {
             const notificationData = {
               userId: follower.id,
               title: 'Nueva Playlist Pública',
@@ -145,6 +149,10 @@ export class PlaylistsService {
                 );
               });
           },
+        );
+
+        this.logger.log(
+          `Prepared ${notificationPromises.length} notification(s) for followers of user ${userId}`,
         );
 
         // Execute all notifications concurrently but don't wait for them
