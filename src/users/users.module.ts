@@ -3,6 +3,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ArtistsModule } from '../artists/artists.module';
 import { MetricsModule } from '../metrics/metrics.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
@@ -21,6 +22,7 @@ import { UsersService } from './users.service';
     }),
     forwardRef(() => ArtistsModule),
     forwardRef(() => MetricsModule),
+    NotificationsModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

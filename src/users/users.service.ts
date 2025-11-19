@@ -12,6 +12,7 @@ import FormData from 'form-data';
 import { firstValueFrom } from 'rxjs';
 import { ArtistsService } from '../artists/artists.service';
 import { MetricsService } from '../metrics/metrics.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { AdminRegisterDto } from './dto/admin-register.dto';
 import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
@@ -50,6 +51,7 @@ export class UsersService {
     private readonly metricsService: MetricsService,
     @Inject(forwardRef(() => ArtistsService))
     private readonly artistsService: ArtistsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async registerUser(registerUserDto: RegisterUserDto): Promise<any> {
@@ -666,6 +668,15 @@ export class UsersService {
       const response = await firstValueFrom(
         this.httpService.post(`/profile/${followerUserId}/follow/${userId}`),
       );
+
+      // Send notification to the followed user (non-blocking)
+      this.sendFollowNotification(userId, followerUserId).catch((error) => {
+        console.error(
+          `Failed to send follow notification to user ${userId}:`,
+          error,
+        );
+      });
+
       return response.data;
     } catch (error: unknown) {
       console.error('Error following user:', error);
@@ -677,6 +688,40 @@ export class UsersService {
         },
         HttpStatus.BAD_REQUEST,
       );
+    }
+  }
+
+  /**
+   * Send notification to user when someone follows them (non-blocking)
+   */
+  private async sendFollowNotification(
+    followedUserId: string,
+    followerUserId: string,
+  ): Promise<void> {
+    try {
+      // Get follower's profile to get their username
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const followerProfile = await this.getProfile(followerUserId);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+      const followerName = followerProfile?.nombre || 'A user';
+
+      const notificationData = {
+        userId: followedUserId,
+        title: 'New Follower',
+        body: `${followerName} started following you`,
+        data: {
+          type: 'user_followed',
+          createdId: followerUserId,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          followerName,
+        },
+      };
+
+      await this.notificationsService.sendNotificationToUserDevices(
+        notificationData,
+      );
+    } catch (error) {
+      console.error('Error sending follow notification:', error);
     }
   }
 

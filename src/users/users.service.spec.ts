@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { of, throwError } from 'rxjs';
 import { ArtistsService } from '../artists/artists.service';
 import { MetricsService } from '../metrics/metrics.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { AdminRegisterDto } from './dto/admin-register.dto';
 import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
@@ -32,6 +33,10 @@ describe('UsersService', () => {
     createArtist: jest.fn(),
   };
 
+  const mockNotificationsService = {
+    sendNotificationToUserDevices: jest.fn(),
+  };
+
   beforeEach(async () => {
     // Mock console.error to suppress error logs during tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -50,6 +55,10 @@ describe('UsersService', () => {
         {
           provide: ArtistsService,
           useValue: mockArtistsService,
+        },
+        {
+          provide: NotificationsService,
+          useValue: mockNotificationsService,
         },
       ],
     }).compile();
@@ -689,6 +698,10 @@ describe('UsersService', () => {
             provide: ArtistsService,
             useValue: mockArtistsService,
           },
+          {
+            provide: NotificationsService,
+            useValue: mockNotificationsService,
+          },
         ],
       }).compile();
 
@@ -732,6 +745,10 @@ describe('UsersService', () => {
           {
             provide: ArtistsService,
             useValue: mockArtistsService,
+          },
+          {
+            provide: NotificationsService,
+            useValue: mockNotificationsService,
           },
         ],
       }).compile();
@@ -781,6 +798,10 @@ describe('UsersService', () => {
           {
             provide: ArtistsService,
             useValue: mockArtistsService,
+          },
+          {
+            provide: NotificationsService,
+            useValue: mockNotificationsService,
           },
         ],
       }).compile();
@@ -887,6 +908,10 @@ describe('UsersService', () => {
             provide: ArtistsService,
             useValue: mockArtistsService,
           },
+          {
+            provide: NotificationsService,
+            useValue: mockNotificationsService,
+          },
         ],
       }).compile();
 
@@ -923,6 +948,10 @@ describe('UsersService', () => {
           {
             provide: ArtistsService,
             useValue: mockArtistsService,
+          },
+          {
+            provide: NotificationsService,
+            useValue: mockNotificationsService,
           },
         ],
       }).compile();
