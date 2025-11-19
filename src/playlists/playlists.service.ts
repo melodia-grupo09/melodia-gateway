@@ -116,14 +116,12 @@ export class PlaylistsService {
   ): Promise<void> {
     try {
       // Get user's followers
-      const followers = (await this.usersService.getFollowers(
-        userId,
-      )) as FollowersResponse;
+      const followers = await this.usersService.getFollowers(userId);
 
       this.logger.log(
         `Notifying followers of user ${userId} about new playlist "${playlistName}" with ID ${playlistId}`,
       );
-      this.logger.log(`Followers data: ${JSON.stringify(followers.data)}`);
+      this.logger.log(`Followers data: ${JSON.stringify(followers)}`);
 
       if (followers?.data?.users && Array.isArray(followers.data.users)) {
         const notificationPromises = followers.data.users.map(
