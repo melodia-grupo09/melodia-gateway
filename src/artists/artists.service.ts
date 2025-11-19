@@ -136,16 +136,14 @@ export class ArtistsService {
       }
 
       // Get user's followers
-      const followers = (await this.usersService.getFollowers(
-        artist.user_id,
-      )) as FollowersResponse;
+      const followers = await this.usersService.getFollowers(artist.user_id);
 
-      if (followers?.data?.users && Array.isArray(followers.data.users)) {
+      if (followers.followers && Array.isArray(followers.followers)) {
         // Send notification to each follower (non-blocking)
-        const notificationPromises = followers.data.users.map(
-          (follower: User) => {
+        const notificationPromises = followers.followers.map(
+          async (follower) => {
             const notificationData = {
-              userId: follower.id,
+              userId: follower.uid,
               title: 'Nuevo Release',
               body: `Un artista que sigues ha lanzado un nuevo release: "${releaseTitle}"`,
               data: {
@@ -161,7 +159,7 @@ export class ArtistsService {
               .sendNotificationToUserDevices(notificationData)
               .catch((error) => {
                 console.error(
-                  `Failed to send notification to user ${follower.id}:`,
+                  `Failed to send notification to user ${follower.uid}:`,
                   error,
                 );
               });
