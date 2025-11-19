@@ -73,8 +73,12 @@ export class PlaylistsService {
     }
 
     // Send notifications to followers if playlist is public (non-blocking)
-    if (createPlaylistDto.is_public) {
-      this.sendPlaylistNotificationToFollowers(userId, createPlaylistDto.name);
+    if (createPlaylistDto.is_public && response.data?.id) {
+      this.sendPlaylistNotificationToFollowers(
+        userId,
+        createPlaylistDto.name,
+        response.data.id,
+      );
     }
 
     return response.data;
@@ -86,14 +90,17 @@ export class PlaylistsService {
   private sendPlaylistNotificationToFollowers(
     userId: string,
     playlistName: string,
+    playlistId: string,
   ): void {
     // Non-blocking call - no await
-    this.notifyFollowersAboutPlaylist(userId, playlistName).catch((error) => {
-      console.error(
-        `Failed to notify followers about playlist for user ${userId}:`,
-        error,
-      );
-    });
+    this.notifyFollowersAboutPlaylist(userId, playlistName, playlistId).catch(
+      (error) => {
+        console.error(
+          `Failed to notify followers about playlist for user ${userId}:`,
+          error,
+        );
+      },
+    );
   }
 
   /**
@@ -102,6 +109,7 @@ export class PlaylistsService {
   private async notifyFollowersAboutPlaylist(
     userId: string,
     playlistName: string,
+    playlistId: string,
   ): Promise<void> {
     try {
       // Get user's followers
@@ -120,6 +128,7 @@ export class PlaylistsService {
               data: {
                 type: 'playlist_created',
                 playlistName,
+                createdId: playlistId,
                 creatorId: userId,
               },
             };

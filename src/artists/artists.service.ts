@@ -86,7 +86,13 @@ export class ArtistsService {
     );
 
     // Send notifications to artist's followers about new release (non-blocking)
-    this.sendReleaseNotificationToFollowers(artistId, createReleaseDto.title);
+    if (response.data?.id) {
+      this.sendReleaseNotificationToFollowers(
+        artistId,
+        createReleaseDto.title,
+        response.data.id,
+      );
+    }
 
     return response.data;
   }
@@ -97,14 +103,17 @@ export class ArtistsService {
   private sendReleaseNotificationToFollowers(
     artistId: string,
     releaseTitle: string,
+    releaseId: string,
   ): void {
     // Non-blocking call - no await
-    this.notifyFollowersAboutRelease(artistId, releaseTitle).catch((error) => {
-      console.error(
-        `Failed to notify followers about release for artist ${artistId}:`,
-        error,
-      );
-    });
+    this.notifyFollowersAboutRelease(artistId, releaseTitle, releaseId).catch(
+      (error) => {
+        console.error(
+          `Failed to notify followers about release for artist ${artistId}:`,
+          error,
+        );
+      },
+    );
   }
 
   /**
@@ -113,6 +122,7 @@ export class ArtistsService {
   private async notifyFollowersAboutRelease(
     artistId: string,
     releaseTitle: string,
+    releaseId: string,
   ): Promise<void> {
     try {
       // Get artist details to find the associated user
@@ -141,6 +151,7 @@ export class ArtistsService {
               data: {
                 type: 'release_created',
                 releaseTitle,
+                createdId: releaseId,
                 artistId,
                 userId: artist.user_id,
               },
