@@ -67,7 +67,7 @@ describe('AppController', () => {
       });
     });
 
-    it('should return status ok with null metrics when service fails', async () => {
+    it('should return status ok with undefined metrics when service fails', async () => {
       const error = new Error('Metrics service error');
 
       mockMetricsService.getTopSongs.mockRejectedValue(error);
@@ -78,9 +78,9 @@ describe('AppController', () => {
 
       expect(result).toEqual({
         status: 'ok',
-        topSongs: null,
-        topAlbums: null,
-        topArtists: null,
+        topSongs: undefined,
+        topAlbums: undefined,
+        topArtists: undefined,
         metricsError: 'Metrics service error',
       });
     });
@@ -92,9 +92,9 @@ describe('AppController', () => {
 
       expect(result).toEqual({
         status: 'ok',
-        topSongs: null,
-        topAlbums: null,
-        topArtists: null,
+        topSongs: undefined,
+        topAlbums: undefined,
+        topArtists: undefined,
         metricsError: 'Failed to fetch metrics',
       });
     });

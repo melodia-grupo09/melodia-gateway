@@ -45,9 +45,9 @@ export class AppController {
 
       return {
         status: 'ok',
-        topSongs: null,
-        topAlbums: null,
-        topArtists: null,
+        topSongs: undefined,
+        topAlbums: undefined,
+        topArtists: undefined,
         metricsError: errorMessage,
       };
     }

@@ -1,8 +1,9 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
 import { Readable } from 'stream';
+import { ArtistsService } from '../artists/artists.service';
 import { MetricsService } from '../metrics/metrics.service';
 
 interface UploadResponse {
@@ -15,13 +16,28 @@ export class SongsService {
   constructor(
     private readonly httpService: HttpService,
     private readonly metricsService: MetricsService,
+    @Inject(forwardRef(() => ArtistsService))
+    private readonly artistsService: ArtistsService,
   ) {}
 
   async getSongById(songId: string): Promise<any> {
     const response = await firstValueFrom(
       this.httpService.get<any>(`/songs/id/${songId}`),
     );
-    return response.data;
+    const songData = response.data;
+
+    // Enrich with cover URL from release
+    try {
+      const coverData =
+        await this.artistsService.getReleaseCoverBySongId(songId);
+      return {
+        ...songData,
+        coverUrl: coverData.coverUrl,
+      };
+    } catch {
+      // If cover fetch fails, return song without cover
+      return songData;
+    }
   }
 
   async getRandom(limit?: number, page?: number): Promise<any[]> {

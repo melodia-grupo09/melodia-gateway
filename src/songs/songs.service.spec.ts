@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AxiosResponse } from 'axios';
 import { of, throwError } from 'rxjs';
 import { Readable } from 'stream';
+import { ArtistsService } from '../artists/artists.service';
 import { MetricsService } from '../metrics/metrics.service';
 import { SongsService } from './songs.service';
 
@@ -19,6 +20,10 @@ describe('SongsService', () => {
     recordSongUpload: jest.fn(),
   };
 
+  const mockArtistsService = {
+    getReleaseCoverBySongId: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -30,6 +35,10 @@ describe('SongsService', () => {
         {
           provide: MetricsService,
           useValue: mockMetricsService,
+        },
+        {
+          provide: ArtistsService,
+          useValue: mockArtistsService,
         },
       ],
     }).compile();
@@ -44,7 +53,41 @@ describe('SongsService', () => {
   });
 
   describe('getSongById', () => {
-    it('should get a song by id', async () => {
+    it('should get a song by id with cover URL', async () => {
+      const songId = 'song-123';
+      const mockSong = {
+        id: songId,
+        title: 'Test Song',
+        artist: 'Test Artist',
+      };
+      const mockCoverData = {
+        coverUrl: 'https://example.com/cover.jpg',
+      };
+      const mockResponse = {
+        data: mockSong,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+      } as unknown as AxiosResponse;
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+      mockArtistsService.getReleaseCoverBySongId.mockResolvedValue(
+        mockCoverData,
+      );
+
+      const result = await service.getSongById(songId);
+
+      expect(result).toEqual({
+        ...mockSong,
+        coverUrl: mockCoverData.coverUrl,
+      });
+      expect(mockHttpService.get).toHaveBeenCalledWith(`/songs/id/${songId}`);
+      expect(mockArtistsService.getReleaseCoverBySongId).toHaveBeenCalledWith(
+        songId,
+      );
+    });
+
+    it('should get a song by id without cover URL when cover fetch fails', async () => {
       const songId = 'song-123';
       const mockSong = {
         id: songId,
@@ -59,6 +102,9 @@ describe('SongsService', () => {
       } as unknown as AxiosResponse;
 
       mockHttpService.get.mockReturnValue(of(mockResponse));
+      mockArtistsService.getReleaseCoverBySongId.mockRejectedValue(
+        new Error('Cover not found'),
+      );
 
       const result = await service.getSongById(songId);
 

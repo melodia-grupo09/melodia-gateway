@@ -286,4 +286,13 @@ export class ArtistsService {
     );
     return response.data;
   }
+
+  async getReleaseCoverBySongId(songId: string): Promise<{ coverUrl: string }> {
+    const response = await firstValueFrom(
+      this.httpService.get<{ coverUrl: string }>(
+        `/releases/song/${songId}/cover`,
+      ),
+    );
+    return response.data;
+  }
 }
