@@ -60,10 +60,49 @@ export class SongsController {
 
   @Get('id/:id')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get song by ID',
+    description:
+      'Retrieves song metadata by ID, including cover URL from the release',
+  })
   @ApiParam({
     name: 'id',
     description: 'ID of the song to retrieve',
     example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Song found and returned with cover URL',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', example: '68fae1ba215f18c12d559cab' },
+        title: { type: 'string', example: 'The scientist' },
+        artists: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              name: { type: 'string' },
+            },
+          },
+          example: [{ id: 'N8UsUphRiJfOaa4uDimu56MCspv1', name: 'Coldplay' }],
+        },
+        duration: { type: 'number', example: 307.63 },
+        coverUrl: {
+          type: 'string',
+          example: 'https://cdn-images.dzcdn.net/images/cover/example.jpg',
+          description: 'Cover URL from the release (if available)',
+        },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Song not found',
   })
   async getSongById(@Param('id') id: string): Promise<any> {
     return this.songsService.getSongById(id);
