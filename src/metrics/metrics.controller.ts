@@ -1,5 +1,15 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBody,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -282,5 +292,283 @@ export class MetricsController {
     @Query('format') format?: 'csv' | 'json',
   ): Promise<unknown> {
     return this.metricsService.exportUserMetrics(startDate, endDate, format);
+  }
+
+  @Post('artists')
+  @ApiOperation({
+    summary: 'Create a new artist',
+    description: 'Create a new artist metrics record',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        artistId: {
+          type: 'string',
+          description: 'Unique identifier for the artist',
+          example: 'artist-123',
+        },
+      },
+      required: ['artistId'],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Artist created successfully',
+  })
+  async createArtist(@Body('artistId') artistId: string): Promise<void> {
+    return this.metricsService.recordArtistCreation(artistId);
+  }
+
+  @Get('artists')
+  @ApiOperation({
+    summary: 'Get metrics for all artists',
+    description:
+      'Retrieve metrics for all artists with pagination and filtering',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10)',
+  })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    type: String,
+    enum: ['daily', 'weekly', 'monthly', 'custom'],
+    description: 'Time period for metrics (default: monthly)',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'Start date for custom period (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'End date for custom period (ISO 8601)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'All artists metrics retrieved successfully',
+  })
+  async getAllArtistsMetrics(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('period') period?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ): Promise<unknown> {
+    return this.metricsService.getAllArtistsMetrics(
+      page,
+      limit,
+      period,
+      startDate,
+      endDate,
+    );
+  }
+
+  @Get('artists/export')
+  @ApiOperation({
+    summary: 'Export metrics for all artists as CSV',
+    description: 'Export metrics for all artists as CSV',
+  })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    type: String,
+    enum: ['daily', 'weekly', 'monthly', 'custom'],
+    description: 'Time period for metrics (default: monthly)',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'Start date for custom period (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'End date for custom period (ISO 8601)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'CSV file exported successfully',
+  })
+  async exportArtistsMetrics(
+    @Query('period') period?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ): Promise<unknown> {
+    return this.metricsService.exportArtistsMetrics(period, startDate, endDate);
+  }
+
+  @Post('artists/:artistId/listeners')
+  @ApiOperation({
+    summary: 'Add a listener to an artist',
+    description: 'Record a new listener for an artist',
+  })
+  @ApiParam({
+    name: 'artistId',
+    required: true,
+    type: String,
+    description: 'Unique identifier for the artist',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        userId: {
+          type: 'string',
+          description: 'Unique identifier for the user',
+          example: 'user-456',
+        },
+      },
+      required: ['userId'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Artist listener recorded successfully',
+  })
+  async addArtistListener(
+    @Param('artistId') artistId: string,
+    @Body('userId') userId: string,
+  ): Promise<void> {
+    return this.metricsService.addArtistListener(artistId, userId);
+  }
+
+  @Get('artists/:artistId/monthly-listeners')
+  @ApiOperation({
+    summary: 'Get monthly listeners for an artist',
+    description: 'Retrieve the count of monthly listeners for an artist',
+  })
+  @ApiParam({
+    name: 'artistId',
+    required: true,
+    type: String,
+    description: 'Unique identifier for the artist',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Monthly listeners retrieved successfully',
+  })
+  async getArtistMonthlyListeners(
+    @Param('artistId') artistId: string,
+  ): Promise<unknown> {
+    return this.metricsService.getArtistMonthlyListeners(artistId);
+  }
+
+  @Delete('artists/:artistId')
+  @ApiOperation({
+    summary: 'Delete an artist',
+    description: 'Delete an artist metrics record',
+  })
+  @ApiParam({
+    name: 'artistId',
+    required: true,
+    type: String,
+    description: 'Unique identifier for the artist',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Artist deleted successfully',
+  })
+  async deleteArtist(@Param('artistId') artistId: string): Promise<void> {
+    return this.metricsService.deleteArtist(artistId);
+  }
+
+  @Get('artists/:artistId')
+  @ApiOperation({
+    summary: 'Get full metrics for an artist',
+    description: 'Retrieve full metrics for a specific artist',
+  })
+  @ApiParam({
+    name: 'artistId',
+    required: true,
+    type: String,
+    description: 'Unique identifier for the artist',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Artist metrics retrieved successfully',
+  })
+  async getArtistMetrics(
+    @Param('artistId') artistId: string,
+  ): Promise<unknown> {
+    return this.metricsService.getArtistMetrics(artistId);
+  }
+
+  @Post('artists/:artistId/followers')
+  @ApiOperation({
+    summary: 'Add a follower to an artist',
+    description: 'Record a new follower for an artist',
+  })
+  @ApiParam({
+    name: 'artistId',
+    required: true,
+    type: String,
+    description: 'Unique identifier for the artist',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        userId: {
+          type: 'string',
+          description: 'Unique identifier for the user',
+          example: 'user-456',
+        },
+      },
+      required: ['userId'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Artist follower recorded successfully',
+  })
+  async addArtistFollower(
+    @Param('artistId') artistId: string,
+    @Body('userId') userId: string,
+  ): Promise<void> {
+    return this.metricsService.addArtistFollower(artistId, userId);
+  }
+
+  @Delete('artists/:artistId/followers/:userId')
+  @ApiOperation({
+    summary: 'Remove a follower from an artist',
+    description: 'Remove a follower from an artist',
+  })
+  @ApiParam({
+    name: 'artistId',
+    required: true,
+    type: String,
+    description: 'Unique identifier for the artist',
+  })
+  @ApiParam({
+    name: 'userId',
+    required: true,
+    type: String,
+    description: 'Unique identifier for the user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Artist follower removed successfully',
+  })
+  async removeArtistFollower(
+    @Param('artistId') artistId: string,
+    @Param('userId') userId: string,
+  ): Promise<void> {
+    return this.metricsService.removeArtistFollower(artistId, userId);
   }
 }

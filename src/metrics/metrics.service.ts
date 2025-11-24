@@ -393,4 +393,126 @@ export class MetricsService {
       // Don't throw error to avoid breaking the main flow
     }
   }
+
+  async getAllArtistsMetrics(
+    page?: number,
+    limit?: number,
+    period?: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<any> {
+    const params: Record<string, string | number> = {};
+    if (page !== undefined) params.page = page;
+    if (limit !== undefined) params.limit = limit;
+    if (period) params.period = period;
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+
+    const response = await firstValueFrom(
+      this.httpService.get('/metrics/artists', { params }),
+    );
+    return response.data;
+  }
+
+  async addArtistListener(artistId: string, userId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.httpService.post(`/metrics/artists/${artistId}/listeners`, {
+          userId,
+        }),
+      );
+      this.logger.log(
+        `Artist listener recorded for artistId: ${artistId}, userId: ${userId}`,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to record artist listener for artistId: ${artistId}: ${message}`,
+      );
+      throw error;
+    }
+  }
+
+  async getArtistMonthlyListeners(artistId: string): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.get(`/metrics/artists/${artistId}/monthly-listeners`),
+    );
+    return response.data;
+  }
+
+  async deleteArtist(artistId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.httpService.delete(`/metrics/artists/${artistId}`),
+      );
+      this.logger.log(`Artist metrics deleted for artistId: ${artistId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to delete artist metrics for artistId: ${artistId}: ${message}`,
+      );
+      throw error;
+    }
+  }
+
+  async getArtistMetrics(artistId: string): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.get(`/metrics/artists/${artistId}`),
+    );
+    return response.data;
+  }
+
+  async addArtistFollower(artistId: string, userId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.httpService.post(`/metrics/artists/${artistId}/followers`, {
+          userId,
+        }),
+      );
+      this.logger.log(
+        `Artist follower recorded for artistId: ${artistId}, userId: ${userId}`,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to record artist follower for artistId: ${artistId}: ${message}`,
+      );
+      throw error;
+    }
+  }
+
+  async removeArtistFollower(artistId: string, userId: string): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.httpService.delete(
+          `/metrics/artists/${artistId}/followers/${userId}`,
+        ),
+      );
+      this.logger.log(
+        `Artist follower removed for artistId: ${artistId}, userId: ${userId}`,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to remove artist follower for artistId: ${artistId}: ${message}`,
+      );
+      throw error;
+    }
+  }
+
+  async exportArtistsMetrics(
+    period?: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<any> {
+    const params: Record<string, string> = {};
+    if (period) params.period = period;
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+
+    const response = await firstValueFrom(
+      this.httpService.get('/metrics/artists/export', { params }),
+    );
+    return response.data;
+  }
 }
