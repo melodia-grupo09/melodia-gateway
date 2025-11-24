@@ -119,8 +119,9 @@ export class UsersService {
         throw new HttpException(
           {
             status: 'error',
-            message: 'Registration failed',
+            message: errorMsg || 'Registration failed',
             code: 'registration_failed',
+            details: errorMsg,
           },
           HttpStatus.BAD_REQUEST,
         );
@@ -212,16 +213,16 @@ export class UsersService {
       return response.data;
     } catch (error: unknown) {
       let errorMsg = '';
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'response' in error &&
-        typeof (error as { response?: { data?: { message?: unknown } } })
-          .response?.data?.message === 'string'
-      ) {
-        errorMsg = (error as { response: { data: { message: string } } })
-          .response.data.message;
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const errorData = (error as { response?: { data?: any } }).response
+          ?.data;
+        if (typeof errorData?.message === 'string') {
+          errorMsg = errorData.message;
+        } else if (typeof errorData?.detail === 'string') {
+          errorMsg = errorData.detail;
+        }
       }
+
       if (
         typeof errorMsg === 'string' &&
         (errorMsg.toLowerCase().includes('password') ||
@@ -252,8 +253,9 @@ export class UsersService {
         throw new HttpException(
           {
             status: 'error',
-            message: 'Login failed',
+            message: errorMsg || 'Login failed',
             code: 'login_failed',
+            details: errorMsg,
           },
           HttpStatus.BAD_REQUEST,
         );
