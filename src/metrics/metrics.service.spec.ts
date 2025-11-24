@@ -11,6 +11,7 @@ describe('MetricsService', () => {
   const mockHttpService = {
     post: jest.fn(),
     get: jest.fn(),
+    delete: jest.fn(),
   };
 
   const mockArtistsService = {
@@ -712,6 +713,199 @@ describe('MetricsService', () => {
       mockHttpService.post.mockReturnValue(throwError(() => error));
 
       await expect(service.recordSongShare(songId)).resolves.toBeUndefined();
+    });
+  });
+
+  describe('getAllArtistsMetrics', () => {
+    it('should return all artists metrics with parameters', async () => {
+      const page = 1;
+      const limit = 10;
+      const period = 'monthly';
+      const startDate = '2024-01-01';
+      const endDate = '2024-12-31';
+      const expectedResult = { items: [], total: 0 };
+
+      mockHttpService.get.mockReturnValue(of({ data: expectedResult }));
+
+      const result = await service.getAllArtistsMetrics(
+        page,
+        limit,
+        period,
+        startDate,
+        endDate,
+      );
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/metrics/artists', {
+        params: { page, limit, period, startDate, endDate },
+      });
+      expect(result).toBe(expectedResult);
+    });
+  });
+
+  describe('addArtistListener', () => {
+    it('should successfully add artist listener', async () => {
+      const artistId = 'artist-123';
+      const userId = 'user-123';
+      const mockResponse = { data: { success: true } };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      await service.addArtistListener(artistId, userId);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/metrics/artists/${artistId}/listeners`,
+        { userId },
+      );
+    });
+
+    it('should throw error on failure', async () => {
+      const artistId = 'artist-123';
+      const userId = 'user-123';
+      const error = new Error('Network error');
+
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(service.addArtistListener(artistId, userId)).rejects.toThrow(
+        error,
+      );
+    });
+  });
+
+  describe('getArtistMonthlyListeners', () => {
+    it('should return monthly listeners count', async () => {
+      const artistId = 'artist-123';
+      const expectedResult = { count: 100 };
+
+      mockHttpService.get.mockReturnValue(of({ data: expectedResult }));
+
+      const result = await service.getArtistMonthlyListeners(artistId);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/metrics/artists/${artistId}/monthly-listeners`,
+      );
+      expect(result).toBe(expectedResult);
+    });
+  });
+
+  describe('deleteArtist', () => {
+    it('should successfully delete artist metrics', async () => {
+      const artistId = 'artist-123';
+      const mockResponse = { data: { success: true } };
+
+      mockHttpService.delete.mockReturnValue(of(mockResponse));
+
+      await service.deleteArtist(artistId);
+
+      expect(mockHttpService.delete).toHaveBeenCalledWith(
+        `/metrics/artists/${artistId}`,
+      );
+    });
+
+    it('should throw error on failure', async () => {
+      const artistId = 'artist-123';
+      const error = new Error('Network error');
+
+      mockHttpService.delete.mockReturnValue(throwError(() => error));
+
+      await expect(service.deleteArtist(artistId)).rejects.toThrow(error);
+    });
+  });
+
+  describe('getArtistMetrics', () => {
+    it('should return full artist metrics', async () => {
+      const artistId = 'artist-123';
+      const expectedResult = { id: artistId, metrics: {} };
+
+      mockHttpService.get.mockReturnValue(of({ data: expectedResult }));
+
+      const result = await service.getArtistMetrics(artistId);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/metrics/artists/${artistId}`,
+      );
+      expect(result).toBe(expectedResult);
+    });
+  });
+
+  describe('addArtistFollower', () => {
+    it('should successfully add artist follower', async () => {
+      const artistId = 'artist-123';
+      const userId = 'user-123';
+      const mockResponse = { data: { success: true } };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      await service.addArtistFollower(artistId, userId);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/metrics/artists/${artistId}/followers`,
+        { userId },
+      );
+    });
+
+    it('should throw error on failure', async () => {
+      const artistId = 'artist-123';
+      const userId = 'user-123';
+      const error = new Error('Network error');
+
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(service.addArtistFollower(artistId, userId)).rejects.toThrow(
+        error,
+      );
+    });
+  });
+
+  describe('removeArtistFollower', () => {
+    it('should successfully remove artist follower', async () => {
+      const artistId = 'artist-123';
+      const userId = 'user-123';
+      const mockResponse = { data: { success: true } };
+
+      mockHttpService.delete.mockReturnValue(of(mockResponse));
+
+      await service.removeArtistFollower(artistId, userId);
+
+      expect(mockHttpService.delete).toHaveBeenCalledWith(
+        `/metrics/artists/${artistId}/followers/${userId}`,
+      );
+    });
+
+    it('should throw error on failure', async () => {
+      const artistId = 'artist-123';
+      const userId = 'user-123';
+      const error = new Error('Network error');
+
+      mockHttpService.delete.mockReturnValue(throwError(() => error));
+
+      await expect(
+        service.removeArtistFollower(artistId, userId),
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('exportArtistsMetrics', () => {
+    it('should return exported metrics data', async () => {
+      const period = 'monthly';
+      const startDate = '2024-01-01';
+      const endDate = '2024-12-31';
+      const expectedResult = 'csv-data';
+
+      mockHttpService.get.mockReturnValue(of({ data: expectedResult }));
+
+      const result = await service.exportArtistsMetrics(
+        period,
+        startDate,
+        endDate,
+      );
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        '/metrics/artists/export',
+        {
+          params: { period, startDate, endDate },
+        },
+      );
+      expect(result).toBe(expectedResult);
     });
   });
 });

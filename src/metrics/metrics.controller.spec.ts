@@ -12,6 +12,18 @@ describe('MetricsController', () => {
     getTopSongs: jest.fn(),
     getTopAlbums: jest.fn(),
     getTopArtists: jest.fn(),
+    getUserContentAnalytics: jest.fn(),
+    getUserActivityPatterns: jest.fn(),
+    exportUserMetrics: jest.fn(),
+    recordArtistCreation: jest.fn(),
+    getAllArtistsMetrics: jest.fn(),
+    addArtistListener: jest.fn(),
+    getArtistMonthlyListeners: jest.fn(),
+    deleteArtist: jest.fn(),
+    getArtistMetrics: jest.fn(),
+    addArtistFollower: jest.fn(),
+    removeArtistFollower: jest.fn(),
+    exportArtistsMetrics: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -285,6 +297,163 @@ describe('MetricsController', () => {
       mockMetricsService.getTopArtists.mockRejectedValue(error);
 
       await expect(controller.getTopArtists()).rejects.toThrow('Service error');
+    });
+  });
+
+  describe('createArtist', () => {
+    it('should call recordArtistCreation', async () => {
+      const artistId = 'artist-123';
+      mockMetricsService.recordArtistCreation.mockResolvedValue(undefined);
+
+      await controller.createArtist(artistId);
+
+      expect(mockMetricsService.recordArtistCreation).toHaveBeenCalledWith(
+        artistId,
+      );
+    });
+  });
+
+  describe('getAllArtistsMetrics', () => {
+    it('should return all artists metrics', async () => {
+      const page = 1;
+      const limit = 10;
+      const period = 'monthly';
+      const startDate = '2024-01-01';
+      const endDate = '2024-12-31';
+      const expectedResult = { items: [], total: 0 };
+
+      mockMetricsService.getAllArtistsMetrics.mockResolvedValue(expectedResult);
+
+      const result = await controller.getAllArtistsMetrics(
+        page,
+        limit,
+        period,
+        startDate,
+        endDate,
+      );
+
+      expect(mockMetricsService.getAllArtistsMetrics).toHaveBeenCalledWith(
+        page,
+        limit,
+        period,
+        startDate,
+        endDate,
+      );
+      expect(result).toBe(expectedResult);
+    });
+  });
+
+  describe('addArtistListener', () => {
+    it('should call addArtistListener', async () => {
+      const artistId = 'artist-123';
+      const userId = 'user-123';
+      mockMetricsService.addArtistListener.mockResolvedValue(undefined);
+
+      await controller.addArtistListener(artistId, userId);
+
+      expect(mockMetricsService.addArtistListener).toHaveBeenCalledWith(
+        artistId,
+        userId,
+      );
+    });
+  });
+
+  describe('getArtistMonthlyListeners', () => {
+    it('should return monthly listeners', async () => {
+      const artistId = 'artist-123';
+      const expectedResult = { count: 100 };
+
+      mockMetricsService.getArtistMonthlyListeners.mockResolvedValue(
+        expectedResult,
+      );
+
+      const result = await controller.getArtistMonthlyListeners(artistId);
+
+      expect(mockMetricsService.getArtistMonthlyListeners).toHaveBeenCalledWith(
+        artistId,
+      );
+      expect(result).toBe(expectedResult);
+    });
+  });
+
+  describe('deleteArtist', () => {
+    it('should call deleteArtist', async () => {
+      const artistId = 'artist-123';
+      mockMetricsService.deleteArtist.mockResolvedValue(undefined);
+
+      await controller.deleteArtist(artistId);
+
+      expect(mockMetricsService.deleteArtist).toHaveBeenCalledWith(artistId);
+    });
+  });
+
+  describe('getArtistMetrics', () => {
+    it('should return artist metrics', async () => {
+      const artistId = 'artist-123';
+      const expectedResult = { id: artistId, metrics: {} };
+
+      mockMetricsService.getArtistMetrics.mockResolvedValue(expectedResult);
+
+      const result = await controller.getArtistMetrics(artistId);
+
+      expect(mockMetricsService.getArtistMetrics).toHaveBeenCalledWith(
+        artistId,
+      );
+      expect(result).toBe(expectedResult);
+    });
+  });
+
+  describe('addArtistFollower', () => {
+    it('should call addArtistFollower', async () => {
+      const artistId = 'artist-123';
+      const userId = 'user-123';
+      mockMetricsService.addArtistFollower.mockResolvedValue(undefined);
+
+      await controller.addArtistFollower(artistId, userId);
+
+      expect(mockMetricsService.addArtistFollower).toHaveBeenCalledWith(
+        artistId,
+        userId,
+      );
+    });
+  });
+
+  describe('removeArtistFollower', () => {
+    it('should call removeArtistFollower', async () => {
+      const artistId = 'artist-123';
+      const userId = 'user-123';
+      mockMetricsService.removeArtistFollower.mockResolvedValue(undefined);
+
+      await controller.removeArtistFollower(artistId, userId);
+
+      expect(mockMetricsService.removeArtistFollower).toHaveBeenCalledWith(
+        artistId,
+        userId,
+      );
+    });
+  });
+
+  describe('exportArtistsMetrics', () => {
+    it('should return exported metrics', async () => {
+      const period = 'monthly';
+      const startDate = '2024-01-01';
+      const endDate = '2024-12-31';
+      const expectedResult = 'csv-data';
+
+      mockMetricsService.exportArtistsMetrics.mockResolvedValue(expectedResult);
+
+      const result = await controller.exportArtistsMetrics(
+        period,
+        startDate,
+        endDate,
+      );
+
+      expect(mockMetricsService.exportArtistsMetrics).toHaveBeenCalledWith(
+        period,
+        startDate,
+        endDate,
+      );
+      expect(result).toBe(expectedResult);
     });
   });
 });
