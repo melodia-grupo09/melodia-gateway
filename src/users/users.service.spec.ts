@@ -390,6 +390,82 @@ describe('UsersService', () => {
         'test@example.com',
       );
     });
+
+    it('should throw HttpException with correct message and status when external service returns an error', async () => {
+      const loginDto: LoginUserDto = {
+        email: 'test@example.com',
+        password: 'wrongpassword',
+      };
+
+      const errorResponse = {
+        response: {
+          status: 401,
+          data: {
+            message: 'Invalid credentials',
+          },
+        },
+      };
+
+      mockHttpService.post.mockReturnValue(throwError(() => errorResponse));
+
+      await expect(service.loginUser(loginDto)).rejects.toThrow(
+        expect.objectContaining({
+          status: 401,
+          response: expect.objectContaining({
+            message: 'Invalid credentials',
+            code: 'login_failed',
+          }),
+        }),
+      );
+    });
+
+    it('should handle error with detail property instead of message', async () => {
+      const loginDto: LoginUserDto = {
+        email: 'test@example.com',
+        password: 'wrongpassword',
+      };
+
+      const errorResponse = {
+        response: {
+          status: 400,
+          data: {
+            detail: 'Some detailed error',
+          },
+        },
+      };
+
+      mockHttpService.post.mockReturnValue(throwError(() => errorResponse));
+
+      await expect(service.loginUser(loginDto)).rejects.toThrow(
+        expect.objectContaining({
+          status: 400,
+          response: expect.objectContaining({
+            message: 'Some detailed error',
+            code: 'login_failed',
+          }),
+        }),
+      );
+    });
+
+    it('should throw default HttpException when external service returns an error without response data', async () => {
+      const loginDto: LoginUserDto = {
+        email: 'test@example.com',
+        password: 'password123',
+      };
+
+      const error = new Error('Network error');
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(service.loginUser(loginDto)).rejects.toThrow(
+        expect.objectContaining({
+          status: 400,
+          response: expect.objectContaining({
+            message: 'Login failed',
+            code: 'login_failed',
+          }),
+        }),
+      );
+    });
   });
 
   describe('forgotPassword', () => {
