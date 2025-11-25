@@ -120,6 +120,8 @@ describe('MetricsController', () => {
       const result = await controller.getUserRetention(
         cohortStartDate,
         cohortEndDate,
+        undefined,
+        undefined,
         daysAfter,
       );
 
@@ -149,6 +151,44 @@ describe('MetricsController', () => {
         undefined,
       );
       expect(result).toBe(expectedResult);
+    });
+
+    it('should return user retention data using startDate and endDate aliases', async () => {
+      const startDate = '2024-01-01';
+      const endDate = '2024-01-31';
+      const daysAfter = 7;
+      const expectedResult = { retentionRate: 0.75 };
+
+      mockMetricsService.getUserRetention.mockResolvedValue(expectedResult);
+
+      const result = await controller.getUserRetention(
+        undefined,
+        undefined,
+        startDate,
+        endDate,
+        daysAfter,
+      );
+
+      expect(mockMetricsService.getUserRetention).toHaveBeenCalledWith(
+        startDate,
+        endDate,
+        daysAfter,
+      );
+      expect(result).toBe(expectedResult);
+    });
+
+    it('should throw BadRequestException when no dates are provided', async () => {
+      await expect(
+        controller.getUserRetention(
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+        ),
+      ).rejects.toThrow(
+        'Both start date and end date are required (use cohortStartDate/cohortEndDate or startDate/endDate)',
+      );
     });
 
     it('should handle errors when getting user retention', async () => {
