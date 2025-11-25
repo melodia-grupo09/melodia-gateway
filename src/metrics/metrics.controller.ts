@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -93,17 +94,31 @@ export class MetricsController {
   })
   @ApiQuery({
     name: 'cohortStartDate',
-    required: true,
+    required: false,
     type: String,
     example: '2024-01-01',
-    description: 'Start date of the cohort period (YYYY-MM-DD format)',
+    description:
+      'Start date of the cohort period (YYYY-MM-DD format). Can also use startDate.',
   })
   @ApiQuery({
     name: 'cohortEndDate',
-    required: true,
+    required: false,
     type: String,
     example: '2024-01-31',
-    description: 'End date of the cohort period (YYYY-MM-DD format)',
+    description:
+      'End date of the cohort period (YYYY-MM-DD format). Can also use endDate.',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'Alias for cohortStartDate',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'Alias for cohortEndDate',
   })
   @ApiQuery({
     name: 'daysAfter',
@@ -117,15 +132,22 @@ export class MetricsController {
     description: 'User retention metrics retrieved successfully',
   })
   async getUserRetention(
-    @Query('cohortStartDate') cohortStartDate: string,
-    @Query('cohortEndDate') cohortEndDate: string,
+    @Query('cohortStartDate') cohortStartDate?: string,
+    @Query('cohortEndDate') cohortEndDate?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
     @Query('daysAfter') daysAfter?: number,
   ): Promise<unknown> {
-    return this.metricsService.getUserRetention(
-      cohortStartDate,
-      cohortEndDate,
-      daysAfter,
-    );
+    const start = cohortStartDate || startDate;
+    const end = cohortEndDate || endDate;
+
+    if (!start || !end) {
+      throw new BadRequestException(
+        'Both start date and end date are required (use cohortStartDate/cohortEndDate or startDate/endDate)',
+      );
+    }
+
+    return this.metricsService.getUserRetention(start, end, daysAfter);
   }
 
   @Get('songs/top')
