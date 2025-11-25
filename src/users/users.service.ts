@@ -212,10 +212,19 @@ export class UsersService {
 
       return response.data;
     } catch (error: unknown) {
-      let errorMsg = '';
+      let errorMsg = 'Login failed';
+      let statusCode = HttpStatus.BAD_REQUEST;
+
       if (typeof error === 'object' && error !== null && 'response' in error) {
-        const errorData = (error as { response?: { data?: any } }).response
-          ?.data;
+        const axiosError = error as {
+          response?: { data?: any; status?: number };
+        };
+        const errorData = axiosError.response?.data;
+
+        if (axiosError.response?.status) {
+          statusCode = axiosError.response.status;
+        }
+
         if (typeof errorData?.message === 'string') {
           errorMsg = errorData.message;
         } else if (typeof errorData?.detail === 'string') {
@@ -223,43 +232,14 @@ export class UsersService {
         }
       }
 
-      if (
-        typeof errorMsg === 'string' &&
-        (errorMsg.toLowerCase().includes('password') ||
-          errorMsg.toLowerCase().includes('contraseña'))
-      ) {
-        throw new HttpException(
-          {
-            status: 'error',
-            message: 'Incorrect password',
-            code: 'incorrect_password',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      } else if (
-        typeof errorMsg === 'string' &&
-        (errorMsg.toLowerCase().includes('not found') ||
-          errorMsg.toLowerCase().includes('no existe'))
-      ) {
-        throw new HttpException(
-          {
-            status: 'error',
-            message: 'Email not found',
-            code: 'email_not_found',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      } else {
-        throw new HttpException(
-          {
-            status: 'error',
-            message: errorMsg || 'Login failed',
-            code: 'login_failed',
-            details: errorMsg,
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+      throw new HttpException(
+        {
+          status: 'error',
+          message: errorMsg,
+          code: 'login_failed',
+        },
+        statusCode,
+      );
     }
   }
 
