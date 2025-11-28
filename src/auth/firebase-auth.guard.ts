@@ -1,9 +1,13 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { Cache } from 'cache-manager';
 import { Request } from 'express';
 import admin from './firebase';
 
@@ -16,6 +20,8 @@ declare module 'express-serve-static-core' {
 
 @Injectable()
 export class FirebaseAuthGuard implements CanActivate {
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     const authHeader =
@@ -42,9 +48,21 @@ export class FirebaseAuthGuard implements CanActivate {
 
     try {
       const decodedToken = await admin.auth().verifyIdToken(token);
+
+      // Check if user is blocked
+      const isBlocked = await this.cacheManager.get(
+        `blocked_user:${decodedToken.uid}`,
+      );
+      if (isBlocked) {
+        throw new ForbiddenException('User is banned');
+      }
+
       request.user = decodedToken;
       return true;
     } catch (error: any) {
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       console.error('Token verification failed:', error?.message || error);
       throw new UnauthorizedException('Invalid or expired token');

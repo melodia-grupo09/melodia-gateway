@@ -1,4 +1,5 @@
 import { HttpService } from '@nestjs/axios';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   BadRequestException,
   HttpException,
@@ -8,6 +9,7 @@ import {
   UnauthorizedException,
   forwardRef,
 } from '@nestjs/common';
+import type { Cache } from 'cache-manager';
 import FormData from 'form-data';
 import { firstValueFrom } from 'rxjs';
 import { ArtistsService } from '../artists/artists.service';
@@ -47,6 +49,7 @@ interface FollowersResponse {
 export class UsersService {
   constructor(
     private readonly httpService: HttpService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @Inject(forwardRef(() => MetricsService))
     private readonly metricsService: MetricsService,
     @Inject(forwardRef(() => ArtistsService))
@@ -427,6 +430,7 @@ export class UsersService {
       const response = await firstValueFrom(
         this.httpService.post(`/admin/users/${userId}/block`),
       );
+      await this.cacheManager.set(`blocked_user:${userId}`, true, 0);
       return response.data;
     } catch (error: unknown) {
       console.error('Error blocking user:', error);
@@ -446,6 +450,7 @@ export class UsersService {
       const response = await firstValueFrom(
         this.httpService.post(`/admin/users/${userId}/unblock`),
       );
+      await this.cacheManager.del(`blocked_user:${userId}`);
       return response.data;
     } catch (error: unknown) {
       console.error('Error unblocking user:', error);

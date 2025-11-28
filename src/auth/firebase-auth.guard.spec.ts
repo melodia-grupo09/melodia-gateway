@@ -1,4 +1,9 @@
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import {
+  ExecutionContext,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Request } from 'express';
 import { FirebaseAuthGuard } from './firebase-auth.guard';
@@ -22,9 +27,19 @@ describe('FirebaseAuthGuard', () => {
   let mockExecutionContext: jest.Mocked<ExecutionContext>;
   let mockRequest: Partial<Request>;
 
+  const mockCacheManager = {
+    get: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FirebaseAuthGuard],
+      providers: [
+        FirebaseAuthGuard,
+        {
+          provide: CACHE_MANAGER,
+          useValue: mockCacheManager,
+        },
+      ],
     }).compile();
 
     guard = module.get<FirebaseAuthGuard>(FirebaseAuthGuard);
@@ -34,6 +49,10 @@ describe('FirebaseAuthGuard', () => {
       headers: {},
       user: undefined,
     };
+
+    // Clear mocks
+    mockVerifyIdToken.mockClear();
+    mockCacheManager.get.mockClear();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     mockExecutionContext = {
@@ -115,9 +134,10 @@ describe('FirebaseAuthGuard', () => {
       );
     });
 
-    it('should return true when token is valid', async () => {
+    it('should return true when token is valid and user is not blocked', async () => {
       const mockDecodedToken = { uid: 'user123', email: 'test@example.com' };
       mockVerifyIdToken.mockResolvedValue(mockDecodedToken);
+      mockCacheManager.get.mockResolvedValue(null);
 
       mockRequest.headers = {
         authorization: 'Bearer valid-token',
@@ -128,6 +148,23 @@ describe('FirebaseAuthGuard', () => {
       expect(result).toBe(true);
       expect(mockRequest.user).toBe(mockDecodedToken);
       expect(mockVerifyIdToken).toHaveBeenCalledWith('valid-token');
+      expect(mockCacheManager.get).toHaveBeenCalledWith('blocked_user:user123');
+    });
+
+    it('should throw ForbiddenException when user is blocked', async () => {
+      const mockDecodedToken = { uid: 'user123', email: 'test@example.com' };
+      mockVerifyIdToken.mockResolvedValue(mockDecodedToken);
+      mockCacheManager.get.mockResolvedValue(true);
+
+      mockRequest.headers = {
+        authorization: 'Bearer valid-token',
+      };
+
+      await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
+        new ForbiddenException('User is banned'),
+      );
+      expect(mockVerifyIdToken).toHaveBeenCalledWith('valid-token');
+      expect(mockCacheManager.get).toHaveBeenCalledWith('blocked_user:user123');
     });
 
     it('should throw UnauthorizedException when token verification fails', async () => {

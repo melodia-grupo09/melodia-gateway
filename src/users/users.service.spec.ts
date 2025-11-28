@@ -1,5 +1,7 @@
 import { HttpService } from '@nestjs/axios';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Cache } from 'cache-manager';
 import { of, throwError } from 'rxjs';
 import { ArtistsService } from '../artists/artists.service';
 import { MetricsService } from '../metrics/metrics.service';
@@ -37,6 +39,12 @@ describe('UsersService', () => {
     sendNotificationToUserDevices: jest.fn(),
   };
 
+  const mockCacheManager = {
+    set: jest.fn(),
+    del: jest.fn(),
+    get: jest.fn(),
+  };
+
   beforeEach(async () => {
     // Mock console.error to suppress error logs during tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -59,6 +67,10 @@ describe('UsersService', () => {
         {
           provide: NotificationsService,
           useValue: mockNotificationsService,
+        },
+        {
+          provide: CACHE_MANAGER,
+          useValue: mockCacheManager,
         },
       ],
     }).compile();
@@ -778,6 +790,10 @@ describe('UsersService', () => {
             provide: NotificationsService,
             useValue: mockNotificationsService,
           },
+          {
+            provide: CACHE_MANAGER,
+            useValue: mockCacheManager,
+          },
         ],
       }).compile();
 
@@ -825,6 +841,10 @@ describe('UsersService', () => {
           {
             provide: NotificationsService,
             useValue: mockNotificationsService,
+          },
+          {
+            provide: CACHE_MANAGER,
+            useValue: mockCacheManager,
           },
         ],
       }).compile();
@@ -879,6 +899,10 @@ describe('UsersService', () => {
             provide: NotificationsService,
             useValue: mockNotificationsService,
           },
+          {
+            provide: CACHE_MANAGER,
+            useValue: mockCacheManager,
+          },
         ],
       }).compile();
 
@@ -905,11 +929,17 @@ describe('UsersService', () => {
       };
 
       mockHttpService.post.mockReturnValue(of(mockResponse));
+      mockCacheManager.set.mockResolvedValue(undefined);
 
       const result = await service.blockUser(userId);
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
         `/admin/users/${userId}/block`,
+      );
+      expect(mockCacheManager.set).toHaveBeenCalledWith(
+        `blocked_user:${userId}`,
+        true,
+        0,
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -924,6 +954,7 @@ describe('UsersService', () => {
       await expect(service.blockUser(userId)).rejects.toThrow(
         'Failed to block user',
       );
+      expect(mockCacheManager.set).not.toHaveBeenCalled();
     });
   });
 
@@ -935,11 +966,15 @@ describe('UsersService', () => {
       };
 
       mockHttpService.post.mockReturnValue(of(mockResponse));
+      mockCacheManager.del.mockResolvedValue(undefined);
 
       const result = await service.unblockUser(userId);
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
         `/admin/users/${userId}/unblock`,
+      );
+      expect(mockCacheManager.del).toHaveBeenCalledWith(
+        `blocked_user:${userId}`,
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -954,6 +989,7 @@ describe('UsersService', () => {
       await expect(service.unblockUser(userId)).rejects.toThrow(
         'Failed to unblock user',
       );
+      expect(mockCacheManager.del).not.toHaveBeenCalled();
     });
   });
 
@@ -987,6 +1023,10 @@ describe('UsersService', () => {
           {
             provide: NotificationsService,
             useValue: mockNotificationsService,
+          },
+          {
+            provide: CACHE_MANAGER,
+            useValue: mockCacheManager,
           },
         ],
       }).compile();
@@ -1028,6 +1068,10 @@ describe('UsersService', () => {
           {
             provide: NotificationsService,
             useValue: mockNotificationsService,
+          },
+          {
+            provide: CACHE_MANAGER,
+            useValue: mockCacheManager,
           },
         ],
       }).compile();
