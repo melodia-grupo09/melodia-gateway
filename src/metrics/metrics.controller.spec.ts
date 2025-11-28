@@ -34,6 +34,14 @@ describe('MetricsController', () => {
           provide: MetricsService,
           useValue: mockMetricsService,
         },
+        {
+          provide: 'CACHE_MANAGER',
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

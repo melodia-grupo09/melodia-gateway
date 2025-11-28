@@ -50,6 +50,14 @@ describe('ArtistsController', () => {
           provide: MetricsService,
           useValue: mockMetricsService,
         },
+        {
+          provide: 'CACHE_MANAGER',
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -99,7 +107,7 @@ describe('ArtistsController', () => {
 
       mockArtistsService.searchArtists.mockResolvedValue(mockResult);
 
-      const result = await controller.searchArtists(query);
+      const result: any = await controller.searchArtists(query);
 
       expect(mockArtistsService.searchArtists).toHaveBeenCalledWith(
         query,
@@ -128,7 +136,7 @@ describe('ArtistsController', () => {
 
       mockArtistsService.searchArtists.mockResolvedValue(mockResult);
 
-      const result = await controller.searchArtists(query, page, limit);
+      const result: any = await controller.searchArtists(query, page, limit);
 
       expect(mockArtistsService.searchArtists).toHaveBeenCalledWith(
         query,
@@ -231,7 +239,7 @@ describe('ArtistsController', () => {
       mockArtistsService.followArtist.mockResolvedValue(mockResult);
       mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
 
-      const result = await controller.followArtist(artistId, mockUser);
+      const result: any = await controller.followArtist(artistId, mockUser);
 
       expect(mockArtistsService.followArtist).toHaveBeenCalledWith(artistId);
       expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
@@ -251,7 +259,7 @@ describe('ArtistsController', () => {
       mockArtistsService.unfollowArtist.mockResolvedValue(mockResult);
       mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
 
-      const result = await controller.unfollowArtist(artistId, mockUser);
+      const result: any = await controller.unfollowArtist(artistId, mockUser);
 
       expect(mockArtistsService.unfollowArtist).toHaveBeenCalledWith(artistId);
       expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
@@ -342,7 +350,6 @@ describe('ArtistsController', () => {
         type: 'album',
         releaseDate: '2024-01-01',
         coverUrl: 'https://example.com/cover.jpg',
-        artistId: '123',
         songIds: ['song-1', 'song-2'],
       };
 
@@ -384,7 +391,6 @@ describe('ArtistsController', () => {
         type: 'album',
         releaseDate: '2024-01-01',
         coverUrl: 'https://example.com/cover.jpg',
-        artistId: '123',
         songIds: ['song-1', 'song-2'],
       };
 
@@ -437,7 +443,6 @@ describe('ArtistsController', () => {
         type: 'album',
         releaseDate: '2024-01-01',
         coverUrl: 'https://example.com/cover.jpg',
-        artistId: '123',
         songIds: ['song-1', 'song-2'],
       };
 
@@ -448,7 +453,10 @@ describe('ArtistsController', () => {
 
       mockArtistsService.createRelease.mockResolvedValue(mockResult);
 
-      const result = await controller.createRelease(artistId, createReleaseDto);
+      const result: any = await controller.createRelease(
+        artistId,
+        createReleaseDto,
+      );
 
       expect(mockArtistsService.createRelease).toHaveBeenCalledWith(
         artistId,

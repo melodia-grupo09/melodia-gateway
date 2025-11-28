@@ -67,6 +67,14 @@ describe('SongsController', () => {
           provide: MetricsService,
           useValue: mockMetricsService,
         },
+        {
+          provide: 'CACHE_MANAGER',
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -327,7 +335,7 @@ describe('SongsController', () => {
 
   describe('uploadSong', () => {
     it('should upload a song successfully', async () => {
-      const uploadDto: UploadSongDTO = {
+      const uploadDTO: UploadSongDTO = {
         title: 'Test Song',
         artists: [
           {
@@ -352,7 +360,7 @@ describe('SongsController', () => {
 
       mockSongsService.uploadSong.mockResolvedValue(mockResponse);
 
-      const result: unknown = await controller.uploadSong(uploadDto, mockFile);
+      const result: unknown = await controller.uploadSong(uploadDTO, mockFile);
 
       expect(mockSongsService.uploadSong).toHaveBeenCalledWith(
         expect.any(FormData),
@@ -361,7 +369,7 @@ describe('SongsController', () => {
     });
 
     it('should throw BadRequestException when file is missing', async () => {
-      const uploadDto: UploadSongDTO = {
+      const uploadDTO: UploadSongDTO = {
         title: 'Test Song',
         artists: [
           {
@@ -371,16 +379,16 @@ describe('SongsController', () => {
         ],
       };
 
-      await expect(controller.uploadSong(uploadDto, undefined)).rejects.toThrow(
+      await expect(controller.uploadSong(uploadDTO, undefined)).rejects.toThrow(
         BadRequestException,
       );
-      await expect(controller.uploadSong(uploadDto, undefined)).rejects.toThrow(
+      await expect(controller.uploadSong(uploadDTO, undefined)).rejects.toThrow(
         'File is required',
       );
     });
 
     it('should handle upload without albumId', async () => {
-      const uploadDto: UploadSongDTO = {
+      const uploadDTO: UploadSongDTO = {
         title: 'Test Song',
         artists: [
           {
@@ -405,7 +413,7 @@ describe('SongsController', () => {
 
       mockSongsService.uploadSong.mockResolvedValue(mockResponse);
 
-      const result: unknown = await controller.uploadSong(uploadDto, mockFile);
+      const result: unknown = await controller.uploadSong(uploadDTO, mockFile);
 
       expect(result).toEqual(mockResponse);
     });

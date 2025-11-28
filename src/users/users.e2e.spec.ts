@@ -1,3 +1,4 @@
+import { CacheModule } from '@nestjs/cache-manager';
 import {
   BadRequestException,
   INestApplication,
@@ -98,6 +99,7 @@ describe('Users Registration', () => {
           isGlobal: true,
           envFilePath: '.env.test',
         }),
+        CacheModule.register({ isGlobal: true }),
         MetricsModule,
         UsersModule,
       ],

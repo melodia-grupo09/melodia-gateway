@@ -51,6 +51,14 @@ describe('PlaylistsController', () => {
           provide: PlaylistsService,
           useValue: mockPlaylistsService,
         },
+        {
+          provide: 'CACHE_MANAGER',
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
