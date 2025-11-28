@@ -11,6 +11,7 @@ describe('ArtistsController', () => {
 
   const mockArtistsService = {
     getArtist: jest.fn(),
+    getSimilarArtists: jest.fn(),
     updateArtist: jest.fn(),
     deleteArtist: jest.fn(),
     updateArtistMedia: jest.fn(),
@@ -85,6 +86,27 @@ describe('ArtistsController', () => {
       };
 
       expect(mockArtistsService.getArtist).toHaveBeenCalledWith(artistId);
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getSimilarArtists', () => {
+    it('should get similar artists by id', async () => {
+      const artistId = '123';
+      const mockResult = [
+        {
+          id: '456',
+          name: 'Similar Artist 1',
+        },
+      ];
+
+      mockArtistsService.getSimilarArtists.mockResolvedValue(mockResult);
+
+      const result = await controller.getSimilarArtists(artistId);
+
+      expect(mockArtistsService.getSimilarArtists).toHaveBeenCalledWith(
+        artistId,
+      );
       expect(result).toEqual(mockResult);
     });
   });

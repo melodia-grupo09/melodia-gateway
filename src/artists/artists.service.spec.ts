@@ -112,17 +112,55 @@ describe('ArtistsService', () => {
       expect(result).toEqual(mockResponse.data);
     });
 
-    it('should throw error when artist not found', async () => {
+    it('should throw error when getting artist fails', async () => {
       const artistId = '123';
-      const error = new Error('Artist not found');
+      const error = new Error('Not found');
 
       mockHttpService.get.mockReturnValue(throwError(() => error));
 
-      await expect(service.getArtist(artistId)).rejects.toThrow(
-        'Artist not found',
+      await expect(service.getArtist(artistId)).rejects.toThrow('Not found');
+    });
+  });
+
+  describe('getSimilarArtists', () => {
+    it('should get similar artists successfully', async () => {
+      const artistId = '123';
+      const mockResponse = {
+        data: [
+          {
+            id: '456',
+            name: 'Similar Artist 1',
+          },
+          {
+            id: '789',
+            name: 'Similar Artist 2',
+          },
+        ],
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.getSimilarArtists(artistId);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/artists/${artistId}/similar`,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw error when getting similar artists fails', async () => {
+      const artistId = '123';
+      const error = new Error('Fetch failed');
+
+      mockHttpService.get.mockReturnValue(throwError(() => error));
+
+      await expect(service.getSimilarArtists(artistId)).rejects.toThrow(
+        'Fetch failed',
       );
     });
   });
+
+  describe('updateArtist', () => {});
 
   describe('searchArtists', () => {
     it('should search artists with default parameters', async () => {

@@ -36,6 +36,13 @@ export class ArtistsService {
     return response.data;
   }
 
+  async getSimilarArtists(id: string): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.get(`/artists/${id}/similar`),
+    );
+    return response.data;
+  }
+
   async updateArtist(id: string, updateData: any): Promise<any> {
     const response = await firstValueFrom(
       this.httpService.patch(`/artists/${id}`, updateData),

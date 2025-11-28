@@ -81,6 +81,25 @@ export class ArtistsController {
     return this.artistsService.getArtist(id);
   }
 
+  @Get(':id/similar')
+  @ApiOperation({ summary: 'Get similar artists' })
+  @ApiParam({
+    name: 'id',
+    description: 'Artist UUID',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of similar artists based on genres',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Artist not found',
+  })
+  async getSimilarArtists(@Param('id') id: string): Promise<any> {
+    return this.artistsService.getSimilarArtists(id);
+  }
+
   @Patch(':id')
   @ApiOperation({ summary: 'Update artist information' })
   @ApiParam({
