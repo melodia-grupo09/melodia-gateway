@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBearerAuth,
   ApiConsumes,
   ApiOperation,
   ApiResponse,
@@ -90,6 +91,7 @@ export class UsersController {
   }
 
   @Post('link/google')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Link Google Account' })
@@ -356,6 +358,7 @@ export class UsersController {
 
   // Profile endpoints
   @Get('profile/search')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Search users',
@@ -370,6 +373,7 @@ export class UsersController {
   }
 
   @Get('profile/:userId')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Get own profile',
@@ -384,6 +388,7 @@ export class UsersController {
   }
 
   @Patch('profile/:userId')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Update profile',
@@ -401,6 +406,7 @@ export class UsersController {
   }
 
   @Post('profile/:userId/photo')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
@@ -424,6 +430,7 @@ export class UsersController {
   }
 
   @Get('profile/public/:userId')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Get public profile',
@@ -438,6 +445,7 @@ export class UsersController {
   }
 
   @Post('profile/:userId/follow')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Follow user',
@@ -455,6 +463,7 @@ export class UsersController {
   }
 
   @Post('profile/:userId/unfollow')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Unfollow user',
@@ -472,6 +481,7 @@ export class UsersController {
   }
 
   @Get('profile/:userId/is-following')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Check if following',
@@ -489,6 +499,7 @@ export class UsersController {
   }
 
   @Get('profile/:userId/followers-count')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Get followers count',
@@ -503,6 +514,7 @@ export class UsersController {
   }
 
   @Get('profile/:userId/following-count')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Get following count',
@@ -517,6 +529,7 @@ export class UsersController {
   }
 
   @Get('profile/:userId/followers')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Get followers',
@@ -535,6 +548,7 @@ export class UsersController {
   }
 
   @Get('profile/:userId/following')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Get following',

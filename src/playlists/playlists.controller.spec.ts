@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { UsersService } from '../users/users.service';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
 import { CreateLikedSongDto } from './dto/create-liked-song.dto';
@@ -6,7 +7,6 @@ import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { ReorderSongDto } from './dto/reorder-song.dto';
 import { PlaylistsController } from './playlists.controller';
 import { PlaylistsService } from './playlists.service';
-import { UsersService } from '../users/users.service';
 
 interface PlaylistResponse {
   id: string;

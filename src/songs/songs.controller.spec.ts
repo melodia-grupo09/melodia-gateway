@@ -3,10 +3,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import type { Request, Response } from 'express';
 import { Readable } from 'stream';
 import { MetricsService } from '../metrics/metrics.service';
+import { UsersService } from '../users/users.service';
 import { UploadSongDTO } from './dto/upload-song.dto';
 import { SongsController } from './songs.controller';
 import { SongsService } from './songs.service';
-import { UsersService } from '../users/users.service';
 
 // Mock the pipeline function from stream/promises
 jest.mock('stream/promises', () => ({

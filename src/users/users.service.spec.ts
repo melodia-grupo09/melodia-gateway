@@ -1,7 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Cache } from 'cache-manager';
 import { of, throwError } from 'rxjs';
 import { ArtistsService } from '../artists/artists.service';
 import { MetricsService } from '../metrics/metrics.service';

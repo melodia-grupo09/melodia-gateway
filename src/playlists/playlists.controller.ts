@@ -15,6 +15,7 @@ import {
   Req,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiHeader,
   ApiOperation,
   ApiParam,
@@ -71,6 +72,7 @@ export class PlaylistsController {
     summary: 'Add a song to liked songs',
     description: "Adds a song to the user's liked songs collection",
   })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 201,
     description: 'Song added to liked songs successfully',

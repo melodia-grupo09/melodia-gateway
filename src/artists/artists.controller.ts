@@ -18,6 +18,7 @@ import {
   FileInterceptor,
 } from '@nestjs/platform-express';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOperation,
@@ -745,6 +746,7 @@ export class ArtistsController {
   }
 
   @Post(':artistId/releases/:releaseId/share')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({ summary: 'Share an album/release' })
   @ApiParam({
@@ -783,6 +785,7 @@ export class ArtistsController {
   }
 
   @Patch(':id/follow')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({ summary: 'Follow artist (increment followers count)' })
   @ApiParam({
@@ -815,6 +818,7 @@ export class ArtistsController {
   }
 
   @Patch(':id/unfollow')
+  @ApiBearerAuth()
   @UseGuards(FirebaseAuthGuard)
   @ApiOperation({ summary: 'Unfollow artist (decrement followers count)' })
   @ApiParam({

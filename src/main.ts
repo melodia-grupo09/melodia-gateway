@@ -32,6 +32,7 @@ function startSwaggerDocs(app: INestApplication) {
     .setDescription('The FIUBA Melodia API description')
     .setVersion('1.0')
     .addTag('melodia')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

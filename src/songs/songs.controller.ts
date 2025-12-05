@@ -18,6 +18,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOperation,
@@ -187,6 +188,7 @@ export class SongsController {
 
   @Get('player/play/:songId')
   @UseGuards(FirebaseAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Stream a song' })
   @ApiParam({
     name: 'songId',
@@ -335,6 +337,7 @@ export class SongsController {
 
   @Post(':songId/like')
   @UseGuards(FirebaseAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Like a song' })
   @ApiParam({
     name: 'songId',
@@ -378,6 +381,7 @@ export class SongsController {
 
   @Post(':songId/share')
   @UseGuards(FirebaseAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Share a song' })
   @ApiParam({
     name: 'songId',

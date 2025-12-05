@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -21,6 +22,7 @@ import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { MetricsService } from './metrics.service';
 
 @ApiTags('metrics')
+@ApiBearerAuth()
 @Controller('metrics')
 @UseGuards(FirebaseAuthGuard)
 export class MetricsController {
