@@ -12,7 +12,7 @@ import {
   Post,
   Put,
   Query,
-  UseGuards,
+  Req,
 } from '@nestjs/common';
 import {
   ApiHeader,
@@ -22,7 +22,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import type { Request } from 'express';
+import { UsersService } from '../users/users.service';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
 import { CreateLikedSongDto } from './dto/create-liked-song.dto';
@@ -33,10 +34,12 @@ import { SearchPlaylistsDto } from './dto/search-playlists.dto';
 import { PlaylistsService } from './playlists.service';
 
 @ApiTags('playlists')
-@UseGuards(FirebaseAuthGuard)
 @Controller('playlists')
 export class PlaylistsController {
-  constructor(private readonly playlistsService: PlaylistsService) {}
+  constructor(
+    private readonly playlistsService: PlaylistsService,
+    private readonly usersService: UsersService,
+  ) {}
 
   // Liked songs endpoints (must be before dynamic routes)
   @Get('liked-songs')
@@ -86,8 +89,18 @@ export class PlaylistsController {
   async addLikedSong(
     @Headers('user-id') userId: string,
     @Body() createLikedSongDto: CreateLikedSongDto,
+    @Req() req: Request,
   ) {
-    return this.playlistsService.addLikedSong(userId, createLikedSongDto);
+    const token = req.headers.authorization?.split(' ')[1];
+    let region = 'unknown';
+    if (token) {
+      region = await this.usersService.getUserRegion(token);
+    }
+    return this.playlistsService.addLikedSong(
+      userId,
+      createLikedSongDto,
+      region,
+    );
   }
 
   @Delete('liked-songs/:songId')

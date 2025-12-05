@@ -446,6 +446,7 @@ describe('MetricsController', () => {
 
       expect(mockMetricsService.getArtistMetrics).toHaveBeenCalledWith(
         artistId,
+        undefined,
       );
       expect(result).toBe(expectedResult);
     });

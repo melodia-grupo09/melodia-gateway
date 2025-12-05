@@ -6,6 +6,7 @@ import { MetricsService } from '../metrics/metrics.service';
 import { UploadSongDTO } from './dto/upload-song.dto';
 import { SongsController } from './songs.controller';
 import { SongsService } from './songs.service';
+import { UsersService } from '../users/users.service';
 
 // Mock the pipeline function from stream/promises
 jest.mock('stream/promises', () => ({
@@ -38,6 +39,10 @@ describe('SongsController', () => {
     trackUserActivity: jest.fn(),
   };
 
+  const mockUsersService = {
+    getUserRegion: jest.fn().mockResolvedValue('AR'),
+  };
+
   beforeEach(async () => {
     mockWriteHead = jest.fn();
     mockStatus = jest.fn().mockReturnThis();
@@ -66,6 +71,10 @@ describe('SongsController', () => {
         {
           provide: MetricsService,
           useValue: mockMetricsService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
         },
         {
           provide: 'CACHE_MANAGER',
@@ -121,6 +130,7 @@ describe('SongsController', () => {
         undefined,
         'user123',
         artistId,
+        'unknown',
       );
       expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
         'user123',
@@ -132,6 +142,47 @@ describe('SongsController', () => {
         'Accept-Ranges': 'bytes',
       });
       expect(mockPipeline).toHaveBeenCalledWith(mockStream, mockResponse);
+    });
+
+    it('should pass user region when authorization token is present', async () => {
+      const songId = 'song123';
+      const mockUser = { uid: 'user123', email: 'test@example.com' };
+      const artistId = 'artist123';
+      const mockStream = new Readable();
+      const mockServiceResponse = {
+        status: 200,
+        headers: {
+          'content-type': 'audio/mpeg',
+        },
+        data: mockStream,
+      };
+
+      const requestWithAuth = {
+        headers: { authorization: 'Bearer valid-token' },
+      } as unknown as Request;
+
+      mockSongsService.streamSong.mockResolvedValue(mockServiceResponse);
+      mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
+      mockPipeline.mockResolvedValue(undefined);
+
+      await controller.streamSong(
+        songId,
+        mockUser,
+        mockResponse,
+        requestWithAuth,
+        artistId,
+      );
+
+      expect(mockUsersService.getUserRegion).toHaveBeenCalledWith(
+        'valid-token',
+      );
+      expect(mockSongsService.streamSong).toHaveBeenCalledWith(
+        songId,
+        undefined,
+        'user123',
+        artistId,
+        'AR',
+      );
     });
 
     it('should stream a song successfully with range headers', async () => {
@@ -172,6 +223,7 @@ describe('SongsController', () => {
         rangeHeader,
         'user456',
         artistId,
+        'unknown',
       );
       expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
         'user456',
@@ -219,6 +271,7 @@ describe('SongsController', () => {
         undefined,
         'user789',
         artistId,
+        'unknown',
       );
       expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
         'user789',
@@ -422,15 +475,25 @@ describe('SongsController', () => {
   describe('likeSong', () => {
     it('should like a song', async () => {
       const songId = 'song-123';
+      const mockUser = { uid: 'user-123', email: 'test@example.com' };
 
-      const mockSongData = { id: songId, title: 'Test Song' };
+      const mockSongData = {
+        id: songId,
+        title: 'Test Song',
+        artists: [{ id: 'artist-123' }],
+      };
       mockSongsService.getSongById.mockResolvedValue(mockSongData);
       mockMetricsService.recordSongLike.mockResolvedValue(undefined);
 
-      const result = await controller.likeSong(songId);
+      const result = await controller.likeSong(songId, mockUser, mockRequest);
 
       expect(mockSongsService.getSongById).toHaveBeenCalledWith(songId);
-      expect(mockMetricsService.recordSongLike).toHaveBeenCalledWith(songId);
+      expect(mockMetricsService.recordSongLike).toHaveBeenCalledWith(
+        songId,
+        'user-123',
+        'artist-123',
+        'unknown',
+      );
       expect(result).toEqual({ message: 'Song like recorded successfully' });
     });
   });
@@ -440,15 +503,24 @@ describe('SongsController', () => {
       const songId = 'song-123';
       const mockUser = { uid: 'user-123', email: 'test@example.com' };
 
-      const mockSongData = { id: songId, title: 'Test Song' };
+      const mockSongData = {
+        id: songId,
+        title: 'Test Song',
+        artists: [{ id: 'artist-123' }],
+      };
       mockSongsService.getSongById.mockResolvedValue(mockSongData);
       mockMetricsService.recordSongShare.mockResolvedValue(undefined);
       mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
 
-      const result = await controller.shareSong(songId, mockUser);
+      const result = await controller.shareSong(songId, mockUser, mockRequest);
 
       expect(mockSongsService.getSongById).toHaveBeenCalledWith(songId);
-      expect(mockMetricsService.recordSongShare).toHaveBeenCalledWith(songId);
+      expect(mockMetricsService.recordSongShare).toHaveBeenCalledWith(
+        songId,
+        'user-123',
+        'artist-123',
+        'unknown',
+      );
       expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
         'user-123',
         'song_share',

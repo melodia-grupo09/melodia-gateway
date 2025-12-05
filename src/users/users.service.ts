@@ -59,6 +59,20 @@ export class UsersService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
+  async getUserRegion(token: string): Promise<string> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get('/profile/me/country', {
+          params: { token },
+        }),
+      );
+      return response.data as string;
+    } catch {
+      // Handle error or return default
+      return 'unknown';
+    }
+  }
+
   async registerUser(registerUserDto: RegisterUserDto): Promise<any> {
     let response: {
       data: {

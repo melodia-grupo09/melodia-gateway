@@ -34,6 +34,7 @@ import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import type { FirebaseUser } from '../auth/user.decorator';
 import { User } from '../auth/user.decorator';
 import { MetricsService } from '../metrics/metrics.service';
+import { UsersService } from '../users/users.service';
 import { UploadSongDTO } from './dto/upload-song.dto';
 import { SongsService } from './songs.service';
 
@@ -56,6 +57,7 @@ export class SongsController {
   constructor(
     private readonly songsService: SongsService,
     private readonly metricsService: MetricsService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Get('id/:id')
@@ -209,8 +211,20 @@ export class SongsController {
   ) {
     try {
       const range = req.headers['range'] as string | string[] | undefined;
+      const token = req.headers.authorization?.split(' ')[1];
+      let region = 'unknown';
+      if (token) {
+        region = await this.usersService.getUserRegion(token);
+      }
+
       const responseFromService: AxiosResponse<Readable> =
-        await this.songsService.streamSong(songId, range, user.uid, artistId);
+        await this.songsService.streamSong(
+          songId,
+          range,
+          user.uid,
+          artistId,
+          region,
+        );
 
       // Track user activity for song play in parallel (don't block streaming)
       try {
@@ -320,6 +334,7 @@ export class SongsController {
   }
 
   @Post(':songId/like')
+  @UseGuards(FirebaseAuthGuard)
   @ApiOperation({ summary: 'Like a song' })
   @ApiParam({
     name: 'songId',
@@ -336,11 +351,27 @@ export class SongsController {
   })
   async likeSong(
     @Param('songId') songId: string,
+    @User() user: FirebaseUser,
+    @Req() req: Request,
   ): Promise<{ message: string }> {
     // Verify the song exists
-    await this.songsService.getSongById(songId);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const song = await this.songsService.getSongById(songId);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+    const artistId = song.artists?.[0]?.id || 'unknown';
 
-    await this.metricsService.recordSongLike(songId);
+    const token = req.headers.authorization?.split(' ')[1];
+    let region = 'unknown';
+    if (token) {
+      region = await this.usersService.getUserRegion(token);
+    }
+
+    await this.metricsService.recordSongLike(
+      songId,
+      user.uid,
+      artistId as string,
+      region,
+    );
 
     return { message: 'Song like recorded successfully' };
   }
@@ -364,13 +395,28 @@ export class SongsController {
   async shareSong(
     @Param('songId') songId: string,
     @User() user: FirebaseUser,
+    @Req() req: Request,
   ): Promise<{ message: string }> {
     // Verify the song exists
-    await this.songsService.getSongById(songId);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const song = await this.songsService.getSongById(songId);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+    const artistId = song.artists?.[0]?.id || 'unknown';
+
+    const token = req.headers.authorization?.split(' ')[1];
+    let region = 'unknown';
+    if (token) {
+      region = await this.usersService.getUserRegion(token);
+    }
 
     // Record the share in metrics service and track user activity
     await Promise.all([
-      this.metricsService.recordSongShare(songId),
+      this.metricsService.recordSongShare(
+        songId,
+        user.uid,
+        artistId as string,
+        region,
+      ),
       this.metricsService.trackUserActivity(user.uid, 'song_share'),
     ]);
 

@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { of } from 'rxjs';
 import { MetricsService } from '../metrics/metrics.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { SongsService } from '../songs/songs.service';
 import { UsersService } from '../users/users.service';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
@@ -44,6 +45,14 @@ describe('PlaylistsService', () => {
     sendNotificationToUserDevices: jest.fn().mockResolvedValue(undefined),
   };
 
+  const mockSongsService = {
+    getSongById: jest.fn().mockResolvedValue({
+      id: 'song123',
+      title: 'Test Song',
+      artists: [{ id: 'artist123', name: 'Test Artist' }],
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -67,6 +76,10 @@ describe('PlaylistsService', () => {
         {
           provide: NotificationsService,
           useValue: mockNotificationsService,
+        },
+        {
+          provide: SongsService,
+          useValue: mockSongsService,
         },
       ],
     }).compile();

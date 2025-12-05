@@ -2,6 +2,7 @@ import { HttpModule } from '@nestjs/axios';
 import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { SongsModule } from '../songs/songs.module';
 import { UsersModule } from '../users/users.module';
 import { PlaylistsController } from './playlists.controller';
 import { PlaylistsService } from './playlists.service';
@@ -21,6 +22,7 @@ import { PlaylistsService } from './playlists.service';
     }),
     forwardRef(() => UsersModule),
     NotificationsModule,
+    SongsModule,
   ],
   controllers: [PlaylistsController],
   providers: [PlaylistsService],

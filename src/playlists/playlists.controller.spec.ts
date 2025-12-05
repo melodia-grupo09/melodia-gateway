@@ -6,6 +6,7 @@ import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { ReorderSongDto } from './dto/reorder-song.dto';
 import { PlaylistsController } from './playlists.controller';
 import { PlaylistsService } from './playlists.service';
+import { UsersService } from '../users/users.service';
 
 interface PlaylistResponse {
   id: string;
@@ -43,6 +44,10 @@ describe('PlaylistsController', () => {
     removeFromHistory: jest.fn(),
   };
 
+  const mockUsersService = {
+    getUserRegion: jest.fn().mockResolvedValue('AR'),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PlaylistsController],
@@ -50,6 +55,10 @@ describe('PlaylistsController', () => {
         {
           provide: PlaylistsService,
           useValue: mockPlaylistsService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
         },
         {
           provide: 'CACHE_MANAGER',
@@ -422,11 +431,22 @@ describe('PlaylistsController', () => {
 
       mockPlaylistsService.addLikedSong.mockResolvedValue(expectedResult);
 
-      const result = await controller.addLikedSong(userId, createLikedSongDto);
+      const mockRequest = {
+        headers: {
+          authorization: 'Bearer test-token',
+        },
+      } as any;
+
+      const result = await controller.addLikedSong(
+        userId,
+        createLikedSongDto,
+        mockRequest,
+      );
 
       expect(mockPlaylistsService.addLikedSong).toHaveBeenCalledWith(
         userId,
         createLikedSongDto,
+        'AR',
       );
       expect(result).toEqual(expectedResult);
     });

@@ -214,12 +214,14 @@ export class MetricsService {
     songId: string,
     userId: string,
     artistId?: string,
+    region?: string,
   ): Promise<void> {
     try {
       // The metrics service requires artistId and userId in the request body
       const requestBody = {
         artistId: artistId || 'unknown',
         userId: userId,
+        region: region || 'unknown',
       };
 
       await firstValueFrom(
@@ -307,10 +309,21 @@ export class MetricsService {
     }
   }
 
-  async recordSongLike(songId: string): Promise<void> {
+  async recordSongLike(
+    songId: string,
+    userId: string,
+    artistId: string,
+    region?: string,
+  ): Promise<void> {
     try {
+      const requestBody = {
+        artistId: artistId || 'unknown',
+        userId: userId,
+        region: region || 'unknown',
+      };
+
       await firstValueFrom(
-        this.httpService.post(`/metrics/songs/${songId}/likes`),
+        this.httpService.post(`/metrics/songs/${songId}/likes`, requestBody),
       );
       this.logger.log(`Song like recorded for songId: ${songId}`);
     } catch (error) {
@@ -322,10 +335,21 @@ export class MetricsService {
     }
   }
 
-  async recordSongShare(songId: string): Promise<void> {
+  async recordSongShare(
+    songId: string,
+    userId: string,
+    artistId: string,
+    region?: string,
+  ): Promise<void> {
     try {
+      const requestBody = {
+        artistId: artistId || 'unknown',
+        userId: userId,
+        region: region || 'unknown',
+      };
+
       await firstValueFrom(
-        this.httpService.post(`/metrics/songs/${songId}/shares`),
+        this.httpService.post(`/metrics/songs/${songId}/shares`, requestBody),
       );
       this.logger.log(`Song share recorded for songId: ${songId}`);
     } catch (error) {
@@ -455,9 +479,12 @@ export class MetricsService {
     }
   }
 
-  async getArtistMetrics(artistId: string): Promise<any> {
+  async getArtistMetrics(artistId: string, region?: string): Promise<any> {
+    const params: Record<string, string> = {};
+    if (region) params.region = region;
+
     const response = await firstValueFrom(
-      this.httpService.get(`/metrics/artists/${artistId}`),
+      this.httpService.get(`/metrics/artists/${artistId}`, { params }),
     );
     return response.data;
   }

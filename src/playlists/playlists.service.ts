@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { SendNotificationToUsersBatchPayloadDTO } from 'src/notifications/dtos/send-notification.dto';
 import { MetricsService } from '../metrics/metrics.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { SongsService } from '../songs/songs.service';
 import { UsersService } from '../users/users.service';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
@@ -24,6 +25,7 @@ export class PlaylistsService {
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
     private readonly notificationsService: NotificationsService,
+    private readonly songsService: SongsService,
   ) {}
 
   // Playlist endpoints
@@ -221,18 +223,35 @@ export class PlaylistsService {
     return response.data;
   }
 
-  async addLikedSong(userId: string, createLikedSongDto: CreateLikedSongDto) {
+  async addLikedSong(
+    userId: string,
+    createLikedSongDto: CreateLikedSongDto,
+    region?: string,
+  ) {
     const response = await firstValueFrom(
       this.httpService.post('/liked-songs/', createLikedSongDto, {
         headers: { 'user-id': userId },
       }),
     );
 
+    // Get song details to get artistId
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const song = await this.songsService.getSongById(
+      createLikedSongDto.song_id,
+    );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+    const artistId = song.artists?.[0]?.id || 'unknown';
+
     // Track user activity and song like metrics
     try {
       await Promise.all([
         this.metricsService.trackUserActivity(userId, 'song_like'),
-        this.metricsService.recordSongLike(createLikedSongDto.song_id),
+        this.metricsService.recordSongLike(
+          createLikedSongDto.song_id,
+          userId,
+          artistId as string,
+          region,
+        ),
       ]);
     } catch (error) {
       console.error('Failed to track song like activity:', error);

@@ -266,6 +266,7 @@ describe('SongsService', () => {
         songId,
         userId,
         artistId,
+        undefined,
       );
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/song123',
@@ -305,6 +306,7 @@ describe('SongsService', () => {
         songId,
         userId,
         artistId,
+        undefined,
       );
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/song456',
@@ -346,6 +348,7 @@ describe('SongsService', () => {
         songId,
         userId,
         artistId,
+        undefined,
       );
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/song789',
@@ -373,6 +376,7 @@ describe('SongsService', () => {
         songId,
         userId,
         artistId,
+        undefined,
       );
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/nonexistent-song',
@@ -405,6 +409,7 @@ describe('SongsService', () => {
         songId,
         userId,
         artistId,
+        undefined,
       );
       expect(mockHttpService.get).toHaveBeenCalledWith(
         '/songs/player/play/different-song-id-12345',

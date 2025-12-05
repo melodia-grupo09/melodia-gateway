@@ -1670,4 +1670,28 @@ describe('UsersService', () => {
       );
     });
   });
+
+  describe('getUserRegion', () => {
+    it('should return user region successfully', async () => {
+      const token = 'valid-token';
+      const mockResponse = { data: 'AR' };
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.getUserRegion(token);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith('/profile/me/country', {
+        params: { token },
+      });
+      expect(result).toBe('AR');
+    });
+
+    it('should return "unknown" when service call fails', async () => {
+      const token = 'valid-token';
+      mockHttpService.get.mockReturnValue(throwError(() => new Error('Error')));
+
+      const result = await service.getUserRegion(token);
+
+      expect(result).toBe('unknown');
+    });
+  });
 });

@@ -494,7 +494,7 @@ describe('MetricsService', () => {
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
         `/metrics/songs/${songId}/plays`,
-        { artistId, userId },
+        { artistId, userId, region: 'unknown' },
       );
     });
 
@@ -514,7 +514,7 @@ describe('MetricsService', () => {
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
         `/metrics/songs/${songId}/plays`,
-        { artistId, userId },
+        { artistId, userId, region: 'unknown' },
       );
     });
   });
@@ -679,6 +679,7 @@ describe('MetricsService', () => {
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
         `/metrics/songs/${songId}/likes`,
+        { artistId: 'unknown', userId: undefined, region: 'unknown' },
       );
     });
 
@@ -703,6 +704,7 @@ describe('MetricsService', () => {
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
         `/metrics/songs/${songId}/shares`,
+        { artistId: 'unknown', userId: undefined, region: 'unknown' },
       );
     });
 
@@ -822,6 +824,7 @@ describe('MetricsService', () => {
 
       expect(mockHttpService.get).toHaveBeenCalledWith(
         `/metrics/artists/${artistId}`,
+        { params: {} },
       );
       expect(result).toBe(expectedResult);
     });

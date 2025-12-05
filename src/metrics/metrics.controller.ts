@@ -521,14 +521,21 @@ export class MetricsController {
     type: String,
     description: 'Unique identifier for the artist',
   })
+  @ApiQuery({
+    name: 'region',
+    required: false,
+    type: String,
+    description: 'Filter metrics by region',
+  })
   @ApiResponse({
     status: 200,
     description: 'Artist metrics retrieved successfully',
   })
   async getArtistMetrics(
     @Param('artistId') artistId: string,
+    @Query('region') region?: string,
   ): Promise<unknown> {
-    return this.metricsService.getArtistMetrics(artistId);
+    return this.metricsService.getArtistMetrics(artistId, region);
   }
 
   @Post('artists/:artistId/followers')
