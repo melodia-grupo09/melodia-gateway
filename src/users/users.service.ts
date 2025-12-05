@@ -20,6 +20,8 @@ import { AdminRegisterDto } from './dto/admin-register.dto';
 import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
 import { ChangeRoleDto } from './dto/change-role.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
+import { LinkGoogleDto } from './dto/link-google.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -244,6 +246,23 @@ export class UsersService {
         statusCode,
       );
     }
+  }
+
+  async loginGoogle(googleLoginDto: GoogleLoginDto): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.post('/auth/login/google', googleLoginDto),
+    );
+    return response.data;
+  }
+
+  async linkGoogle(userId: string, linkGoogleDto: LinkGoogleDto): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.post('/auth/link/google', {
+        user_id: userId,
+        id_token: linkGoogleDto.id_token,
+      }),
+    );
+    return response.data;
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<any> {

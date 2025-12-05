@@ -10,6 +10,8 @@ import { AdminLoginDto } from './dto/admin-login.dto';
 import { AdminRegisterDto } from './dto/admin-register.dto';
 import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
+import { LinkGoogleDto } from './dto/link-google.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -1590,6 +1592,81 @@ describe('UsersService', () => {
 
       await expect(service.getFollowing(userId)).rejects.toThrow(
         'Failed to get following',
+      );
+    });
+  });
+
+  describe('loginGoogle', () => {
+    it('should successfully login with google', async () => {
+      const googleLoginDto: GoogleLoginDto = {
+        id_token: 'test-token',
+      };
+
+      const mockResponse = {
+        data: {
+          token: 'access-token',
+          refresh_token: 'refresh-token',
+        },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = await service.loginGoogle(googleLoginDto);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        '/auth/login/google',
+        googleLoginDto,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw error when google login fails', async () => {
+      const googleLoginDto: GoogleLoginDto = {
+        id_token: 'invalid-token',
+      };
+
+      const error = new Error('Login failed');
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(service.loginGoogle(googleLoginDto)).rejects.toThrow(error);
+    });
+  });
+
+  describe('linkGoogle', () => {
+    it('should successfully link google account', async () => {
+      const userId = 'user-123';
+      const linkGoogleDto: LinkGoogleDto = {
+        id_token: 'test-token',
+      };
+
+      const mockResponse = {
+        data: {
+          message: 'Account linked successfully',
+        },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = await service.linkGoogle(userId, linkGoogleDto);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith('/auth/link/google', {
+        user_id: userId,
+        id_token: linkGoogleDto.id_token,
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw error when linking google account fails', async () => {
+      const userId = 'user-123';
+      const linkGoogleDto: LinkGoogleDto = {
+        id_token: 'invalid-token',
+      };
+
+      const error = new Error('Link failed');
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(service.linkGoogle(userId, linkGoogleDto)).rejects.toThrow(
+        error,
       );
     });
   });

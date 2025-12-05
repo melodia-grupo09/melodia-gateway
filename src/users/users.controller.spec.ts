@@ -3,6 +3,8 @@ import { AdminLoginDto } from './dto/admin-login.dto';
 import { AdminRegisterDto } from './dto/admin-register.dto';
 import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
+import { LinkGoogleDto } from './dto/link-google.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -37,6 +39,8 @@ describe('UsersController', () => {
     uploadProfilePhoto: jest.fn(),
     getProfile: jest.fn(),
     updateProfile: jest.fn(),
+    loginGoogle: jest.fn(),
+    linkGoogle: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -461,6 +465,49 @@ describe('UsersController', () => {
       await expect(
         controller.uploadProfilePhoto(userId, mockFile),
       ).rejects.toThrow('Upload failed');
+    });
+  });
+
+  describe('loginGoogle', () => {
+    it('should login with google successfully', async () => {
+      const googleLoginDto: GoogleLoginDto = {
+        id_token: 'test-token',
+      };
+
+      const mockResult = {
+        token: 'access-token',
+        refresh_token: 'refresh-token',
+      };
+
+      mockUsersService.loginGoogle.mockResolvedValue(mockResult);
+
+      const result = await controller.loginGoogle(googleLoginDto);
+
+      expect(mockUsersService.loginGoogle).toHaveBeenCalledWith(googleLoginDto);
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('linkGoogle', () => {
+    it('should link google account successfully', async () => {
+      const user = { uid: 'user-123' } as any;
+      const linkGoogleDto: LinkGoogleDto = {
+        id_token: 'test-token',
+      };
+
+      const mockResult = {
+        message: 'Account linked successfully',
+      };
+
+      mockUsersService.linkGoogle.mockResolvedValue(mockResult);
+
+      const result = await controller.linkGoogle(user, linkGoogleDto);
+
+      expect(mockUsersService.linkGoogle).toHaveBeenCalledWith(
+        user.uid,
+        linkGoogleDto,
+      );
+      expect(result).toEqual(mockResult);
     });
   });
 });

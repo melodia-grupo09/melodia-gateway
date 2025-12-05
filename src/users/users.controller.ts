@@ -27,6 +27,8 @@ import { AdminRegisterDto } from './dto/admin-register.dto';
 import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
 import { ChangeRoleDto } from './dto/change-role.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
+import { LinkGoogleDto } from './dto/link-google.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -74,6 +76,32 @@ export class UsersController {
   })
   async loginUser(@Body() loginUserDto: LoginUserDto): Promise<any> {
     return this.usersService.loginUser(loginUserDto);
+  }
+
+  @Post('login/google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with Google' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+  })
+  async loginGoogle(@Body() googleLoginDto: GoogleLoginDto): Promise<any> {
+    return this.usersService.loginGoogle(googleLoginDto);
+  }
+
+  @Post('link/google')
+  @UseGuards(FirebaseAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Link Google Account' })
+  @ApiResponse({
+    status: 200,
+    description: 'Account linked successfully',
+  })
+  async linkGoogle(
+    @User() user: FirebaseUser,
+    @Body() linkGoogleDto: LinkGoogleDto,
+  ): Promise<any> {
+    return this.usersService.linkGoogle(user.uid, linkGoogleDto);
   }
   constructor(private readonly usersService: UsersService) {}
 
