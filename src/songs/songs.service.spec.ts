@@ -272,6 +272,7 @@ describe('SongsService', () => {
         '/songs/player/play/song123',
         {
           headers: {},
+          params: {},
           responseType: 'stream',
         },
       );
@@ -312,6 +313,7 @@ describe('SongsService', () => {
         '/songs/player/play/song456',
         {
           headers: { range },
+          params: {},
           responseType: 'stream',
         },
       );
@@ -354,6 +356,7 @@ describe('SongsService', () => {
         '/songs/player/play/song789',
         {
           headers: { range: rangeArray },
+          params: {},
           responseType: 'stream',
         },
       );
@@ -382,6 +385,7 @@ describe('SongsService', () => {
         '/songs/player/play/nonexistent-song',
         {
           headers: {},
+          params: {},
           responseType: 'stream',
         },
       );
@@ -415,6 +419,7 @@ describe('SongsService', () => {
         '/songs/player/play/different-song-id-12345',
         {
           headers: {},
+          params: {},
           responseType: 'stream',
         },
       );
