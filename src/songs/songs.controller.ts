@@ -266,6 +266,81 @@ export class SongsController {
     }
   }
 
+  @Get('player/video/:songId/:filename')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Stream a song video (HLS)' })
+  @ApiParam({
+    name: 'songId',
+    description: 'ID of the song to stream',
+    type: String,
+  })
+  @ApiParam({
+    name: 'filename',
+    description: 'Specific HLS file (playlist.m3u8 or segments .ts)',
+    type: String,
+  })
+  @ApiResponse({ status: 200, description: 'Stream content' })
+  @ApiResponse({ status: 404, description: 'Video not found' })
+  async streamVideo(
+    @Param('songId') songId: string,
+    @Param('filename') filename: string,
+    @User() user: FirebaseUser,
+    @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
+  ) {
+    try {
+      const range = req.headers['range'] as string | string[] | undefined;
+
+      // Llamada al servicio (Asegúrate de agregar este método a SongsService en el gateway)
+      const responseFromService: AxiosResponse<Readable> =
+        await this.songsService.streamVideo(songId, filename, range);
+
+      // Solo trakeamos la actividad si se pide la playlist principal (.m3u8)
+      // para evitar spam de métricas con cada segmento .ts
+      if (filename.endsWith('.m3u8')) {
+        try {
+          await this.metricsService.trackUserActivity(user.uid, 'video_play');
+        } catch (error) {
+          console.error('Failed to track video play activity:', error);
+        }
+      }
+
+      const headers = {
+        'Content-Type': responseFromService.headers['content-type'] as string,
+        'Content-Length': responseFromService.headers[
+          'content-length'
+        ] as string,
+        'Content-Range': responseFromService.headers['content-range'] as string,
+        'Accept-Ranges': responseFromService.headers['accept-ranges'] as string,
+        'Cache-Control': responseFromService.headers['cache-control'] as string,
+      };
+
+      const cleanHeaders = Object.fromEntries(
+        Object.entries(headers).filter(([, value]) => value != null),
+      );
+
+      res.writeHead(responseFromService.status, cleanHeaders);
+      await pipeline(responseFromService.data, res);
+    } catch (error: unknown) {
+      if (!res.headersSent) {
+        const errorWithResponse = error as ErrorWithResponse;
+        if (errorWithResponse.response) {
+          res
+            .status(errorWithResponse.response.status)
+            .send(errorWithResponse.response.data);
+        } else {
+          console.error('Error streaming video:', error);
+          res
+            .status(500)
+            .send('An unexpected error occurred while streaming video.');
+        }
+      } else {
+        res.destroy();
+      }
+    }
+  }
+
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Upload a new song' })

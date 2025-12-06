@@ -41,7 +41,6 @@ export class SongsService {
     );
     const songData = response.data;
 
-    // Enrich with cover URL from release
     try {
       const coverData =
         await this.artistsService.getReleaseCoverBySongId(songId);
@@ -50,7 +49,6 @@ export class SongsService {
         coverUrl: coverData.coverUrl,
       };
     } catch {
-      // If cover fetch fails, return song without cover
       return songData;
     }
   }
@@ -106,6 +104,30 @@ export class SongsService {
 
     return firstValueFrom(
       this.httpService.get<Readable>(`/songs/player/play/${songId}`, config),
+    );
+  }
+
+  async streamVideo(
+    songId: string,
+    fileName: string,
+    range: string | string[] | undefined,
+  ): Promise<AxiosResponse<Readable>> {
+    const headers: Record<string, string | string[]> = {};
+    // Si el cliente pide un rango específico
+    if (range) {
+      headers['range'] = range;
+    }
+
+    const config: AxiosRequestConfig = {
+      headers,
+      responseType: 'stream',
+    };
+
+    return firstValueFrom(
+      this.httpService.get<Readable>(
+        `/songs/player/video/${songId}/${fileName}`,
+        config,
+      ),
     );
   }
 
