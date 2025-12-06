@@ -92,6 +92,7 @@ describe('UsersService', () => {
         email: 'test@example.com',
         password: 'password123',
         username: 'testuser',
+        country: 'Argentina',
       };
 
       const mockResponse = {
@@ -107,6 +108,8 @@ describe('UsersService', () => {
         email: registerDto.email,
         password: registerDto.password,
         nombre: registerDto.username,
+        pais: registerDto.country,
+        esArtista: registerDto.isArtist,
       });
 
       expect(mockMetricsService.recordUserRegistration).toHaveBeenCalledWith(
@@ -124,6 +127,7 @@ describe('UsersService', () => {
         email: 'test@example.com',
         password: 'password123',
         username: 'testuser',
+        country: 'Argentina',
       };
 
       const mockResponse = {
@@ -148,6 +152,7 @@ describe('UsersService', () => {
         email: 'test@example.com',
         password: 'password123',
         username: 'testuser',
+        country: 'Argentina',
       };
 
       const error = new Error('User service error');
@@ -163,6 +168,7 @@ describe('UsersService', () => {
         email: 'artist@example.com',
         password: 'password123',
         username: 'testartist',
+        country: 'Argentina',
         isArtist: true,
       };
 
@@ -201,6 +207,7 @@ describe('UsersService', () => {
         email: 'artist@example.com',
         password: 'password123',
         username: 'testartist',
+        country: 'Argentina',
         isArtist: true,
       };
 
@@ -228,6 +235,7 @@ describe('UsersService', () => {
         email: 'user@example.com',
         password: 'password123',
         username: 'testuser',
+        country: 'Argentina',
         isArtist: false,
       };
 
@@ -252,6 +260,7 @@ describe('UsersService', () => {
         email: 'existing@example.com',
         password: 'password123',
         username: 'testuser',
+        country: 'Argentina',
       };
 
       const error = {

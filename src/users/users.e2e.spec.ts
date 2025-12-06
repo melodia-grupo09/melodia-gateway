@@ -201,6 +201,7 @@ describe('Users Registration', () => {
         email: 'new@test.com',
         username: 'newuser',
         password: 'Password123!',
+        country: 'Argentina',
       };
 
       return request(app.getHttpServer())
@@ -222,6 +223,7 @@ describe('Users Registration', () => {
         email: 'test@example.com', // This email is in the "registered" list
         username: 'testuser',
         password: 'Password123!',
+        country: 'Argentina',
       };
 
       return request(app.getHttpServer())

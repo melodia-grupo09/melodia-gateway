@@ -87,6 +87,8 @@ export class UsersService {
           email: registerUserDto.email,
           password: registerUserDto.password,
           nombre: registerUserDto.username,
+          pais: registerUserDto.country,
+          esArtista: registerUserDto.isArtist,
         }),
       );
     } catch (error: unknown) {

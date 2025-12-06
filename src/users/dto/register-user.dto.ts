@@ -49,6 +49,14 @@ export class RegisterUserDto {
   password: string;
 
   @ApiProperty({
+    description: 'User country',
+    example: 'Argentina',
+  })
+  @IsNotEmpty({ message: 'Country is required' })
+  @IsString({ message: 'Country must be a string' })
+  country: string;
+
+  @ApiProperty({
     description: 'Whether the user is an artist',
     example: false,
     required: false,
