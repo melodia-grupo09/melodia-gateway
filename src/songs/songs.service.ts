@@ -6,7 +6,22 @@ import { Readable } from 'stream';
 import { ArtistsService } from '../artists/artists.service';
 import { MetricsService } from '../metrics/metrics.service';
 
-interface UploadResponse {
+export interface SongArtist {
+  id?: string;
+  name?: string;
+  [key: string]: unknown;
+}
+
+export interface SongDetails {
+  id: string;
+  title?: string;
+  duration?: number;
+  coverUrl?: string;
+  artists?: SongArtist[];
+  [key: string]: unknown;
+}
+
+export interface UploadResponse {
   id?: string;
   [key: string]: unknown;
 }
@@ -20,9 +35,9 @@ export class SongsService {
     private readonly artistsService: ArtistsService,
   ) {}
 
-  async getSongById(songId: string): Promise<any> {
+  async getSongById(songId: string): Promise<SongDetails> {
     const response = await firstValueFrom(
-      this.httpService.get<any>(`/songs/id/${songId}`),
+      this.httpService.get<SongDetails>(`/songs/id/${songId}`),
     );
     const songData = response.data;
 
@@ -40,13 +55,13 @@ export class SongsService {
     }
   }
 
-  async getRandom(limit?: number, page?: number): Promise<any[]> {
+  async getRandom(limit?: number, page?: number): Promise<SongDetails[]> {
     const params: Record<string, number> = {};
     if (limit !== undefined) params['limit'] = limit;
     if (page !== undefined) params['page'] = page;
 
     const response = await firstValueFrom(
-      this.httpService.get<any[]>('/songs/random', { params }),
+      this.httpService.get<SongDetails[]>('/songs/random', { params }),
     );
     return response.data;
   }
@@ -55,9 +70,9 @@ export class SongsService {
     query: string,
     limit: number,
     page: number,
-  ): Promise<any[]> {
+  ): Promise<SongDetails[]> {
     const response = await firstValueFrom(
-      this.httpService.get<any[]>('/songs/search', {
+      this.httpService.get<SongDetails[]>('/songs/search', {
         params: { query, limit, page },
       }),
     );
@@ -77,9 +92,13 @@ export class SongsService {
       headers['range'] = range;
     }
 
+    const params: Record<string, string> = {};
+    if (region) params.region = region;
+
     const config: AxiosRequestConfig = {
       headers,
       responseType: 'stream',
+      params,
     };
 
     // Record song play metrics with user and artist information
@@ -90,7 +109,7 @@ export class SongsService {
     );
   }
 
-  async uploadSong(formData: FormData): Promise<any> {
+  async uploadSong(formData: FormData): Promise<UploadResponse> {
     const response = await firstValueFrom(
       this.httpService.post<UploadResponse>('/songs/upload', formData, {
         headers: {
