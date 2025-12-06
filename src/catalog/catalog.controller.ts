@@ -7,7 +7,8 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import type { CatalogService, CatalogPayload } from './catalog.service';
+import { CatalogService } from './catalog.service';
+import type { CatalogPayload } from './catalog.service';
 
 type CatalogQuery = Record<string, string | string[] | undefined>;
 
