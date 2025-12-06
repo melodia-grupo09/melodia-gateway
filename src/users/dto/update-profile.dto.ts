@@ -3,7 +3,7 @@ import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class UpdateProfileDto {
   @ApiProperty({
-    description: 'Nombre del usuario',
+    description: 'User first name',
     example: 'Juan',
     required: false,
   })
@@ -12,7 +12,7 @@ export class UpdateProfileDto {
   nombre?: string;
 
   @ApiProperty({
-    description: 'Apellido del usuario',
+    description: 'User last name',
     example: 'Pérez',
     required: false,
   })
@@ -21,7 +21,7 @@ export class UpdateProfileDto {
   apellido?: string;
 
   @ApiProperty({
-    description: 'Nombre completo del usuario',
+    description: 'User full name',
     example: 'Juan Carlos Pérez',
     required: false,
   })
@@ -30,7 +30,7 @@ export class UpdateProfileDto {
   nombre_completo?: string;
 
   @ApiProperty({
-    description: 'Email del usuario',
+    description: 'User email',
     example: 'juan.perez@email.com',
     required: false,
   })
@@ -39,7 +39,7 @@ export class UpdateProfileDto {
   email?: string;
 
   @ApiProperty({
-    description: 'Teléfono del usuario',
+    description: 'User phone number',
     example: '+54911234567',
     required: false,
   })
@@ -48,7 +48,7 @@ export class UpdateProfileDto {
   telefono?: string;
 
   @ApiProperty({
-    description: 'Dirección del usuario',
+    description: 'User address',
     example: 'Av. Corrientes 1234',
     required: false,
   })
@@ -57,7 +57,16 @@ export class UpdateProfileDto {
   direccion?: string;
 
   @ApiProperty({
-    description: 'Biografía del usuario',
+    description: 'User country',
+    example: 'Argentina',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  pais?: string;
+
+  @ApiProperty({
+    description: 'User biography',
     example: 'Músico profesional...',
     required: false,
   })
@@ -66,7 +75,7 @@ export class UpdateProfileDto {
   biografia?: string;
 
   @ApiProperty({
-    description: 'Filtro de contenido habilitado',
+    description: 'Content filter enabled',
     example: true,
     required: false,
   })

@@ -1227,7 +1227,7 @@ describe('UsersService', () => {
   describe('updateProfile', () => {
     it('should update profile successfully', async () => {
       const userId = 'user123';
-      const updateProfileDto = { nombre: 'Updated Name' };
+      const updateProfileDto = { nombre: 'Updated Name', pais: 'Argentina' };
       const mockResponse = { message: 'Profile updated successfully' };
 
       mockHttpService.patch.mockReturnValue(of({ data: mockResponse }));

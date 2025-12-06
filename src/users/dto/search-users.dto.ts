@@ -11,7 +11,7 @@ import {
 
 export class SearchUsersDto {
   @ApiProperty({
-    description: 'Término de búsqueda (mínimo 2 caracteres)',
+    description: 'Search term (minimum 2 characters)',
     example: 'juan',
     minLength: 2,
   })
@@ -20,7 +20,7 @@ export class SearchUsersDto {
   query: string;
 
   @ApiProperty({
-    description: 'Número de página',
+    description: 'Page number',
     example: 1,
     minimum: 1,
     required: false,
@@ -32,7 +32,7 @@ export class SearchUsersDto {
   page?: number = 1;
 
   @ApiProperty({
-    description: 'Usuarios por página',
+    description: 'Users per page',
     example: 10,
     minimum: 1,
     maximum: 50,

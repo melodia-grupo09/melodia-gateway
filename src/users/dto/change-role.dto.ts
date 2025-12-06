@@ -3,7 +3,7 @@ import { IsBoolean } from 'class-validator';
 
 export class ChangeRoleDto {
   @ApiProperty({
-    description: 'Si el usuario debe ser artista o no',
+    description: 'Whether the user should be an artist or not',
     example: true,
   })
   @IsBoolean()
