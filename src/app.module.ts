@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as redisStore from 'cache-manager-redis-store';
 import { AppController } from './app.controller';
 import { ArtistsModule } from './artists/artists.module';
+import { CatalogModule } from './catalog/catalog.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PlaylistsModule } from './playlists/playlists.module';
@@ -37,6 +38,7 @@ import { UsersModule } from './users/users.module';
     SongsModule,
     UsersModule,
     NotificationsModule,
+    CatalogModule,
   ],
   providers: [],
 })
