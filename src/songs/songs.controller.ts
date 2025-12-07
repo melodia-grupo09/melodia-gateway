@@ -61,6 +61,14 @@ export class SongsController {
     private readonly usersService: UsersService,
   ) {}
 
+  @Get('deep-link/:id')
+  @ApiOperation({ summary: 'Redirect to song deep link' })
+  @ApiParam({ name: 'id', description: 'Song ID' })
+  @ApiResponse({ status: 302, description: 'Redirect to app' })
+  redirectSong(@Param('id') id: string, @Res() res: Response) {
+    return res.redirect(`melodiaappfront://song/${id}`);
+  }
+
   @Get('id/:id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

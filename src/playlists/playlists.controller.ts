@@ -13,6 +13,7 @@ import {
   Put,
   Query,
   Req,
+  Res,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -23,7 +24,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
@@ -41,6 +42,14 @@ export class PlaylistsController {
     private readonly playlistsService: PlaylistsService,
     private readonly usersService: UsersService,
   ) {}
+
+  @Get('deep-link/:id')
+  @ApiOperation({ summary: 'Redirect to playlist deep link' })
+  @ApiParam({ name: 'id', description: 'Playlist ID' })
+  @ApiResponse({ status: 302, description: 'Redirect to app' })
+  redirectPlaylist(@Param('id') id: string, @Res() res: Response) {
+    return res.redirect(`melodiaappfront://library/playlist/${id}`);
+  }
 
   // Liked songs endpoints (must be before dynamic routes)
   @Get('liked-songs')
