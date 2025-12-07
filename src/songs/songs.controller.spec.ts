@@ -27,6 +27,7 @@ describe('SongsController', () => {
 
   const mockSongsService = {
     streamSong: jest.fn(),
+    streamVideo: jest.fn(),
     uploadSong: jest.fn(),
     getSongById: jest.fn(),
   };
@@ -383,6 +384,195 @@ describe('SongsController', () => {
       expect(mockSend).toHaveBeenCalledWith(
         'An unexpected error occurred while streaming.',
       );
+    });
+  });
+
+  describe('streamVideo', () => {
+    it('should stream a video successfully without range headers', async () => {
+      const songId = 'song123';
+      const filename = 'playlist.m3u8';
+      const mockUser = { uid: 'user123', email: 'test@example.com' };
+      const mockStream = new Readable();
+      const mockServiceResponse = {
+        status: 200,
+        headers: {
+          'content-type': 'application/vnd.apple.mpegurl',
+          'content-length': '1024',
+          'cache-control': 'no-cache',
+        },
+        data: mockStream,
+      };
+
+      mockSongsService.streamVideo.mockResolvedValue(mockServiceResponse);
+      mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
+      mockPipeline.mockResolvedValue(undefined);
+
+      await controller.streamVideo(
+        songId,
+        filename,
+        mockUser,
+        mockResponse,
+        mockRequest,
+      );
+
+      expect(mockSongsService.streamVideo).toHaveBeenCalledWith(
+        songId,
+        filename,
+        undefined,
+      );
+      expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
+        'user123',
+        'video_play',
+      );
+      expect(mockWriteHead).toHaveBeenCalledWith(200, {
+        'Content-Type': 'application/vnd.apple.mpegurl',
+        'Content-Length': '1024',
+        'Cache-Control': 'no-cache',
+      });
+      expect(mockPipeline).toHaveBeenCalledWith(mockStream, mockResponse);
+    });
+
+    it('should not track user activity for .ts segments', async () => {
+      const songId = 'song123';
+      const filename = 'segment.ts';
+      const mockUser = { uid: 'user123', email: 'test@example.com' };
+      const mockStream = new Readable();
+      const mockServiceResponse = {
+        status: 200,
+        headers: {
+          'content-type': 'video/mp2t',
+        },
+        data: mockStream,
+      };
+
+      mockSongsService.streamVideo.mockResolvedValue(mockServiceResponse);
+      mockPipeline.mockResolvedValue(undefined);
+
+      await controller.streamVideo(
+        songId,
+        filename,
+        mockUser,
+        mockResponse,
+        mockRequest,
+      );
+
+      expect(mockMetricsService.trackUserActivity).not.toHaveBeenCalled();
+    });
+
+    it('should handle service error with response object', async () => {
+      const songId = 'song404';
+      const filename = 'playlist.m3u8';
+      const mockUser = { uid: 'user404', email: 'test@example.com' };
+      const error = {
+        response: {
+          status: 404,
+          data: 'Video not found',
+        },
+      };
+
+      mockSongsService.streamVideo.mockRejectedValue(error);
+
+      await controller.streamVideo(
+        songId,
+        filename,
+        mockUser,
+        mockResponse,
+        mockRequest,
+      );
+
+      expect(mockStatus).toHaveBeenCalledWith(404);
+      expect(mockSend).toHaveBeenCalledWith('Video not found');
+    });
+
+    it('should handle generic error without response object', async () => {
+      const songId = 'song500';
+      const filename = 'playlist.m3u8';
+      const mockUser = { uid: 'user500', email: 'test@example.com' };
+      const error = new Error('Generic error');
+
+      mockSongsService.streamVideo.mockRejectedValue(error);
+
+      await controller.streamVideo(
+        songId,
+        filename,
+        mockUser,
+        mockResponse,
+        mockRequest,
+      );
+
+      expect(mockStatus).toHaveBeenCalledWith(500);
+      expect(mockSend).toHaveBeenCalledWith(
+        'An unexpected error occurred while streaming video.',
+      );
+    });
+
+    it('should destroy response if headers already sent on error', async () => {
+      const songId = 'song500';
+      const filename = 'playlist.m3u8';
+      const mockUser = { uid: 'user500b', email: 'test@example.com' };
+      const error = new Error('Pipeline error');
+
+      mockSongsService.streamVideo.mockResolvedValue({
+        status: 200,
+        headers: { 'content-type': 'application/vnd.apple.mpegurl' },
+        data: new Readable(),
+      });
+
+      // Simulate headers already sent
+      mockResponse.headersSent = true;
+      mockPipeline.mockRejectedValue(error);
+
+      await controller.streamVideo(
+        songId,
+        filename,
+        mockUser,
+        mockResponse,
+        mockRequest,
+      );
+
+      expect(mockDestroy).toHaveBeenCalled();
+    });
+
+    it('should handle metrics tracking error gracefully', async () => {
+      const songId = 'song123';
+      const filename = 'playlist.m3u8';
+      const mockUser = { uid: 'user123', email: 'test@example.com' };
+      const mockStream = new Readable();
+      const mockServiceResponse = {
+        status: 200,
+        headers: {
+          'content-type': 'application/vnd.apple.mpegurl',
+        },
+        data: mockStream,
+      };
+
+      mockSongsService.streamVideo.mockResolvedValue(mockServiceResponse);
+      mockMetricsService.trackUserActivity.mockRejectedValue(
+        new Error('Metrics error'),
+      );
+      mockPipeline.mockResolvedValue(undefined);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      await controller.streamVideo(
+        songId,
+        filename,
+        mockUser,
+        mockResponse,
+        mockRequest,
+      );
+
+      expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
+        'user123',
+        'video_play',
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to track video play activity:',
+        expect.any(Error),
+      );
+      expect(mockPipeline).toHaveBeenCalledWith(mockStream, mockResponse);
+
+      consoleSpy.mockRestore();
     });
   });
 

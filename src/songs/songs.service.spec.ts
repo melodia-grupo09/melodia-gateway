@@ -426,6 +426,83 @@ describe('SongsService', () => {
     });
   });
 
+  describe('streamVideo', () => {
+    it('should successfully stream a video without range headers', async () => {
+      const songId = 'song123';
+      const filename = 'playlist.m3u8';
+      const mockStream = new Readable();
+      const mockResponse = {
+        data: mockStream,
+        status: 200,
+        statusText: 'OK',
+        headers: {
+          'content-type': 'application/vnd.apple.mpegurl',
+        },
+      } as unknown as AxiosResponse<Readable>;
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.streamVideo(songId, filename, undefined);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/songs/player/video/${songId}/${filename}`,
+        {
+          headers: {},
+          responseType: 'stream',
+        },
+      );
+    });
+
+    it('should successfully stream a video with range headers', async () => {
+      const songId = 'song456';
+      const filename = 'segment.ts';
+      const range = 'bytes=0-1023';
+      const mockStream = new Readable();
+      const mockResponse = {
+        data: mockStream,
+        status: 206,
+        statusText: 'Partial Content',
+        headers: {
+          'content-type': 'video/mp2t',
+          'content-range': 'bytes 0-1023/1024000',
+        },
+      } as unknown as AxiosResponse<Readable>;
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.streamVideo(songId, filename, range);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/songs/player/video/${songId}/${filename}`,
+        {
+          headers: { range },
+          responseType: 'stream',
+        },
+      );
+    });
+
+    it('should handle errors when streaming video fails', async () => {
+      const songId = 'nonexistent-song';
+      const filename = 'playlist.m3u8';
+      const error = new Error('Video not found');
+
+      mockHttpService.get.mockReturnValue(throwError(() => error));
+
+      await expect(
+        service.streamVideo(songId, filename, undefined),
+      ).rejects.toThrow('Video not found');
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/songs/player/video/${songId}/${filename}`,
+        {
+          headers: {},
+          responseType: 'stream',
+        },
+      );
+    });
+  });
+
   describe('uploadSong', () => {
     it('should successfully upload a song and record metrics', async () => {
       const mockFormData = new FormData();
