@@ -1702,4 +1702,91 @@ describe('UsersService', () => {
       expect(result).toBe('unknown');
     });
   });
+
+  describe('shareSongs', () => {
+    it('should share songs successfully', async () => {
+      const uid = 'user123';
+      const shareSongsDto = { song_ids: ['song1', 'song2'] };
+      const mockResponse = { data: { message: 'Songs shared successfully' } };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = await service.shareSongs(uid, shareSongsDto);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        `/feed/${uid}/share`,
+        shareSongsDto,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw error when share songs fails', async () => {
+      const uid = 'user123';
+      const shareSongsDto = { song_ids: ['song1', 'song2'] };
+
+      mockHttpService.post.mockReturnValue(
+        throwError(() => new Error('Error')),
+      );
+
+      await expect(service.shareSongs(uid, shareSongsDto)).rejects.toThrow();
+    });
+  });
+
+  describe('getUserFeed', () => {
+    it('should get user feed successfully', async () => {
+      const uid = 'user123';
+      const mockResponse = {
+        data: {
+          feed: [
+            { id: 'song1', title: 'Song 1' },
+            { id: 'song2', title: 'Song 2' },
+          ],
+        },
+      };
+
+      mockHttpService.get.mockReturnValue(of(mockResponse));
+
+      const result = await service.getUserFeed(uid);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(`/feed/${uid}`);
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw error when get user feed fails', async () => {
+      const uid = 'user123';
+
+      mockHttpService.get.mockReturnValue(throwError(() => new Error('Error')));
+
+      await expect(service.getUserFeed(uid)).rejects.toThrow();
+    });
+  });
+
+  describe('removeSongsFromFeed', () => {
+    it('should remove songs from feed successfully', async () => {
+      const uid = 'user123';
+      const songIds = ['song1', 'song2'];
+      const mockResponse = { data: { message: 'Songs removed successfully' } };
+
+      mockHttpService.delete.mockReturnValue(of(mockResponse));
+
+      const result = await service.removeSongsFromFeed(uid, songIds);
+
+      expect(mockHttpService.delete).toHaveBeenCalledWith(
+        `/feed/${uid}/songs`,
+        { params: { song_ids: songIds } },
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw error when remove songs from feed fails', async () => {
+      const uid = 'user123';
+      const songIds = ['song1', 'song2'];
+
+      mockHttpService.delete.mockReturnValue(
+        throwError(() => new Error('Error')),
+      );
+
+      await expect(service.removeSongsFromFeed(uid, songIds)).rejects.toThrow();
+    });
+  });
 });

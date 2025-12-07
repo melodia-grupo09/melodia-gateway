@@ -27,6 +27,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { SearchUsersDto } from './dto/search-users.dto';
+import { ShareSongsDto } from './dto/share-songs.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
 interface User {
@@ -870,6 +871,65 @@ export class UsersService {
           status: 'error',
           message: 'Failed to get following',
           code: 'get_following_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async shareSongs(uid: string, shareSongsDto: ShareSongsDto): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(`/feed/${uid}/share`, shareSongsDto),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error sharing songs:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to share songs',
+          code: 'share_songs_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getUserFeed(uid: string): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`/feed/${uid}`),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error getting user feed:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to get user feed',
+          code: 'get_feed_failed',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async removeSongsFromFeed(uid: string, songIds: string[]): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.delete(`/feed/${uid}/songs`, {
+          params: { song_ids: songIds },
+        }),
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Error removing songs from feed:', error);
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to remove songs from feed',
+          code: 'remove_songs_failed',
         },
         HttpStatus.BAD_REQUEST,
       );
