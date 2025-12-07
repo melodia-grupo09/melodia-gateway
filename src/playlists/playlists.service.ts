@@ -235,12 +235,10 @@ export class PlaylistsService {
     );
 
     // Get song details to get artistId
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const song = await this.songsService.getSongById(
       createLikedSongDto.song_id,
     );
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-    const artistId = song.artists?.[0]?.id || 'unknown';
+    const artistId = song.artists?.[0]?.id ?? 'unknown';
 
     // Track user activity and song like metrics
     try {
@@ -249,7 +247,7 @@ export class PlaylistsService {
         this.metricsService.recordSongLike(
           createLikedSongDto.song_id,
           userId,
-          artistId as string,
+          artistId,
           region,
         ),
       ]);

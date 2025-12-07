@@ -37,7 +37,7 @@ import { User } from '../auth/user.decorator';
 import { MetricsService } from '../metrics/metrics.service';
 import { UsersService } from '../users/users.service';
 import { UploadSongDTO } from './dto/upload-song.dto';
-import { SongsService } from './songs.service';
+import { SongDetails, SongsService, UploadResponse } from './songs.service';
 
 interface ErrorWithResponse {
   response?: {
@@ -115,7 +115,7 @@ export class SongsController {
     status: 404,
     description: 'Song not found',
   })
-  async getSongById(@Param('id') id: string): Promise<any> {
+  async getSongById(@Param('id') id: string): Promise<SongDetails> {
     return this.songsService.getSongById(id);
   }
 
@@ -134,7 +134,7 @@ export class SongsController {
   async getRandom(
     @Query('limit') limit?: number,
     @Query('page') page?: number,
-  ): Promise<any> {
+  ): Promise<SongDetails[]> {
     return this.songsService.getRandom(limit, page);
   }
 
@@ -181,7 +181,7 @@ export class SongsController {
     page: number,
     @Query('limit', new DefaultValuePipe(20), new ParseIntPipe())
     limit: number,
-  ): Promise<any[]> {
+  ): Promise<SongDetails[]> {
     if (!query) {
       throw new BadRequestException('Query parameter is required');
     }
@@ -395,7 +395,7 @@ export class SongsController {
   async uploadSong(
     @Body() body: UploadSongDTO,
     @UploadedFile() file?: UploadedFileData,
-  ): Promise<any> {
+  ): Promise<UploadResponse> {
     if (!file) {
       throw new BadRequestException('File is required');
     }
@@ -441,10 +441,8 @@ export class SongsController {
     @Req() req: Request,
   ): Promise<{ message: string }> {
     // Verify the song exists
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const song = await this.songsService.getSongById(songId);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-    const artistId = song.artists?.[0]?.id || 'unknown';
+    const artistId = song.artists?.[0]?.id ?? 'unknown';
 
     const token = req.headers.authorization?.split(' ')[1];
     let region = 'unknown';
@@ -455,7 +453,7 @@ export class SongsController {
     await this.metricsService.recordSongLike(
       songId,
       user.uid,
-      artistId as string,
+      artistId,
       region,
     );
 
@@ -485,10 +483,8 @@ export class SongsController {
     @Req() req: Request,
   ): Promise<{ message: string }> {
     // Verify the song exists
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const song = await this.songsService.getSongById(songId);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-    const artistId = song.artists?.[0]?.id || 'unknown';
+    const artistId = song.artists?.[0]?.id ?? 'unknown';
 
     const token = req.headers.authorization?.split(' ')[1];
     let region = 'unknown';
@@ -498,12 +494,7 @@ export class SongsController {
 
     // Record the share in metrics service and track user activity
     await Promise.all([
-      this.metricsService.recordSongShare(
-        songId,
-        user.uid,
-        artistId as string,
-        region,
-      ),
+      this.metricsService.recordSongShare(songId, user.uid, artistId, region),
       this.metricsService.trackUserActivity(user.uid, 'song_share'),
     ]);
 
