@@ -140,40 +140,52 @@ export class ArtistsService {
       }
 
       // Get user's followers
-      const followers = await this.usersService.getFollowers(
-        artist.user_id,
-        1,
-        50,
-      );
+      let page = 1;
+      const limit = 50;
+      let totalPages = 1;
 
-      if (!followers.followers || !Array.isArray(followers.followers)) {
-        return;
-      }
-      // Send notification to each follower (non-blocking)
-      const followerIds = followers.followers.map((follower) => follower.uid);
-      const notificationData: SendNotificationToUsersBatchPayloadDTO = {
-        userIds: followerIds,
-        title: 'New Release',
-        body: `An artist you follow has released a new album: ${releaseTitle}`,
-        data: {
-          type: 'release_created',
-          releaseTitle,
-          createdId: releaseId,
-          artistId,
-          userId: artist.user_id,
-        },
-      };
+      do {
+        const followers = await this.usersService.getFollowers(
+          artist.user_id,
+          page,
+          limit,
+        );
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return this.notificationsService
-        .sendNotificationToUsersDevicesBatch(notificationData)
+        if (!followers.followers || !Array.isArray(followers.followers)) {
+          break;
+        }
 
-        .catch((error) => {
-          console.error(
-            `Failed to send notification to user ${followerIds.join(', ')}:`,
-            error,
+        totalPages = followers.pagination.total_pages;
+
+        if (followers.followers.length > 0) {
+          // Send notification to each follower (non-blocking)
+          const followerIds = followers.followers.map(
+            (follower) => follower.uid,
           );
-        });
+          const notificationData: SendNotificationToUsersBatchPayloadDTO = {
+            userIds: followerIds,
+            title: 'New Release',
+            body: `An artist you follow has released a new album: ${releaseTitle}`,
+            data: {
+              type: 'release_created',
+              releaseTitle,
+              createdId: releaseId,
+              artistId,
+              userId: artist.user_id,
+            },
+          };
+
+          this.notificationsService
+            .sendNotificationToUsersDevicesBatch(notificationData)
+            .catch((error) => {
+              console.error(
+                `Failed to send notification to user batch page ${page}:`,
+                error,
+              );
+            });
+        }
+        page++;
+      } while (page <= totalPages);
     } catch (error) {
       console.error('Error getting followers for release notification:', error);
     }

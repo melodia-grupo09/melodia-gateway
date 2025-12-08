@@ -17,14 +17,19 @@ describe('ArtistsService', () => {
 
   const mockUsersService = {
     getFollowers: jest.fn().mockResolvedValue({
-      data: {
-        users: [{ id: 'follower1' }, { id: 'follower2' }],
+      followers: [{ uid: 'follower1' }, { uid: 'follower2' }],
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 2,
+        total_pages: 1,
       },
     }),
   };
 
   const mockNotificationsService = {
     sendNotificationToUserDevices: jest.fn().mockResolvedValue(undefined),
+    sendNotificationToUsersDevicesBatch: jest.fn().mockResolvedValue(undefined),
   };
 
   beforeEach(async () => {
@@ -525,6 +530,35 @@ describe('ArtistsService', () => {
       mockHttpService.post.mockReturnValue(of(mockResponse));
       mockHttpService.get.mockReturnValue(of(mockArtistResponse));
 
+      // Mock getFollowers to return 2 pages
+      mockUsersService.getFollowers.mockImplementation((_userId, page) => {
+        if (page === 1) {
+          return Promise.resolve({
+            followers: [{ uid: 'follower1' }, { uid: 'follower2' }],
+            pagination: {
+              page: 1,
+              limit: 50,
+              total: 3,
+              total_pages: 2,
+            },
+          });
+        } else if (page === 2) {
+          return Promise.resolve({
+            followers: [{ uid: 'follower3' }],
+            pagination: {
+              page: 2,
+              limit: 50,
+              total: 3,
+              total_pages: 2,
+            },
+          });
+        }
+        return Promise.resolve({
+          followers: [],
+          pagination: { total_pages: 2 },
+        });
+      });
+
       await service.createRelease(artistId, createReleaseDto);
 
       // Give time for async notification to potentially be called
@@ -535,6 +569,50 @@ describe('ArtistsService', () => {
         createReleaseDto,
       );
       expect(mockHttpService.get).toHaveBeenCalledWith(`/artists/${artistId}`);
+
+      // Check calls for both pages
+      expect(mockUsersService.getFollowers).toHaveBeenCalledWith(
+        'user-456',
+        1,
+        50,
+      );
+      expect(mockUsersService.getFollowers).toHaveBeenCalledWith(
+        'user-456',
+        2,
+        50,
+      );
+
+      // Check notifications for first page
+      expect(
+        mockNotificationsService.sendNotificationToUsersDevicesBatch,
+      ).toHaveBeenCalledWith({
+        userIds: ['follower1', 'follower2'],
+        title: 'New Release',
+        body: `An artist you follow has released a new album: ${createReleaseDto.title}`,
+        data: {
+          type: 'release_created',
+          releaseTitle: createReleaseDto.title,
+          createdId: 'release-123',
+          artistId,
+          userId: 'user-456',
+        },
+      });
+
+      // Check notifications for second page
+      expect(
+        mockNotificationsService.sendNotificationToUsersDevicesBatch,
+      ).toHaveBeenCalledWith({
+        userIds: ['follower3'],
+        title: 'New Release',
+        body: `An artist you follow has released a new album: ${createReleaseDto.title}`,
+        data: {
+          type: 'release_created',
+          releaseTitle: createReleaseDto.title,
+          createdId: 'release-123',
+          artistId,
+          userId: 'user-456',
+        },
+      });
     });
   });
 
