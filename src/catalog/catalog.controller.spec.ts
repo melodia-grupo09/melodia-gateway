@@ -48,11 +48,11 @@ describe('CatalogController', () => {
     it('should request items by kind and id', async () => {
       mockCatalogService.getCatalogItem.mockResolvedValue('item');
 
-      const result = await controller.getCatalogItem('songs', '123');
+      const result = await controller.getCatalogItem('song', '123');
 
       expect(result).toBe('item');
       expect(mockCatalogService.getCatalogItem).toHaveBeenCalledWith(
-        'songs',
+        'song',
         '123',
       );
     });
@@ -63,15 +63,11 @@ describe('CatalogController', () => {
       const payload: CatalogPayload = { blocked: false };
       mockCatalogService.updateCatalogItem.mockResolvedValue('updated');
 
-      const result = await controller.updateCatalogItem(
-        'artists',
-        'abc',
-        payload,
-      );
+      const result = await controller.updateCatalogItem('song', 'abc', payload);
 
       expect(result).toBe('updated');
       expect(mockCatalogService.updateCatalogItem).toHaveBeenCalledWith(
-        'artists',
+        'song',
         'abc',
         payload,
       );
@@ -83,11 +79,11 @@ describe('CatalogController', () => {
       const payload: CatalogPayload = { reason: 'policy' };
       mockCatalogService.blockCatalogItem.mockResolvedValue('blocked');
 
-      const result = await controller.blockCatalogItem('songs', 'xyz', payload);
+      const result = await controller.blockCatalogItem('song', 'xyz', payload);
 
       expect(result).toBe('blocked');
       expect(mockCatalogService.blockCatalogItem).toHaveBeenCalledWith(
-        'songs',
+        'song',
         'xyz',
         payload,
       );
@@ -100,14 +96,14 @@ describe('CatalogController', () => {
       mockCatalogService.unblockCatalogItem.mockResolvedValue('unblocked');
 
       const result = await controller.unblockCatalogItem(
-        'songs',
+        'song',
         'xyz',
         payload,
       );
 
       expect(result).toBe('unblocked');
       expect(mockCatalogService.unblockCatalogItem).toHaveBeenCalledWith(
-        'songs',
+        'song',
         'xyz',
         payload,
       );

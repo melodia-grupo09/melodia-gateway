@@ -10,14 +10,14 @@ export class CatalogService {
 
   async listCatalog(params: CatalogPayload): Promise<unknown> {
     const response = await firstValueFrom(
-      this.httpService.get<unknown>('/catalog', { params }),
+      this.httpService.get<unknown>('/songs/admin', { params }),
     );
     return response.data;
   }
 
   async getCatalogItem(kind: string, id: string): Promise<unknown> {
     const response = await firstValueFrom(
-      this.httpService.get<unknown>(`/catalog/${kind}/${id}`),
+      this.httpService.get<unknown>(`/songs/admin/${id}`),
     );
     return response.data;
   }
@@ -28,7 +28,10 @@ export class CatalogService {
     payload: CatalogPayload,
   ): Promise<unknown> {
     const response = await firstValueFrom(
-      this.httpService.patch<unknown>(`/catalog/${kind}/${id}`, payload),
+      this.httpService.patch<unknown>(
+        `/songs/admin/${id}/availability`,
+        payload,
+      ),
     );
     return response.data;
   }
@@ -39,7 +42,7 @@ export class CatalogService {
     payload: CatalogPayload,
   ): Promise<unknown> {
     const response = await firstValueFrom(
-      this.httpService.post<unknown>(`/catalog/${kind}/${id}/block`, payload),
+      this.httpService.post<unknown>(`/songs/admin/${id}/block`, payload),
     );
     return response.data;
   }
@@ -50,7 +53,7 @@ export class CatalogService {
     payload: CatalogPayload,
   ): Promise<unknown> {
     const response = await firstValueFrom(
-      this.httpService.post<unknown>(`/catalog/${kind}/${id}/unblock`, payload),
+      this.httpService.post<unknown>(`/songs/admin/${id}/unblock`, payload),
     );
     return response.data;
   }

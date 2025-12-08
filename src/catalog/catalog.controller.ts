@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -11,6 +12,11 @@ import { CatalogService } from './catalog.service';
 import type { CatalogPayload } from './catalog.service';
 
 type CatalogQuery = Record<string, string | string[] | undefined>;
+
+function checkSong(kind: string) {
+  if (kind !== 'song')
+    throw new NotFoundException('Only songs are available in this service');
+}
 
 @Controller('catalog')
 export class CatalogController {
@@ -26,6 +32,7 @@ export class CatalogController {
     @Param('kind') kind: string,
     @Param('id') id: string,
   ): Promise<unknown> {
+    checkSong(kind);
     return this.catalogService.getCatalogItem(kind, id);
   }
 
@@ -35,6 +42,7 @@ export class CatalogController {
     @Param('id') id: string,
     @Body() payload: CatalogPayload,
   ): Promise<unknown> {
+    checkSong(kind);
     return this.catalogService.updateCatalogItem(kind, id, payload);
   }
 
@@ -44,6 +52,7 @@ export class CatalogController {
     @Param('id') id: string,
     @Body() payload: CatalogPayload,
   ): Promise<unknown> {
+    checkSong(kind);
     return this.catalogService.blockCatalogItem(kind, id, payload);
   }
 
@@ -53,6 +62,7 @@ export class CatalogController {
     @Param('id') id: string,
     @Body() payload: CatalogPayload,
   ): Promise<unknown> {
+    checkSong(kind);
     return this.catalogService.unblockCatalogItem(kind, id, payload);
   }
 }

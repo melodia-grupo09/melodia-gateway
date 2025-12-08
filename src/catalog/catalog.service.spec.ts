@@ -40,7 +40,7 @@ describe('CatalogService', () => {
       const result = await service.listCatalog(query);
 
       expect(result).toEqual(mockResponse.data);
-      expect(mockHttpService.get).toHaveBeenCalledWith('/catalog', {
+      expect(mockHttpService.get).toHaveBeenCalledWith('/songs/admin', {
         params: query,
       });
     });
@@ -51,10 +51,10 @@ describe('CatalogService', () => {
       const response = { data: { id: '123' } };
       mockHttpService.get.mockReturnValue(of(response));
 
-      const result = await service.getCatalogItem('songs', '123');
+      const result = await service.getCatalogItem('song', '123');
 
       expect(result).toEqual(response.data);
-      expect(mockHttpService.get).toHaveBeenCalledWith('/catalog/songs/123');
+      expect(mockHttpService.get).toHaveBeenCalledWith('/songs/admin/123');
     });
   });
 
@@ -64,11 +64,11 @@ describe('CatalogService', () => {
       const response = { data: { blocked: true } };
       mockHttpService.patch.mockReturnValue(of(response));
 
-      const result = await service.updateCatalogItem('artists', 'abc', payload);
+      const result = await service.updateCatalogItem('song', 'abc', payload);
 
       expect(result).toEqual(response.data);
       expect(mockHttpService.patch).toHaveBeenCalledWith(
-        '/catalog/artists/abc',
+        '/songs/admin/abc/availability',
         payload,
       );
     });
@@ -80,11 +80,11 @@ describe('CatalogService', () => {
       const response = { data: { blocked: true } };
       mockHttpService.post.mockReturnValue(of(response));
 
-      const result = await service.blockCatalogItem('songs', 'xyz', payload);
+      const result = await service.blockCatalogItem('song', 'xyz', payload);
 
       expect(result).toEqual(response.data);
       expect(mockHttpService.post).toHaveBeenCalledWith(
-        '/catalog/songs/xyz/block',
+        '/songs/admin/xyz/block',
         payload,
       );
     });
@@ -96,11 +96,11 @@ describe('CatalogService', () => {
       const response = { data: { blocked: false } };
       mockHttpService.post.mockReturnValue(of(response));
 
-      const result = await service.unblockCatalogItem('songs', 'xyz', payload);
+      const result = await service.unblockCatalogItem('song', 'xyz', payload);
 
       expect(result).toEqual(response.data);
       expect(mockHttpService.post).toHaveBeenCalledWith(
-        '/catalog/songs/xyz/unblock',
+        '/songs/admin/xyz/unblock',
         payload,
       );
     });
