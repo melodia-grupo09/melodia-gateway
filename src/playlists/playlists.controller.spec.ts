@@ -6,6 +6,7 @@ import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
 import { CreateLikedSongDto } from './dto/create-liked-song.dto';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { ReorderSongDto } from './dto/reorder-song.dto';
+import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 import { PlaylistsController } from './playlists.controller';
 import { PlaylistsService } from './playlists.service';
 
@@ -27,6 +28,7 @@ describe('PlaylistsController', () => {
     createPlaylist: jest.fn(),
     getPlaylists: jest.fn(),
     getPlaylist: jest.fn(),
+    updatePlaylist: jest.fn(),
     deletePlaylist: jest.fn(),
     addSongToPlaylist: jest.fn(),
     removeSongFromPlaylist: jest.fn(),
@@ -666,6 +668,40 @@ describe('PlaylistsController', () => {
         userId,
       );
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('updatePlaylist', () => {
+    it('should update a playlist successfully', async () => {
+      const playlistId = 'playlist-123';
+      const userId = 'user-123';
+      const updatePlaylistDto: UpdatePlaylistDto = {
+        name: 'Updated Playlist',
+        is_public: true,
+      };
+
+      const expectedResult = {
+        id: playlistId,
+        name: 'Updated Playlist',
+        is_public: true,
+        owner_id: userId,
+        created_at: '2025-10-18T00:00:00Z',
+      };
+
+      mockPlaylistsService.updatePlaylist.mockResolvedValue(expectedResult);
+
+      const result = await controller.updatePlaylist(
+        playlistId,
+        userId,
+        updatePlaylistDto,
+      );
+
+      expect(mockPlaylistsService.updatePlaylist).toHaveBeenCalledWith(
+        playlistId,
+        userId,
+        updatePlaylistDto,
+      );
+      expect(result).toEqual(expectedResult);
     });
   });
 });

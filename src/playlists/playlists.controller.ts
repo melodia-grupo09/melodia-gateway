@@ -11,6 +11,7 @@ import {
   Param,
   Post,
   Put,
+  Patch,
   Query,
   Req,
   Res,
@@ -33,6 +34,7 @@ import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { GetHistoryQueryDto } from './dto/get-history-query.dto';
 import { ReorderSongDto } from './dto/reorder-song.dto';
 import { SearchPlaylistsDto } from './dto/search-playlists.dto';
+import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 import { PlaylistsService } from './playlists.service';
 
 @ApiTags('playlists')
@@ -308,6 +310,23 @@ export class PlaylistsController {
   @ApiParam({ name: 'playlistId', description: 'Playlist ID' })
   async getPlaylist(@Param('playlistId') playlistId: string) {
     return this.playlistsService.getPlaylist(playlistId);
+  }
+
+  @Patch(':playlistId')
+  @ApiOperation({ summary: 'Update a playlist' })
+  @ApiResponse({ status: 200, description: 'Playlist updated successfully' })
+  @ApiParam({ name: 'playlistId', description: 'Playlist ID' })
+  @ApiHeader({ name: 'user-id', description: 'User ID', required: true })
+  async updatePlaylist(
+    @Param('playlistId') playlistId: string,
+    @Headers('user-id') userId: string,
+    @Body() updatePlaylistDto: UpdatePlaylistDto,
+  ) {
+    return this.playlistsService.updatePlaylist(
+      playlistId,
+      userId,
+      updatePlaylistDto,
+    );
   }
 
   @Delete(':playlistId')

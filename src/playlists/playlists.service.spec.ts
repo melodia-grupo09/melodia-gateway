@@ -11,6 +11,7 @@ import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
 import { CreateLikedSongDto } from './dto/create-liked-song.dto';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { ReorderSongDto } from './dto/reorder-song.dto';
+import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 import { PlaylistsService } from './playlists.service';
 
 describe('PlaylistsService', () => {
@@ -795,6 +796,40 @@ describe('PlaylistsService', () => {
         },
       );
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('updatePlaylist', () => {
+    it('should update a playlist successfully', async () => {
+      const playlistId = 'playlist-123';
+      const userId = 'user-123';
+      const updatePlaylistDto: UpdatePlaylistDto = {
+        name: 'Updated Playlist',
+        is_public: true,
+      };
+      const mockResponse = {
+        data: {
+          id: playlistId,
+          ...updatePlaylistDto,
+        },
+      };
+
+      mockHttpService.patch.mockReturnValue(of(mockResponse));
+
+      const result = await service.updatePlaylist(
+        playlistId,
+        userId,
+        updatePlaylistDto,
+      );
+
+      expect(mockHttpService.patch).toHaveBeenCalledWith(
+        `/playlists/${playlistId}`,
+        updatePlaylistDto,
+        {
+          headers: { 'user-id': userId },
+        },
+      );
+      expect(result).toEqual(mockResponse.data);
     });
   });
 });

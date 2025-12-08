@@ -14,6 +14,7 @@ import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { GetHistoryQueryDto } from './dto/get-history-query.dto';
 import { ReorderSongDto } from './dto/reorder-song.dto';
 import { SearchPlaylistsDto } from './dto/search-playlists.dto';
+import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 
 @Injectable()
 export class PlaylistsService {
@@ -172,6 +173,19 @@ export class PlaylistsService {
   async getPlaylist(playlistId: string) {
     const response = await firstValueFrom(
       this.httpService.get(`/playlists/${playlistId}`),
+    );
+    return response.data;
+  }
+
+  async updatePlaylist(
+    playlistId: string,
+    userId: string,
+    updatePlaylistDto: UpdatePlaylistDto,
+  ) {
+    const response = await firstValueFrom(
+      this.httpService.patch(`/playlists/${playlistId}`, updatePlaylistDto, {
+        headers: { 'user-id': userId },
+      }),
     );
     return response.data;
   }
