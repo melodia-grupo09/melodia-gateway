@@ -43,6 +43,13 @@ export class ArtistsService {
     return response.data;
   }
 
+  async getLatestRelease(artistIds: string[]): Promise<any> {
+    const response = await firstValueFrom(
+      this.httpService.post('/artists/latest-release', { artistIds }),
+    );
+    return response.data;
+  }
+
   async updateArtist(id: string, updateData: any): Promise<any> {
     const response = await firstValueFrom(
       this.httpService.patch(`/artists/${id}`, updateData),

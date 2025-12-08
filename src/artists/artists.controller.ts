@@ -33,6 +33,7 @@ import { MetricsService } from '../metrics/metrics.service';
 import { HttpErrorInterceptor } from '../users/interceptors/http-error.interceptor';
 import { ArtistsService } from './artists.service';
 import { CreateReleaseDto } from './dto/create-release.dto';
+import { GetLatestReleaseDto } from './dto/get-latest-release.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { UpdateReleaseDto } from './dto/update-release.dto';
 
@@ -61,6 +62,23 @@ export class ArtistsController {
     @Query('limit') limit: number = 20,
   ): Promise<any> {
     return this.artistsService.searchArtists(query, page, limit);
+  }
+
+  @Post('latest-release')
+  @ApiOperation({ summary: 'Get the latest release from a list of artists' })
+  @ApiBody({ type: GetLatestReleaseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'The latest release found among the provided artists',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No releases found for the provided artists',
+  })
+  async getLatestRelease(
+    @Body() getLatestReleaseDto: GetLatestReleaseDto,
+  ): Promise<any> {
+    return this.artistsService.getLatestRelease(getLatestReleaseDto.artistIds);
   }
 
   @Get(':id')

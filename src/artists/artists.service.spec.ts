@@ -160,6 +160,40 @@ describe('ArtistsService', () => {
     });
   });
 
+  describe('getLatestRelease', () => {
+    it('should get latest release successfully', async () => {
+      const artistIds = ['123', '456'];
+      const mockResponse = {
+        data: {
+          id: 'release-1',
+          title: 'Latest Hit',
+          artistId: '123',
+        },
+      };
+
+      mockHttpService.post.mockReturnValue(of(mockResponse));
+
+      const result = await service.getLatestRelease(artistIds);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        '/artists/latest-release',
+        { artistIds },
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw error when getting latest release fails', async () => {
+      const artistIds = ['123'];
+      const error = new Error('Fetch failed');
+
+      mockHttpService.post.mockReturnValue(throwError(() => error));
+
+      await expect(service.getLatestRelease(artistIds)).rejects.toThrow(
+        'Fetch failed',
+      );
+    });
+  });
+
   describe('updateArtist', () => {});
 
   describe('searchArtists', () => {

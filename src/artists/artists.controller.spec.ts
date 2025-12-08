@@ -18,6 +18,7 @@ describe('ArtistsController', () => {
     followArtist: jest.fn(),
     unfollowArtist: jest.fn(),
     searchArtists: jest.fn(),
+    getLatestRelease: jest.fn(),
     // Release methods
     getArtistReleases: jest.fn(),
     getUpcomingReleases: jest.fn(),
@@ -106,6 +107,28 @@ describe('ArtistsController', () => {
 
       expect(mockArtistsService.getSimilarArtists).toHaveBeenCalledWith(
         artistId,
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getLatestRelease', () => {
+    it('should get latest release from list of artists', async () => {
+      const getLatestReleaseDto = {
+        artistIds: ['123', '456'],
+      };
+      const mockResult = {
+        id: 'release-1',
+        title: 'Latest Hit',
+        artistId: '123',
+      };
+
+      mockArtistsService.getLatestRelease.mockResolvedValue(mockResult);
+
+      const result = await controller.getLatestRelease(getLatestReleaseDto);
+
+      expect(mockArtistsService.getLatestRelease).toHaveBeenCalledWith(
+        getLatestReleaseDto.artistIds,
       );
       expect(result).toEqual(mockResult);
     });
