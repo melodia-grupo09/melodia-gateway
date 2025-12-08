@@ -18,7 +18,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
-import { FirebaseUser, User } from '../auth/user.decorator';
+import type { FirebaseUser } from '../auth/user.decorator';
+import { User } from '../auth/user.decorator';
 import { ShareSongsDto } from './dto/share-songs.dto';
 import { HttpErrorInterceptor } from './interceptors/http-error.interceptor';
 import { UsersService } from './users.service';
