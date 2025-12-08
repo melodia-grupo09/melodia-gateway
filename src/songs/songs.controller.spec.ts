@@ -24,6 +24,7 @@ describe('SongsController', () => {
   let mockStatus: jest.Mock;
   let mockSend: jest.Mock;
   let mockDestroy: jest.Mock;
+  let mockRedirect: jest.Mock;
 
   const mockSongsService = {
     streamSong: jest.fn(),
@@ -49,6 +50,7 @@ describe('SongsController', () => {
     mockStatus = jest.fn().mockReturnThis();
     mockSend = jest.fn().mockReturnThis();
     mockDestroy = jest.fn();
+    mockRedirect = jest.fn();
 
     mockResponse = {
       writeHead: mockWriteHead,
@@ -56,6 +58,7 @@ describe('SongsController', () => {
       status: mockStatus,
       send: mockSend,
       destroy: mockDestroy,
+      redirect: mockRedirect,
     } as unknown as Response;
 
     mockRequest = {
@@ -96,6 +99,16 @@ describe('SongsController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('redirectSong', () => {
+    it('should redirect to the app deep link', () => {
+      const songId = '123';
+      controller.redirectSong(songId, mockResponse);
+      expect(mockRedirect).toHaveBeenCalledWith(
+        `melodiaappfront://song/${songId}`,
+      );
+    });
   });
 
   describe('streamSong', () => {

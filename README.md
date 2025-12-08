@@ -49,6 +49,63 @@ The gateway integrates with the following external services:
 - **Metrics Service**: [https://melodia-metrics-e9ca6dea743b.herokuapp.com](https://melodia-metrics-e9ca6dea743b.herokuapp.com)
 - **Notifications Service**: [https://melodia-notification-service-4211bca82b5a.herokuapp.com](https://melodia-notification-service-4211bca82b5a.herokuapp.com)
 
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v22.x)
+- npm or yarn
+- Redis (for caching)
+
+### Environment Variables
+
+```env
+PORT=3000
+REDIS_URL=redis://localhost:6379
+# Service URLs
+USERS_SERVICE_URL=...
+SONGS_SERVICE_URL=...
+ARTISTS_SERVICE_URL=...
+PLAYLISTS_SERVICE_URL=...
+METRICS_SERVICE_URL=...
+NOTIFICATIONS_SERVICE_URL=...
+# Firebase
+FIREBASE_PROJECT_ID=...
+# Other configs as needed
+```
+
+### Installation
+
+```bash
+$ npm install
+```
+
+### Running the app
+
+```bash
+# development
+$ npm run start
+
+# watch mode
+$ npm run start:dev
+
+# production mode
+$ npm run start:prod
+```
+
+### Test
+
+```bash
+# unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
+```
+
 ## API Documentation
 
 For comprehensive API documentation, including all endpoints, request/response schemas, and interactive testing, visit our Swagger documentation:
@@ -79,6 +136,7 @@ Comprehensive test coverage tracked automatically via Codecov:
 - **NestJS**: Modern Node.js framework with TypeScript support
 - **Firebase Admin SDK**: Authentication and user management
 - **Axios**: HTTP client for external API integration
+- **Redis**: Caching layer
 
 ### Development & Testing
 

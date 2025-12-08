@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import type { Response } from 'express';
 import { UsersService } from '../users/users.service';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
@@ -75,6 +76,21 @@ describe('PlaylistsController', () => {
 
     // Clear all mocks before each test
     jest.clearAllMocks();
+  });
+
+  describe('redirectPlaylist', () => {
+    it('should redirect to the app deep link', () => {
+      const playlistId = '123';
+      const mockResponse = {
+        redirect: jest.fn(),
+      } as unknown as Response;
+
+      controller.redirectPlaylist(playlistId, mockResponse);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(mockResponse.redirect).toHaveBeenCalledWith(
+        `melodiaappfront://library/playlist/${playlistId}`,
+      );
+    });
   });
 
   describe('searchPlaylists', () => {
