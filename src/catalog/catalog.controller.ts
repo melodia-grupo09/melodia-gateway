@@ -7,9 +7,11 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CatalogService } from './catalog.service';
 import type { CatalogPayload } from './catalog.service';
+import { HttpErrorInterceptor } from '../users/interceptors/http-error.interceptor';
 
 type CatalogQuery = Record<string, string | string[] | undefined>;
 
@@ -19,6 +21,7 @@ function checkSong(kind: string) {
 }
 
 @Controller('catalog')
+@UseInterceptors(HttpErrorInterceptor)
 export class CatalogController {
   constructor(private readonly catalogService: CatalogService) {}
 
