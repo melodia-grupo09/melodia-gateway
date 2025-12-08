@@ -13,6 +13,7 @@ import type { Cache } from 'cache-manager';
 import FormData from 'form-data';
 import { firstValueFrom } from 'rxjs';
 import { ArtistsService } from '../artists/artists.service';
+import { FirebaseUser } from '../auth/user.decorator';
 import { MetricsService } from '../metrics/metrics.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AdminLoginDto } from './dto/admin-login.dto';
@@ -877,11 +878,31 @@ export class UsersService {
     }
   }
 
-  async shareSongs(uid: string, shareSongsDto: ShareSongsDto): Promise<any> {
+  async shareSongs(
+    uid: string,
+    shareSongsDto: ShareSongsDto,
+    sender: FirebaseUser,
+  ): Promise<any> {
     try {
       const response = await firstValueFrom(
         this.httpService.post(`/feed/${uid}/share`, shareSongsDto),
       );
+
+      try {
+        const senderName = sender.name || 'Someone';
+        await this.notificationsService.sendNotificationToUserDevices({
+          userId: uid,
+          title: 'New Song Shared',
+          body: `${senderName} shared a song with you`,
+          data: {
+            type: 'SONG_SHARE',
+            redirect: 'home',
+          },
+        });
+      } catch (error) {
+        console.warn(`Failed to send notification for shared song: ${error}`);
+      }
+
       return response.data;
     } catch (error: unknown) {
       console.error('Error sharing songs:', error);

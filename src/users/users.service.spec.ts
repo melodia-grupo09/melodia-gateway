@@ -1704,31 +1704,49 @@ describe('UsersService', () => {
   });
 
   describe('shareSongs', () => {
-    it('should share songs successfully', async () => {
+    it('should share songs successfully and send notification', async () => {
       const uid = 'user123';
       const shareSongsDto = { song_ids: ['song1', 'song2'] };
+      const mockSender = { uid: 'sender123', name: 'Sender' };
       const mockResponse = { data: { message: 'Songs shared successfully' } };
 
       mockHttpService.post.mockReturnValue(of(mockResponse));
+      mockNotificationsService.sendNotificationToUserDevices.mockResolvedValue(
+        undefined,
+      );
 
-      const result = await service.shareSongs(uid, shareSongsDto);
+      const result = await service.shareSongs(uid, shareSongsDto, mockSender);
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
         `/feed/${uid}/share`,
         shareSongsDto,
       );
+      expect(
+        mockNotificationsService.sendNotificationToUserDevices,
+      ).toHaveBeenCalledWith({
+        userId: uid,
+        title: 'New Song Shared',
+        body: 'Sender shared a song with you',
+        data: {
+          type: 'SONG_SHARE',
+          redirect: 'home',
+        },
+      });
       expect(result).toEqual(mockResponse.data);
     });
 
     it('should throw error when share songs fails', async () => {
       const uid = 'user123';
       const shareSongsDto = { song_ids: ['song1', 'song2'] };
+      const mockSender = { uid: 'sender123', name: 'Sender' };
 
       mockHttpService.post.mockReturnValue(
         throwError(() => new Error('Error')),
       );
 
-      await expect(service.shareSongs(uid, shareSongsDto)).rejects.toThrow();
+      await expect(
+        service.shareSongs(uid, shareSongsDto, mockSender),
+      ).rejects.toThrow();
     });
   });
 

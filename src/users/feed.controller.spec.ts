@@ -46,15 +46,17 @@ describe('FeedController', () => {
       const shareSongsDto: ShareSongsDto = {
         song_ids: ['song1', 'song2'],
       };
+      const mockUser = { uid: 'sender123', name: 'Sender' };
       const mockResult = { message: 'Songs shared successfully' };
 
       mockUsersService.shareSongs.mockResolvedValue(mockResult);
 
-      const result = await controller.shareSongs(uid, shareSongsDto);
+      const result = await controller.shareSongs(uid, shareSongsDto, mockUser);
 
       expect(mockUsersService.shareSongs).toHaveBeenCalledWith(
         uid,
         shareSongsDto,
+        mockUser,
       );
       expect(result).toEqual(mockResult);
     });

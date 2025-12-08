@@ -18,6 +18,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { FirebaseUser, User } from '../auth/user.decorator';
 import { ShareSongsDto } from './dto/share-songs.dto';
 import { HttpErrorInterceptor } from './interceptors/http-error.interceptor';
 import { UsersService } from './users.service';
@@ -40,8 +41,9 @@ export class FeedController {
   async shareSongs(
     @Param('uid') uid: string,
     @Body() shareSongsDto: ShareSongsDto,
+    @User() user: FirebaseUser,
   ): Promise<any> {
-    return this.usersService.shareSongs(uid, shareSongsDto);
+    return this.usersService.shareSongs(uid, shareSongsDto, user);
   }
 
   @Get(':uid')
