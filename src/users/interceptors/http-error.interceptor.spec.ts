@@ -137,4 +137,25 @@ describe('HttpErrorInterceptor', () => {
       },
     });
   });
+
+  it('should handle Axios error without response (network error)', (done) => {
+    const axiosError = new AxiosError('Network Error');
+    // No response property
+
+    const mockContext = {} as ExecutionContext;
+    const mockHandler = {
+      handle: () => throwError(() => axiosError),
+    } as CallHandler;
+
+    const result$ = interceptor.intercept(mockContext, mockHandler);
+
+    result$.subscribe({
+      error: (error: HttpException) => {
+        expect(error).toBeInstanceOf(HttpException);
+        expect(error.getStatus()).toBe(HttpStatus.SERVICE_UNAVAILABLE);
+        expect(error.message).toBe('External service unavailable');
+        done();
+      },
+    });
+  });
 });
