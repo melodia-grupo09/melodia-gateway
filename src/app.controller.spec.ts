@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { MetricsService } from './metrics/metrics.service';
+import { FirebaseAuthGuard } from './auth/firebase-auth.guard';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -20,7 +21,10 @@ describe('AppController', () => {
           useValue: mockMetricsService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(FirebaseAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     appController = app.get<AppController>(AppController);
   });

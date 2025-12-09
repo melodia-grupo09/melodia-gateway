@@ -8,7 +8,10 @@ import {
   Post,
   Query,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { CatalogService } from './catalog.service';
 import type { CatalogPayload } from './catalog.service';
 import { HttpErrorInterceptor } from '../users/interceptors/http-error.interceptor';
@@ -20,6 +23,9 @@ function checkSong(kind: string) {
     throw new NotFoundException('Only songs are available in this service');
 }
 
+@ApiTags('catalog')
+@ApiBearerAuth()
+@UseGuards(FirebaseAuthGuard)
 @Controller('catalog')
 @UseInterceptors(HttpErrorInterceptor)
 export class CatalogController {

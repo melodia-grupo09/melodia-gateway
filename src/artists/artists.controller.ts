@@ -38,6 +38,8 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 import { UpdateReleaseDto } from './dto/update-release.dto';
 
 @ApiTags('artists')
+@ApiBearerAuth()
+@UseGuards(FirebaseAuthGuard)
 @UseInterceptors(HttpErrorInterceptor)
 @Controller('artists')
 export class ArtistsController {

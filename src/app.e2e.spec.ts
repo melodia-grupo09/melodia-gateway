@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from './app.module';
 import { MetricsService } from './metrics/metrics.service';
+import { FirebaseAuthGuard } from './auth/firebase-auth.guard';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -18,6 +19,8 @@ describe('AppController (e2e)', () => {
         getTopAlbums: jest.fn().mockResolvedValue([]),
         getTopArtists: jest.fn().mockResolvedValue([]),
       })
+      .overrideGuard(FirebaseAuthGuard)
+      .useValue({ canActivate: () => true })
       .compile();
 
     app = moduleFixture.createNestApplication();

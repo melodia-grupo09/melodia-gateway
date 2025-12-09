@@ -53,6 +53,8 @@ interface UploadedFileData {
 }
 
 @ApiTags('songs')
+@ApiBearerAuth()
+@UseGuards(FirebaseAuthGuard)
 @Controller('songs')
 export class SongsController {
   constructor(
