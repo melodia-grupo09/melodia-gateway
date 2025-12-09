@@ -28,8 +28,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
       } else if (Array.isArray(msg)) {
         message = msg;
       } else {
-        const stringified = JSON.stringify(exceptionResponse);
-        message = stringified === '{}' ? exception.message : stringified;
+        try {
+          const stringified = JSON.stringify(exceptionResponse);
+          message = stringified === '{}' ? exception.message : stringified;
+        } catch (e) {
+          console.error('Failed to stringify exception response:', e);
+          message = exception.message || 'Internal Server Error';
+        }
       }
       code = (exceptionResponse as { code?: string }).code;
     } else {
