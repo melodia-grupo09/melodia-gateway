@@ -467,7 +467,12 @@ export class UsersService {
       const response = await firstValueFrom(
         this.httpService.post(`/admin/users/${userId}/block`),
       );
-      await this.cacheManager.set(`blocked_user:${userId}`, true, 0);
+      // Set cache with 1 year TTL (in milliseconds) to avoid immediate expiration if 0 is treated as 0ms
+      await this.cacheManager.set(
+        `blocked_user:${userId}`,
+        true,
+        365 * 24 * 60 * 60 * 1000,
+      );
       return response.data;
     } catch (error: unknown) {
       console.error('Error blocking user:', error);

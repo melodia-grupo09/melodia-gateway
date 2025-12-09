@@ -224,11 +224,11 @@ export class MetricsService {
         region: region || 'unknown',
       };
 
-      await firstValueFrom(
+      const response = await firstValueFrom(
         this.httpService.post(`/metrics/songs/${songId}/plays`, requestBody),
       );
       this.logger.log(
-        `Song play recorded for songId: ${songId}, userId: ${userId}`,
+        `Song play recorded for songId: ${songId}, userId: ${userId}. Status: ${response.status}`,
       );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

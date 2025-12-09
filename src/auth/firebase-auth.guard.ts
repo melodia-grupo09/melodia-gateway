@@ -2,7 +2,8 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   UnauthorizedException,
@@ -54,13 +55,19 @@ export class FirebaseAuthGuard implements CanActivate {
         `blocked_user:${decodedToken.uid}`,
       );
       if (isBlocked) {
-        throw new ForbiddenException('User is banned');
+        throw new HttpException(
+          {
+            status: 403,
+            message: 'User is banned',
+          },
+          HttpStatus.FORBIDDEN,
+        );
       }
 
       request.user = decodedToken;
       return true;
     } catch (error: any) {
-      if (error instanceof ForbiddenException) {
+      if (error instanceof HttpException) {
         throw error;
       }
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
