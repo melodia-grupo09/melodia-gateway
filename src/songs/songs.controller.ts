@@ -54,8 +54,6 @@ interface UploadedFileData {
 }
 
 @ApiTags('songs')
-@ApiBearerAuth()
-@UseGuards(FirebaseAuthGuard)
 @UseInterceptors(HttpErrorInterceptor)
 @Controller('songs')
 export class SongsController {
@@ -66,6 +64,8 @@ export class SongsController {
   ) {}
 
   @Get('deep-link/:id')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Redirect to song deep link' })
   @ApiParam({ name: 'id', description: 'Song ID' })
   @ApiResponse({ status: 302, description: 'Redirect to app' })
@@ -74,6 +74,8 @@ export class SongsController {
   }
 
   @Get('id/:id')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get song by ID',
@@ -124,6 +126,8 @@ export class SongsController {
   }
 
   @Get('random')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiQuery({
     name: 'limit',
@@ -359,6 +363,8 @@ export class SongsController {
   }
 
   @Post('upload')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Upload a new song' })
   @ApiConsumes('multipart/form-data')
