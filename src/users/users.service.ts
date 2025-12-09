@@ -311,6 +311,22 @@ export class UsersService {
       );
 
       const refreshData = response.data;
+      const userId =
+        typeof refreshData.user_id === 'string' ? refreshData.user_id : '';
+
+      // Check if user is blocked
+      if (userId) {
+        const isBlocked = await this.cacheManager.get(`blocked_user:${userId}`);
+        if (isBlocked) {
+          throw new HttpException(
+            {
+              status: 403,
+              message: 'User is banned',
+            },
+            HttpStatus.FORBIDDEN,
+          );
+        }
+      }
 
       // Get user data from the refresh response
       const userEmail =
