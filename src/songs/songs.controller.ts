@@ -35,6 +35,7 @@ import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import type { FirebaseUser } from '../auth/user.decorator';
 import { User } from '../auth/user.decorator';
 import { MetricsService } from '../metrics/metrics.service';
+import { HttpErrorInterceptor } from '../users/interceptors/http-error.interceptor';
 import { UsersService } from '../users/users.service';
 import { UploadSongDTO } from './dto/upload-song.dto';
 import { SongDetails, SongsService, UploadResponse } from './songs.service';
@@ -55,6 +56,7 @@ interface UploadedFileData {
 @ApiTags('songs')
 @ApiBearerAuth()
 @UseGuards(FirebaseAuthGuard)
+@UseInterceptors(HttpErrorInterceptor)
 @Controller('songs')
 export class SongsController {
   constructor(
