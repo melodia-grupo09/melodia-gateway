@@ -358,8 +358,6 @@ export class UsersController {
 
   // Profile endpoints
   @Get('profile/search')
-  @ApiBearerAuth()
-  @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Search users',
     description: 'Search users by name with pagination',

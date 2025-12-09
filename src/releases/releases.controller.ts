@@ -18,8 +18,6 @@ import { HttpErrorInterceptor } from '../users/interceptors/http-error.intercept
 import { ReleasesService } from './releases.service';
 
 @ApiTags('releases')
-@ApiBearerAuth()
-@UseGuards(FirebaseAuthGuard)
 @UseInterceptors(HttpErrorInterceptor)
 @Controller('releases')
 export class ReleasesController {
@@ -44,6 +42,8 @@ export class ReleasesController {
   }
 
   @Get(':id')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get release by ID with artist information' })
   @ApiParam({
     name: 'id',
