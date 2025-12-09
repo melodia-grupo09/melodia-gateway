@@ -317,7 +317,7 @@ export class MetricsService {
   ): Promise<void> {
     try {
       const requestBody = {
-        artistId: artistId || 'unknown',
+        artistId: artistId,
         userId: userId,
         region: region || 'unknown',
       };
@@ -343,7 +343,7 @@ export class MetricsService {
   ): Promise<void> {
     try {
       const requestBody = {
-        artistId: artistId || 'unknown',
+        artistId: artistId,
         userId: userId,
         region: region || 'unknown',
       };
@@ -485,6 +485,23 @@ export class MetricsService {
 
     const response = await firstValueFrom(
       this.httpService.get(`/metrics/artists/${artistId}`, { params }),
+    );
+    return response.data;
+  }
+
+  async getArtistTopSongs(
+    artistId: string,
+    region?: string,
+    sortBy?: string,
+  ): Promise<any> {
+    const params: Record<string, string> = {};
+    if (region) params.region = region;
+    if (sortBy) params.sortBy = sortBy;
+
+    const response = await firstValueFrom(
+      this.httpService.get(`/metrics/artists/${artistId}/top-songs`, {
+        params,
+      }),
     );
     return response.data;
   }

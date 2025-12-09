@@ -493,6 +493,41 @@ export class MetricsController {
     return this.metricsService.getArtistMonthlyListeners(artistId);
   }
 
+  @Get('artists/:artistId/top-songs')
+  @ApiOperation({
+    summary: 'Get top songs for an artist',
+    description: 'Retrieve the top songs for an artist based on metrics',
+  })
+  @ApiParam({
+    name: 'artistId',
+    required: true,
+    type: String,
+    description: 'Unique identifier for the artist',
+  })
+  @ApiQuery({
+    name: 'region',
+    required: false,
+    type: String,
+    description: 'Filter by region',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    type: String,
+    description: 'Sort by metric (e.g., likes, plays)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Top songs retrieved successfully',
+  })
+  async getArtistTopSongs(
+    @Param('artistId') artistId: string,
+    @Query('region') region?: string,
+    @Query('sortBy') sortBy?: string,
+  ): Promise<unknown> {
+    return this.metricsService.getArtistTopSongs(artistId, region, sortBy);
+  }
+
   @Delete('artists/:artistId')
   @ApiOperation({
     summary: 'Delete an artist',

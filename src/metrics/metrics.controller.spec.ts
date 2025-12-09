@@ -24,6 +24,7 @@ describe('MetricsController', () => {
     addArtistFollower: jest.fn(),
     removeArtistFollower: jest.fn(),
     exportArtistsMetrics: jest.fn(),
+    getArtistTopSongs: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -501,6 +502,30 @@ describe('MetricsController', () => {
         period,
         startDate,
         endDate,
+      );
+      expect(result).toBe(expectedResult);
+    });
+  });
+
+  describe('getArtistTopSongs', () => {
+    it('should return artist top songs', async () => {
+      const artistId = 'artist-123';
+      const region = 'US';
+      const sortBy = 'plays';
+      const expectedResult = [{ id: 'song-1', plays: 100 }];
+
+      mockMetricsService.getArtistTopSongs.mockResolvedValue(expectedResult);
+
+      const result = await controller.getArtistTopSongs(
+        artistId,
+        region,
+        sortBy,
+      );
+
+      expect(mockMetricsService.getArtistTopSongs).toHaveBeenCalledWith(
+        artistId,
+        region,
+        sortBy,
       );
       expect(result).toBe(expectedResult);
     });

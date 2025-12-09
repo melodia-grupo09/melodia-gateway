@@ -671,50 +671,64 @@ describe('MetricsService', () => {
   describe('recordSongLike', () => {
     it('should successfully record song like', async () => {
       const songId = 'song-123';
+      const userId = 'user-123';
+      const artistId = 'artist-123';
+      const region = 'US';
       const mockResponse = { data: { success: true } };
 
       mockHttpService.post.mockReturnValue(of(mockResponse));
 
-      await service.recordSongLike(songId);
+      await service.recordSongLike(songId, userId, artistId, region);
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
         `/metrics/songs/${songId}/likes`,
-        { artistId: 'unknown', userId: undefined, region: 'unknown' },
+        { artistId, userId, region },
       );
     });
 
     it('should handle errors gracefully and not throw', async () => {
       const songId = 'song-123';
+      const userId = 'user-123';
+      const artistId = 'artist-123';
       const error = new Error('Network error');
 
       mockHttpService.post.mockReturnValue(throwError(() => error));
 
-      await expect(service.recordSongLike(songId)).resolves.toBeUndefined();
+      await expect(
+        service.recordSongLike(songId, userId, artistId),
+      ).resolves.toBeUndefined();
     });
   });
 
   describe('recordSongShare', () => {
     it('should successfully record song share', async () => {
       const songId = 'song-123';
+      const userId = 'user-123';
+      const artistId = 'artist-123';
+      const region = 'US';
       const mockResponse = { data: { success: true } };
 
       mockHttpService.post.mockReturnValue(of(mockResponse));
 
-      await service.recordSongShare(songId);
+      await service.recordSongShare(songId, userId, artistId, region);
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
         `/metrics/songs/${songId}/shares`,
-        { artistId: 'unknown', userId: undefined, region: 'unknown' },
+        { artistId, userId, region },
       );
     });
 
     it('should handle errors gracefully and not throw', async () => {
       const songId = 'song-123';
+      const userId = 'user-123';
+      const artistId = 'artist-123';
       const error = new Error('Network error');
 
       mockHttpService.post.mockReturnValue(throwError(() => error));
 
-      await expect(service.recordSongShare(songId)).resolves.toBeUndefined();
+      await expect(
+        service.recordSongShare(songId, userId, artistId),
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -906,6 +920,27 @@ describe('MetricsService', () => {
         '/metrics/artists/export',
         {
           params: { period, startDate, endDate },
+        },
+      );
+      expect(result).toBe(expectedResult);
+    });
+  });
+
+  describe('getArtistTopSongs', () => {
+    it('should return top songs for an artist', async () => {
+      const artistId = 'artist-123';
+      const region = 'AR';
+      const sortBy = 'likes';
+      const expectedResult = [{ id: 'song-1', title: 'Song 1' }];
+
+      mockHttpService.get.mockReturnValue(of({ data: expectedResult }));
+
+      const result = await service.getArtistTopSongs(artistId, region, sortBy);
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        `/metrics/artists/${artistId}/top-songs`,
+        {
+          params: { region, sortBy },
         },
       );
       expect(result).toBe(expectedResult);
