@@ -145,6 +145,7 @@ describe('ArtistsService', () => {
 
       mockHttpService.get.mockReturnValue(of(mockResponse));
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getSimilarArtists(artistId);
 
       expect(mockHttpService.get).toHaveBeenCalledWith(
@@ -178,6 +179,7 @@ describe('ArtistsService', () => {
 
       mockHttpService.post.mockReturnValue(of(mockResponse));
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getLatestRelease(artistIds);
 
       expect(mockHttpService.post).toHaveBeenCalledWith(
@@ -221,6 +223,7 @@ describe('ArtistsService', () => {
 
       mockHttpService.get.mockReturnValue(of(mockResponse));
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.searchArtists(query);
 
       expect(mockHttpService.get).toHaveBeenCalledWith('/artists/search', {
@@ -254,6 +257,7 @@ describe('ArtistsService', () => {
 
       mockHttpService.get.mockReturnValue(of(mockResponse));
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.searchArtists(query, page, limit);
 
       expect(mockHttpService.get).toHaveBeenCalledWith('/artists/search', {

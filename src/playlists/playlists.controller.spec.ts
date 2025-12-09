@@ -146,12 +146,13 @@ describe('PlaylistsController', () => {
       const expectedResult = {
         playlists: [],
         total: 0,
-        page: 2,
-        limit: 20,
+        page: 1,
+        limit: 10,
       };
 
       mockPlaylistsService.searchPlaylists.mockResolvedValue(expectedResult);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await controller.searchPlaylists(searchQuery);
 
       expect(mockPlaylistsService.searchPlaylists).toHaveBeenCalledWith(

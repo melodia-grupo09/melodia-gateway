@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
 import { of } from 'rxjs';
-import { CatalogService, CatalogPayload } from './catalog.service';
+import { CatalogPayload, CatalogService } from './catalog.service';
 
 describe('CatalogService', () => {
   let service: CatalogService;
@@ -68,7 +68,7 @@ describe('CatalogService', () => {
 
       expect(result).toEqual(response.data);
       expect(mockHttpService.patch).toHaveBeenCalledWith(
-        '/songs/admin/abc/availability',
+        '/songs/admin/abc',
         payload,
       );
     });

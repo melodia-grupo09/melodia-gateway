@@ -28,10 +28,7 @@ export class CatalogService {
     payload: CatalogPayload,
   ): Promise<unknown> {
     const response = await firstValueFrom(
-      this.httpService.patch<unknown>(
-        `/songs/admin/${id}/availability`,
-        payload,
-      ),
+      this.httpService.patch<unknown>(`/songs/admin/${id}`, payload),
     );
     return response.data;
   }

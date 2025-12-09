@@ -80,6 +80,7 @@ describe('SearchPlaylistsDto', () => {
   });
 
   it('should fail validation when page is not an integer', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (dto as any).page = 1.5;
 
     const errors = await validate(dto);
@@ -90,6 +91,7 @@ describe('SearchPlaylistsDto', () => {
   });
 
   it('should fail validation when limit is not an integer', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (dto as any).limit = 10.5;
 
     const errors = await validate(dto);
@@ -100,6 +102,7 @@ describe('SearchPlaylistsDto', () => {
   });
 
   it('should fail validation when search is not a string', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (dto as any).search = 123;
 
     const errors = await validate(dto);
@@ -110,6 +113,7 @@ describe('SearchPlaylistsDto', () => {
   });
 
   it('should fail validation when user_id is not a string', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (dto as any).user_id = 123;
 
     const errors = await validate(dto);

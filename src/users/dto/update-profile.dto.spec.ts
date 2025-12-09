@@ -44,6 +44,7 @@ describe('UpdateProfileDto', () => {
   });
 
   it('should fail validation when nombre is not a string', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (dto as any).nombre = 123;
 
     const errors = await validate(dto);
@@ -52,6 +53,7 @@ describe('UpdateProfileDto', () => {
   });
 
   it('should fail validation when apellido is not a string', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (dto as any).apellido = 123;
 
     const errors = await validate(dto);
@@ -60,6 +62,7 @@ describe('UpdateProfileDto', () => {
   });
 
   it('should fail validation when nombre_completo is not a string', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (dto as any).nombre_completo = 123;
 
     const errors = await validate(dto);
@@ -76,6 +79,7 @@ describe('UpdateProfileDto', () => {
   });
 
   it('should fail validation when fecha_nacimiento is not a string', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (dto as any).telefono = 123;
 
     const errors = await validate(dto);
@@ -92,6 +96,7 @@ describe('UpdateProfileDto', () => {
   });
 
   it('should fail validation when filtro_contenido is not a boolean', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (dto as any).filtro_contenido = 'true';
 
     const errors = await validate(dto);

@@ -743,6 +743,7 @@ describe('MetricsService', () => {
 
       mockHttpService.get.mockReturnValue(of({ data: expectedResult }));
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getAllArtistsMetrics(
         page,
         limit,
@@ -794,6 +795,7 @@ describe('MetricsService', () => {
 
       mockHttpService.get.mockReturnValue(of({ data: expectedResult }));
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getArtistMonthlyListeners(artistId);
 
       expect(mockHttpService.get).toHaveBeenCalledWith(
@@ -834,6 +836,7 @@ describe('MetricsService', () => {
 
       mockHttpService.get.mockReturnValue(of({ data: expectedResult }));
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getArtistMetrics(artistId);
 
       expect(mockHttpService.get).toHaveBeenCalledWith(
@@ -910,6 +913,7 @@ describe('MetricsService', () => {
 
       mockHttpService.get.mockReturnValue(of({ data: expectedResult }));
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.exportArtistsMetrics(
         period,
         startDate,
@@ -935,6 +939,7 @@ describe('MetricsService', () => {
 
       mockHttpService.get.mockReturnValue(of({ data: expectedResult }));
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await service.getArtistTopSongs(artistId, region, sortBy);
 
       expect(mockHttpService.get).toHaveBeenCalledWith(

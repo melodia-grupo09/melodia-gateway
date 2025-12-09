@@ -266,7 +266,7 @@ export class ArtistsController {
   async updateArtistMedia(
     @Param('id') id: string,
     @UploadedFiles()
-    files?: { image?: any[]; cover?: any[] },
+    files?: { image?: Express.Multer.File[]; cover?: Express.Multer.File[] },
   ): Promise<any> {
     const formData = new FormData();
 
@@ -376,6 +376,7 @@ export class ArtistsController {
     @Param('artistId') artistId: string,
     @Body() createReleaseDto: CreateReleaseDto,
   ): Promise<any> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const release = await this.artistsService.createRelease(
       artistId,
       createReleaseDto,
@@ -823,6 +824,7 @@ export class ArtistsController {
     @Param('id') id: string,
     @User() user: FirebaseUser,
   ): Promise<any> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await this.artistsService.followArtist(id);
 
     // Track user activity for following artist
@@ -856,6 +858,7 @@ export class ArtistsController {
     @Param('id') id: string,
     @User() user: FirebaseUser,
   ): Promise<any> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await this.artistsService.unfollowArtist(id);
 
     // Track user activity for unfollowing artist

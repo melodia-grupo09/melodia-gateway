@@ -103,6 +103,7 @@ describe('ArtistsController', () => {
 
       mockArtistsService.getSimilarArtists.mockResolvedValue(mockResult);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await controller.getSimilarArtists(artistId);
 
       expect(mockArtistsService.getSimilarArtists).toHaveBeenCalledWith(
@@ -125,6 +126,7 @@ describe('ArtistsController', () => {
 
       mockArtistsService.getLatestRelease.mockResolvedValue(mockResult);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await controller.getLatestRelease(getLatestReleaseDto);
 
       expect(mockArtistsService.getLatestRelease).toHaveBeenCalledWith(
@@ -152,6 +154,7 @@ describe('ArtistsController', () => {
 
       mockArtistsService.searchArtists.mockResolvedValue(mockResult);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result: any = await controller.searchArtists(query);
 
       expect(mockArtistsService.searchArtists).toHaveBeenCalledWith(
@@ -181,6 +184,7 @@ describe('ArtistsController', () => {
 
       mockArtistsService.searchArtists.mockResolvedValue(mockResult);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result: any = await controller.searchArtists(query, page, limit);
 
       expect(mockArtistsService.searchArtists).toHaveBeenCalledWith(
@@ -284,6 +288,7 @@ describe('ArtistsController', () => {
       mockArtistsService.followArtist.mockResolvedValue(mockResult);
       mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result: any = await controller.followArtist(artistId, mockUser);
 
       expect(mockArtistsService.followArtist).toHaveBeenCalledWith(artistId);
@@ -304,6 +309,7 @@ describe('ArtistsController', () => {
       mockArtistsService.unfollowArtist.mockResolvedValue(mockResult);
       mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result: any = await controller.unfollowArtist(artistId, mockUser);
 
       expect(mockArtistsService.unfollowArtist).toHaveBeenCalledWith(artistId);
@@ -498,6 +504,7 @@ describe('ArtistsController', () => {
 
       mockArtistsService.createRelease.mockResolvedValue(mockResult);
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result: any = await controller.createRelease(
         artistId,
         createReleaseDto,

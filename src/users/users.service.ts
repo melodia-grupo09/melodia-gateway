@@ -240,7 +240,10 @@ export class UsersService {
 
       if (typeof error === 'object' && error !== null && 'response' in error) {
         const axiosError = error as {
-          response?: { data?: any; status?: number };
+          response?: {
+            data?: { message?: unknown; detail?: unknown };
+            status?: number;
+          };
         };
         const errorData = axiosError.response?.data;
 
@@ -248,9 +251,9 @@ export class UsersService {
           statusCode = axiosError.response.status;
         }
 
-        if (typeof errorData?.message === 'string') {
+        if (errorData && typeof errorData.message === 'string') {
           errorMsg = errorData.message;
-        } else if (typeof errorData?.detail === 'string') {
+        } else if (errorData && typeof errorData.detail === 'string') {
           errorMsg = errorData.detail;
         }
       }

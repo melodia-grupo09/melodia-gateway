@@ -26,7 +26,7 @@ export class SearchUsersDto {
     required: false,
   })
   @IsOptional()
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => parseInt(value as string))
   @IsInt()
   @Min(1)
   page?: number = 1;
@@ -39,7 +39,7 @@ export class SearchUsersDto {
     required: false,
   })
   @IsOptional()
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => parseInt(value as string))
   @IsInt()
   @Min(1)
   @Max(50)
