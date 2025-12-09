@@ -1,7 +1,7 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   ExecutionContext,
-  ForbiddenException,
+  HttpException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -161,7 +161,13 @@ describe('FirebaseAuthGuard', () => {
       };
 
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
-        new ForbiddenException('User is banned'),
+        new HttpException(
+          {
+            status: 403,
+            message: 'User is banned',
+          },
+          403,
+        ),
       );
       expect(mockVerifyIdToken).toHaveBeenCalledWith('valid-token');
       expect(mockCacheManager.get).toHaveBeenCalledWith('blocked_user:user123');

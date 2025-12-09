@@ -949,7 +949,7 @@ describe('UsersService', () => {
       expect(mockCacheManager.set).toHaveBeenCalledWith(
         `blocked_user:${userId}`,
         true,
-        0,
+        31536000000,
       );
       expect(result).toEqual(mockResponse.data);
     });
