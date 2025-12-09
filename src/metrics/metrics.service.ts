@@ -213,13 +213,13 @@ export class MetricsService {
   async recordSongPlay(
     songId: string,
     userId: string,
-    artistId?: string,
+    artistId: string,
     region?: string,
   ): Promise<void> {
     try {
       // The metrics service requires artistId and userId in the request body
       const requestBody = {
-        artistId: artistId || 'unknown',
+        artistId: artistId,
         userId: userId,
         region: region || 'unknown',
       };

@@ -205,8 +205,8 @@ export class SongsController {
   })
   @ApiQuery({
     name: 'artistId',
-    description: 'ID of the artist (optional, for metrics)',
-    required: false,
+    description: 'ID of the artist (required for metrics)',
+    required: true,
     type: String,
   })
   @ApiResponse({ status: 200, description: 'Full song stream' })
@@ -217,7 +217,7 @@ export class SongsController {
     @User() user: FirebaseUser,
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request,
-    @Query('artistId') artistId?: string,
+    @Query('artistId') artistId: string,
   ) {
     try {
       const range = req.headers['range'] as string | string[] | undefined;
@@ -238,7 +238,12 @@ export class SongsController {
 
       // Track user activity for song play in parallel (don't block streaming)
       try {
-        await this.metricsService.trackUserActivity(user.uid, 'song_play');
+        await this.metricsService.recordSongPlay(
+          songId,
+          user.uid,
+          artistId,
+          region,
+        );
       } catch (error) {
         console.error('Failed to track song play activity:', error);
       }

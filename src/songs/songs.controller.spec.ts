@@ -128,7 +128,7 @@ describe('SongsController', () => {
       };
 
       mockSongsService.streamSong.mockResolvedValue(mockServiceResponse);
-      mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
+      mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
       mockPipeline.mockResolvedValue(undefined);
 
       await controller.streamSong(
@@ -146,9 +146,11 @@ describe('SongsController', () => {
         artistId,
         'unknown',
       );
-      expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(
+        songId,
         'user123',
-        'song_play',
+        artistId,
+        'unknown',
       );
       expect(mockWriteHead).toHaveBeenCalledWith(200, {
         'Content-Type': 'audio/mpeg',
@@ -221,7 +223,7 @@ describe('SongsController', () => {
       } as Request;
 
       mockSongsService.streamSong.mockResolvedValue(mockServiceResponse);
-      mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
+      mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
       mockPipeline.mockResolvedValue(undefined);
 
       await controller.streamSong(
@@ -239,9 +241,11 @@ describe('SongsController', () => {
         artistId,
         'unknown',
       );
-      expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(
+        songId,
         'user456',
-        'song_play',
+        artistId,
+        'unknown',
       );
       expect(mockWriteHead).toHaveBeenCalledWith(206, {
         'Content-Type': 'audio/mpeg',
@@ -269,7 +273,7 @@ describe('SongsController', () => {
       };
 
       mockSongsService.streamSong.mockResolvedValue(mockServiceResponse);
-      mockMetricsService.trackUserActivity.mockResolvedValue(undefined);
+      mockMetricsService.recordSongPlay.mockResolvedValue(undefined);
       mockPipeline.mockResolvedValue(undefined);
 
       await controller.streamSong(
@@ -287,9 +291,11 @@ describe('SongsController', () => {
         artistId,
         'unknown',
       );
-      expect(mockMetricsService.trackUserActivity).toHaveBeenCalledWith(
+      expect(mockMetricsService.recordSongPlay).toHaveBeenCalledWith(
+        songId,
         'user789',
-        'song_play',
+        artistId,
+        'unknown',
       );
       expect(mockWriteHead).toHaveBeenCalledWith(200, {
         'Content-Type': 'audio/mpeg',

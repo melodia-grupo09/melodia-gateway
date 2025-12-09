@@ -81,7 +81,7 @@ export class SongsService {
     songId: string,
     range: string | string[] | undefined,
     userId: string,
-    artistId?: string,
+    artistId: string,
     region?: string,
   ): Promise<AxiosResponse<Readable>> {
     const headers: Record<string, string | string[]> = {};
@@ -100,7 +100,11 @@ export class SongsService {
     };
 
     // Record song play metrics with user and artist information
-    await this.metricsService.recordSongPlay(songId, userId, artistId, region);
+    this.metricsService
+      .recordSongPlay(songId, userId, artistId, region)
+      .catch((err) =>
+        console.error(`Failed to record song play for ${songId}:`, err),
+      );
 
     return firstValueFrom(
       this.httpService.get<Readable>(`/songs/player/play/${songId}`, config),
