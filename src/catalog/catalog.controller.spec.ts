@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { CatalogController } from './catalog.controller';
-import { CatalogService, CatalogPayload } from './catalog.service';
+import { CatalogPayload, CatalogService } from './catalog.service';
 
 describe('CatalogController', () => {
   let controller: CatalogController;
@@ -22,7 +23,10 @@ describe('CatalogController', () => {
           useValue: mockCatalogService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(FirebaseAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<CatalogController>(CatalogController);
     jest.clearAllMocks();

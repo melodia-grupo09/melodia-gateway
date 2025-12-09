@@ -9,12 +9,13 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
-  Patch,
   Query,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -26,6 +27,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { UsersService } from '../users/users.service';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
@@ -38,6 +40,8 @@ import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 import { PlaylistsService } from './playlists.service';
 
 @ApiTags('playlists')
+@ApiBearerAuth()
+@UseGuards(FirebaseAuthGuard)
 @Controller('playlists')
 export class PlaylistsController {
   constructor(

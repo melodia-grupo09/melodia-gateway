@@ -1,9 +1,25 @@
-import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { HttpErrorInterceptor } from '../users/interceptors/http-error.interceptor';
 import { ReleasesService } from './releases.service';
 
 @ApiTags('releases')
+@ApiBearerAuth()
+@UseGuards(FirebaseAuthGuard)
 @UseInterceptors(HttpErrorInterceptor)
 @Controller('releases')
 export class ReleasesController {

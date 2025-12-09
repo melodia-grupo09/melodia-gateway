@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { ReleasesController } from './releases.controller';
 import { ReleasesService } from './releases.service';
 
@@ -19,7 +20,10 @@ describe('ReleasesController', () => {
           useValue: mockReleasesService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(FirebaseAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<ReleasesController>(ReleasesController);
 

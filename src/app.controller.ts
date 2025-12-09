@@ -1,5 +1,11 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { FirebaseAuthGuard } from './auth/firebase-auth.guard';
 import { MetricsService } from './metrics/metrics.service';
 
 interface HealthCheckResponse {
@@ -11,6 +17,8 @@ interface HealthCheckResponse {
 }
 
 @ApiTags('health')
+@ApiBearerAuth()
+@UseGuards(FirebaseAuthGuard)
 @Controller()
 export class AppController {
   constructor(private readonly metricsService: MetricsService) {}
