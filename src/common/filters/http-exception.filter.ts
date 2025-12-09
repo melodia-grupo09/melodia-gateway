@@ -20,8 +20,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message = exceptionResponse;
     } else if (
       typeof exceptionResponse === 'object' &&
-      exceptionResponse !== null &&
-      'message' in exceptionResponse
+      exceptionResponse !== null
     ) {
       const msg = (exceptionResponse as { message?: unknown }).message;
       if (typeof msg === 'string') {
@@ -29,7 +28,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
       } else if (Array.isArray(msg)) {
         message = msg;
       } else {
-        message = exception.message;
+        const stringified = JSON.stringify(exceptionResponse);
+        message = stringified === '{}' ? exception.message : stringified;
       }
       code = (exceptionResponse as { code?: string }).code;
     } else {

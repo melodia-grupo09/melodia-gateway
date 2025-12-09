@@ -16,7 +16,14 @@ export class HttpErrorInterceptor implements NestInterceptor {
       catchError((error) => {
         if (error instanceof AxiosError && error.response) {
           const status = (error.response as { status?: number })?.status ?? 500;
-          const data = (error.response as { data?: unknown })?.data;
+          let data = (error.response as { data?: unknown })?.data;
+          if (
+            data &&
+            typeof data === 'object' &&
+            Object.keys(data).length === 0
+          ) {
+            data = undefined;
+          }
 
           // Pass through the exact status code from the external service
           throw new HttpException(
