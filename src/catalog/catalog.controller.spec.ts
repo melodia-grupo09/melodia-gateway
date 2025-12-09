@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CatalogController } from './catalog.controller';
-import { CatalogService, CatalogPayload } from './catalog.service';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { CatalogController } from './catalog.controller';
+import { CatalogPayload, CatalogService } from './catalog.service';
 
 describe('CatalogController', () => {
   let controller: CatalogController;

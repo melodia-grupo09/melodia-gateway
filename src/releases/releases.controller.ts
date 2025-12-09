@@ -3,15 +3,15 @@ import {
   Get,
   Param,
   Query,
-  UseInterceptors,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiOperation,
   ApiParam,
   ApiResponse,
   ApiTags,
-  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { HttpErrorInterceptor } from '../users/interceptors/http-error.interceptor';

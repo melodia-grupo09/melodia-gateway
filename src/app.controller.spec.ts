@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
-import { MetricsService } from './metrics/metrics.service';
 import { FirebaseAuthGuard } from './auth/firebase-auth.guard';
+import { MetricsService } from './metrics/metrics.service';
 
 describe('AppController', () => {
   let appController: AppController;

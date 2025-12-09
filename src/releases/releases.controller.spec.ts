@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { ReleasesController } from './releases.controller';
 import { ReleasesService } from './releases.service';
-import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 
 describe('ReleasesController', () => {
   let controller: ReleasesController;

@@ -9,9 +9,9 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
-  Patch,
   Query,
   Req,
   Res,
@@ -27,6 +27,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
+import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { UsersService } from '../users/users.service';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
@@ -37,7 +38,6 @@ import { ReorderSongDto } from './dto/reorder-song.dto';
 import { SearchPlaylistsDto } from './dto/search-playlists.dto';
 import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 import { PlaylistsService } from './playlists.service';
-import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 
 @ApiTags('playlists')
 @ApiBearerAuth()

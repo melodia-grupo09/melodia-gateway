@@ -7,14 +7,14 @@ import {
   Patch,
   Post,
   Query,
-  UseInterceptors,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
-import { CatalogService } from './catalog.service';
-import type { CatalogPayload } from './catalog.service';
 import { HttpErrorInterceptor } from '../users/interceptors/http-error.interceptor';
+import type { CatalogPayload } from './catalog.service';
+import { CatalogService } from './catalog.service';
 
 type CatalogQuery = Record<string, string | string[] | undefined>;
 
