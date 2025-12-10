@@ -8,9 +8,11 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import type { Cache } from 'cache-manager';
 import { Request } from 'express';
 import admin from './firebase';
+import { IS_PUBLIC_KEY } from './public.decorator';
 
 // Extend Express Request interface to include 'user'
 declare module 'express-serve-static-core' {
@@ -21,9 +23,20 @@ declare module 'express-serve-static-core' {
 
 @Injectable()
 export class FirebaseAuthGuard implements CanActivate {
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private reflector: Reflector,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) {
+      return true;
+    }
+
     const request: Request = context.switchToHttp().getRequest();
     const authHeader =
       request.headers['authorization'] || request.headers['Authorization'];

@@ -28,6 +28,7 @@ import {
 } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { Public } from '../auth/public.decorator';
 import { UsersService } from '../users/users.service';
 import { AddSongToPlaylistDto } from './dto/add-song-to-playlist.dto';
 import { CreateHistoryEntryDto } from './dto/create-history-entry.dto';
@@ -50,6 +51,7 @@ export class PlaylistsController {
   ) {}
 
   @Get('deep-link/:id')
+  @Public()
   @ApiOperation({ summary: 'Redirect to playlist deep link' })
   @ApiParam({ name: 'id', description: 'Playlist ID' })
   @ApiResponse({ status: 302, description: 'Redirect to app' })

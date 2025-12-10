@@ -32,6 +32,7 @@ import type { Request, Response } from 'express';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { Public } from '../auth/public.decorator';
 import type { FirebaseUser } from '../auth/user.decorator';
 import { User } from '../auth/user.decorator';
 import { MetricsService } from '../metrics/metrics.service';
@@ -66,6 +67,7 @@ export class SongsController {
   ) {}
 
   @Get('deep-link/:id')
+  @Public()
   @ApiOperation({ summary: 'Redirect to song deep link' })
   @ApiParam({ name: 'id', description: 'Song ID' })
   @ApiResponse({ status: 302, description: 'Redirect to app' })
