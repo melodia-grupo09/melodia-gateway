@@ -21,7 +21,7 @@ Rest API Gateway built with [**NestJS**](https://nestjs.com/) for the Melodía a
 
 ## Live Deployment
 
-The application is deployed on Heroku and accessible at: [https://melodia-gateway-2b9807728e9a.herokuapp.com/](https://melodia-gateway-2b9807728e9a.herokuapp.com/)
+The application is deployed on Heroku and accessible at: [https://melodia-gateway-2b9807728e9a.herokuapp.com/](https://melodia-gateway-2b9807728e9a.herokuapp.com/).
 
 ## Overview
 
