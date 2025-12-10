@@ -4,6 +4,7 @@ import {
   HttpException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Request } from 'express';
 import { FirebaseAuthGuard } from './firebase-auth.guard';
@@ -31,6 +32,10 @@ describe('FirebaseAuthGuard', () => {
     get: jest.fn(),
   };
 
+  const mockReflector = {
+    getAllAndOverride: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -38,6 +43,10 @@ describe('FirebaseAuthGuard', () => {
         {
           provide: CACHE_MANAGER,
           useValue: mockCacheManager,
+        },
+        {
+          provide: Reflector,
+          useValue: mockReflector,
         },
       ],
     }).compile();
@@ -53,9 +62,12 @@ describe('FirebaseAuthGuard', () => {
     // Clear mocks
     mockVerifyIdToken.mockClear();
     mockCacheManager.get.mockClear();
+    mockReflector.getAllAndOverride.mockClear();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     mockExecutionContext = {
+      getHandler: jest.fn(),
+      getClass: jest.fn(),
       switchToHttp: jest.fn(() => ({
         getRequest: jest.fn(() => mockRequest),
         getResponse: jest.fn(),
@@ -194,6 +206,15 @@ describe('FirebaseAuthGuard', () => {
       );
 
       consoleSpy.mockRestore();
+    });
+
+    it('should return true when route is public', async () => {
+      mockReflector.getAllAndOverride.mockReturnValue(true);
+
+      const result = await guard.canActivate(mockExecutionContext);
+
+      expect(result).toBe(true);
+      expect(mockReflector.getAllAndOverride).toHaveBeenCalled();
     });
   });
 });
