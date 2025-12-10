@@ -38,6 +38,8 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 import { UpdateReleaseDto } from './dto/update-release.dto';
 
 @ApiTags('artists')
+@ApiBearerAuth()
+@UseGuards(FirebaseAuthGuard)
 @UseInterceptors(HttpErrorInterceptor)
 @Controller('artists')
 export class ArtistsController {
@@ -65,8 +67,6 @@ export class ArtistsController {
   }
 
   @Post('latest-release')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get the latest release from a list of artists' })
   @ApiBody({ type: GetLatestReleaseDto })
   @ApiResponse({
@@ -84,8 +84,6 @@ export class ArtistsController {
   }
 
   @Get(':id')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get artist by ID' })
   @ApiParam({
     name: 'id',
@@ -105,8 +103,6 @@ export class ArtistsController {
   }
 
   @Get(':id/similar')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get similar artists' })
   @ApiParam({
     name: 'id',
@@ -126,9 +122,7 @@ export class ArtistsController {
   }
 
   @Patch(':id')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update artist profile' })
+  @ApiOperation({ summary: 'Update artist information' })
   @ApiParam({
     name: 'id',
     description: 'Artist UUID',
@@ -214,8 +208,6 @@ export class ArtistsController {
   }
 
   @Delete(':id')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete artist' })
   @ApiParam({
     name: 'id',
@@ -235,15 +227,13 @@ export class ArtistsController {
   }
 
   @Patch(':id/media')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'image', maxCount: 1 },
-      { name: 'back_image', maxCount: 1 },
+      { name: 'cover', maxCount: 1 },
     ]),
   )
-  @ApiOperation({ summary: 'Update artist media (images)' })
+  @ApiOperation({ summary: 'Update artist media (profile image and/or cover)' })
   @ApiConsumes('multipart/form-data')
   @ApiParam({
     name: 'id',
@@ -311,9 +301,7 @@ export class ArtistsController {
 
   // Release endpoints - Specific routes MUST come before general routes
   @Get(':artistId/releases/upcoming')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get upcoming releases for an artist' })
+  @ApiOperation({ summary: 'Get upcoming/scheduled releases for an artist' })
   @ApiParam({
     name: 'artistId',
     description: 'Artist UUID',
@@ -332,8 +320,6 @@ export class ArtistsController {
   }
 
   @Get(':artistId/releases/published')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get published releases for an artist' })
   @ApiParam({
     name: 'artistId',
@@ -355,8 +341,6 @@ export class ArtistsController {
   }
 
   @Get(':artistId/releases')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all releases for an artist' })
   @ApiParam({
     name: 'artistId',
@@ -376,8 +360,6 @@ export class ArtistsController {
   }
 
   @Post(':artistId/releases')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new release for an artist' })
   @ApiParam({
     name: 'artistId',
@@ -418,8 +400,6 @@ export class ArtistsController {
   }
 
   @Get(':artistId/releases/:releaseId')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a specific release' })
   @ApiParam({
     name: 'artistId',
@@ -447,8 +427,6 @@ export class ArtistsController {
   }
 
   @Patch(':artistId/releases/:releaseId')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a release' })
   @ApiParam({
     name: 'artistId',
@@ -481,8 +459,6 @@ export class ArtistsController {
   }
 
   @Delete(':artistId/releases/:releaseId')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a release' })
   @ApiParam({
     name: 'artistId',
@@ -510,10 +486,8 @@ export class ArtistsController {
   }
 
   @Patch(':artistId/releases/:releaseId/cover')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('cover'))
-  @ApiOperation({ summary: 'Update release cover' })
+  @ApiOperation({ summary: 'Update release cover image' })
   @ApiConsumes('multipart/form-data')
   @ApiParam({
     name: 'artistId',
@@ -559,9 +533,7 @@ export class ArtistsController {
   }
 
   @Patch(':artistId/releases/:releaseId/songs/add')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Add songs to a release' })
+  @ApiOperation({ summary: 'Add songs to release' })
   @ApiParam({
     name: 'artistId',
     description: 'Artist UUID',
@@ -700,9 +672,7 @@ export class ArtistsController {
   }
 
   @Patch(':artistId/releases/:releaseId/songs/remove')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Remove songs from a release' })
+  @ApiOperation({ summary: 'Remove songs from release' })
   @ApiParam({
     name: 'artistId',
     description: 'Artist UUID',
@@ -765,9 +735,7 @@ export class ArtistsController {
   }
 
   @Post(':artistId/releases/:releaseId/like')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Like a release' })
+  @ApiOperation({ summary: 'Like an album/release' })
   @ApiParam({
     name: 'artistId',
     description: 'Artist UUID',

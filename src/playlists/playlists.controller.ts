@@ -40,6 +40,8 @@ import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 import { PlaylistsService } from './playlists.service';
 
 @ApiTags('playlists')
+@ApiBearerAuth()
+@UseGuards(FirebaseAuthGuard)
 @Controller('playlists')
 export class PlaylistsController {
   constructor(
@@ -48,8 +50,6 @@ export class PlaylistsController {
   ) {}
 
   @Get('deep-link/:id')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Redirect to playlist deep link' })
   @ApiParam({ name: 'id', description: 'Playlist ID' })
   @ApiResponse({ status: 302, description: 'Redirect to app' })
@@ -59,8 +59,6 @@ export class PlaylistsController {
 
   // Liked songs endpoints (must be before dynamic routes)
   @Get('liked-songs')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all liked songs for a user' })
   @ApiResponse({
     status: 200,
@@ -85,7 +83,6 @@ export class PlaylistsController {
   }
 
   @Post('liked-songs')
-  @UseGuards(FirebaseAuthGuard)
   @ApiOperation({
     summary: 'Add a song to liked songs',
     description: "Adds a song to the user's liked songs collection",
@@ -124,8 +121,6 @@ export class PlaylistsController {
   }
 
   @Delete('liked-songs/:songId')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a song from liked songs' })
   @ApiResponse({
@@ -142,8 +137,6 @@ export class PlaylistsController {
   }
 
   @Put('liked-songs/reorder')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Reorder liked songs' })
   @ApiResponse({
     status: 200,
@@ -158,8 +151,6 @@ export class PlaylistsController {
   }
 
   @Get('liked-songs/is-liked')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Check if song is liked',
     description: "Check if a song is in the user's liked songs collection",
@@ -182,8 +173,6 @@ export class PlaylistsController {
 
   // History endpoints (must be before dynamic routes)
   @Get('history')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get playback history with pagination and filters',
     description:
@@ -223,8 +212,6 @@ export class PlaylistsController {
   }
 
   @Post('history')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Add a song to playback history' })
   @ApiResponse({
     status: 201,
@@ -239,8 +226,6 @@ export class PlaylistsController {
   }
 
   @Delete('history')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Clear all history' })
   @ApiResponse({ status: 204, description: 'History cleared successfully' })
@@ -250,8 +235,6 @@ export class PlaylistsController {
   }
 
   @Delete('history/:songId')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a song from history' })
   @ApiResponse({
@@ -304,8 +287,6 @@ export class PlaylistsController {
   }
 
   @Post()
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new playlist' })
   @ApiResponse({ status: 201, description: 'Playlist created successfully' })
   async createPlaylist(
@@ -316,8 +297,6 @@ export class PlaylistsController {
   }
 
   @Get()
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all playlists' })
   @ApiResponse({ status: 200, description: 'Playlists retrieved successfully' })
   @ApiQuery({
@@ -330,8 +309,6 @@ export class PlaylistsController {
   }
 
   @Get(':playlistId')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a specific playlist' })
   @ApiResponse({ status: 200, description: 'Playlist retrieved successfully' })
   @ApiParam({ name: 'playlistId', description: 'Playlist ID' })
@@ -340,8 +317,6 @@ export class PlaylistsController {
   }
 
   @Patch(':playlistId')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a playlist' })
   @ApiResponse({ status: 200, description: 'Playlist updated successfully' })
   @ApiParam({ name: 'playlistId', description: 'Playlist ID' })
@@ -359,8 +334,6 @@ export class PlaylistsController {
   }
 
   @Delete(':playlistId')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a playlist' })
   @ApiResponse({ status: 204, description: 'Playlist deleted successfully' })
@@ -374,8 +347,6 @@ export class PlaylistsController {
   }
 
   @Post(':playlistId/songs')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Add a song to playlist' })
   @ApiResponse({
     status: 201,
@@ -390,8 +361,6 @@ export class PlaylistsController {
   }
 
   @Delete(':playlistId/songs/:songId')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a song from playlist' })
   @ApiResponse({
@@ -408,8 +377,6 @@ export class PlaylistsController {
   }
 
   @Put(':playlistId/songs/reorder')
-  @UseGuards(FirebaseAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Reorder songs in playlist' })
   @ApiResponse({ status: 200, description: 'Songs reordered successfully' })
   @ApiParam({ name: 'playlistId', description: 'Playlist ID' })
